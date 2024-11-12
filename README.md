@@ -14,7 +14,7 @@ This is an R package **GPTCM** implementing Bayesian hierarchical modeling for a
 ## Reference
 
 Chen, M.-H., Ibrahim, J. G., and Sinha, D. (1999). A new Bayesian model for survival data with
-a surviving fraction. Journal of the American Statistical Association, 94(447):909–919.
+a surviving fraction. Journal of the American Statistical Association, 94(447):909--919.
 
 Yakovlev, A. (1996). Threshold models of tumor recurrence. Mathematical and Computer Modelling,
-23(6):153–164.
+23(6):153--164.
