@@ -1,0 +1,7 @@
+^data-raw$
+^\.github$
+^LICENSE$
+^test_build.R
+^test_ex.R
+^.*\.Rproj$
+^\.Rproj\.user$

@@ -1,0 +1,17 @@
+Package: GPTCM
+Title: Generalized Promotion Time Cure Model with Bayesian Shrinkage priors
+Version: 0.0.1
+Date: 2024-11-12
+Authors@R: c(person("Zhi", "Zhao", role=c("aut","cre"), email = "zhi.zhao@medisin.uio.no"))
+Description: Generalized promotion time cure model with Bayesian hierarchical modelling for multiscale data integration.
+URL: https://github.com/ocbe-uio/GPTCM
+BugReports: https://github.com/ocbe-uio/GPTCM/issues
+License: GPL-3
+Depends: R (>= 4.2.0)
+Encoding: UTF-8
+RoxygenNote: 7.3.2
+LinkingTo: testthat
+Imports: HI, truncnorm, survival, riskRegression, ggplot2, miCoPTCM, MASS, Matrix, utils, stats
+Suggests: testthat
+LazyData: false
+NeedsCompilation: no
