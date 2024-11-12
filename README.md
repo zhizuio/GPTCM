@@ -12,11 +12,11 @@ This is an R package **GPTCM** implementing Bayesian hierarchical modeling for a
 
 ## Installation
 
-......
+...
 
 ## Examples
 
-......
+...
 
 
 ## Reference
