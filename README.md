@@ -9,3 +9,12 @@ status](https://www.r-pkg.org/badges/version/BayesSurvive)](https://cran.r-proje
 -->
 
 This is an R package **GPTCM** implementing Bayesian hierarchical modeling for a generalized promotion time cure model (GPTCM) for the identification of cell-type-specific tumor driver genes and survival prognosis. 
+
+
+## Reference
+
+Chen, M.-H., Ibrahim, J. G., and Sinha, D. (1999). A new Bayesian model for survival data with
+a surviving fraction. Journal of the American Statistical Association, 94(447):909–919.
+
+Yakovlev, A. (1996). Threshold models of tumor recurrence. Mathematical and Computer Modelling,
+23(6):153–164.
