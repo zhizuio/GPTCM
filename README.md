@@ -10,6 +10,14 @@ status](https://www.r-pkg.org/badges/version/BayesSurvive)](https://cran.r-proje
 
 This is an R package **GPTCM** implementing Bayesian hierarchical modeling for a generalized promotion time cure model (GPTCM) for the identification of cell-type-specific tumor driver genes and survival prognosis. 
 
+## Installation
+
+...
+
+## Examples
+
+...
+
 
 ## Reference
 
