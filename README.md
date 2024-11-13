@@ -9,11 +9,11 @@ status](https://www.r-pkg.org/badges/version/GPTCM)](https://cran.r-project.org/
 [![R-CMD-check](https://github.com/zhizuio/GPTCM/workflows/R-CMD-check/badge.svg)](https://github.com/zhizuio/GPTCM/actions)
 
 
-This is an R package **GPTCM** implementing Bayesian hierarchical modeling for a generalized promotion time cure model (GPTCM) for the identification of cell-type-specific tumor driver genes and survival prognosis. 
+This is an R package **GPTCM** implementing Bayesian hierarchical modeling for a generalized promotion time cure model (GPTCM) ([Zhao \& Kızılaslan, 2024](https://doi.org/10.48550/arXiv.2408.17188)) for the identification of cell-type-specific tumor driver genes and survival prognosis. 
 
 ## Installation
 
-Install the latest development version from [GitHub](https://github.com/zhizuio/GPTCM)
+Install the latest development version from [GitHub](https://github.com/zhizuio/GPTCM):
 
 ```r
 #install.packages("remotes")
@@ -64,3 +64,6 @@ a surviving fraction. Journal of the American Statistical Association, 94(447):9
 
 Yakovlev, A. (1996). Threshold models of tumor recurrence. Mathematical and Computer Modelling,
 23(6):153--164.
+
+Zhao Z, Kızılaslan F. (2024). A note on promotion time cure models with a new biological consideration. arXiv,
+DOI https://doi.org/10.48550/arXiv.2408.17188.

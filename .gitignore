@@ -4,6 +4,9 @@
 .Rhistory
 .DS_Store
 
+test_build.R
+test_ex.R
+
 GPTCM/src/*.o
 GPTCM/src/*.so
 GPTCM/src/*.dll
