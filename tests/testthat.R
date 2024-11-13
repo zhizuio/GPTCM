@@ -8,5 +8,6 @@
 
 library(testthat)
 library(GPTCM)
+library(HI)
 
 test_check("GPTCM")
