@@ -5,7 +5,7 @@
 #'
 #' @name convex_support_phi
 #'
-#' @param x
+#' @param x TBA
 #'
 #' @return An object of ...
 #'

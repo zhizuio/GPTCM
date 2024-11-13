@@ -7,7 +7,7 @@
 convex_support(x)
 }
 \arguments{
-\item{x}{}
+\item{x}{TBA}
 }
 \value{
 An object of ...

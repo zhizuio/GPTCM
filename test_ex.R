@@ -16,12 +16,15 @@ Sigma <- 0 # "Sigma=0" means with dependent X; "Sigma=1" means with independent 
 library(GPTCM)
 dat <- simData(n, p, L, Sigma = diag(p*L) * Sigma)
 
+start.time <- Sys.time()
 set.seed(123)
 fit <- GPTCM(dat, n, p, L,
-             nIter = 50, burnin = 10)
+             nIter = 500, burnin = 200)
+end.time <- Sys.time()
+time.taken <- end.time - start.time
+time.taken
 
 # survival predictions based on posterior mean
-library(survival)
 b <- plotBrier(dat, datMCMC = fit)
 #pdf(paste0("sim_brierSigma",Sigma,".pdf"), height = 4, width = 5)
 b

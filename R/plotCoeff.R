@@ -6,7 +6,7 @@
 #' @name plotCoeff
 #'
 #' @importFrom stats quantile
-#' @importFrom graphics axis points arrows
+#' @importFrom graphics axis points arrows legend
 #' @importFrom utils capture.output
 #' @importFrom scales alpha
 #' 

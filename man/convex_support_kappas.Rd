@@ -7,7 +7,7 @@
 convex_support_kappas(x)
 }
 \arguments{
-\item{x}{}
+\item{x}{TBA}
 }
 \value{
 An object of ...

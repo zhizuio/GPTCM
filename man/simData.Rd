@@ -4,7 +4,7 @@
 \alias{simData}
 \title{Simulate data}
 \usage{
-simData(n = 200, p = 10, L = 3, Sigma = 0)
+simData(n = 200, p = 10, L = 3, Sigma = 0, proportion.model = "alr")
 }
 \arguments{
 \item{n}{TBA}
@@ -14,6 +14,8 @@ simData(n = 200, p = 10, L = 3, Sigma = 0)
 \item{L}{TBA}
 
 \item{Sigma}{TBA}
+
+\item{proportion.model}{TBA}
 }
 \value{
 An object of ...

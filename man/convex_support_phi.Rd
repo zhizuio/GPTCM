@@ -7,7 +7,7 @@
 convex_support_phi(x)
 }
 \arguments{
-\item{x}{}
+\item{x}{TBA}
 }
 \value{
 An object of ...

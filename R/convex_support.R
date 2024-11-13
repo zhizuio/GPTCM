@@ -5,7 +5,7 @@
 #'
 #' @name convex_support
 #'
-#' @param x
+#' @param x TBA
 #'
 #' @return An object of ...
 #'
