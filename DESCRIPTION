@@ -7,7 +7,7 @@ Description: Generalized promotion time cure model with Bayesian hierarchical mo
 URL: https://github.com/ocbe-uio/GPTCM
 BugReports: https://github.com/ocbe-uio/GPTCM/issues
 License: GPL-3
-Depends: R (>= 4.2.0)
+Depends: R (>= 4.1.0)
 Encoding: UTF-8
 RoxygenNote: 7.3.2
 Imports: HI, remotes, truncnorm, survival, riskRegression, ggplot2, miCoPTCM, MASS, Matrix, scales, utils, stats, graphics
