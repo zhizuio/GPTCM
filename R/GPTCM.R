@@ -5,6 +5,8 @@
 #' for sparse identification of high-dimensional covariates.
 #'
 #' @name GPTCM
+#' 
+#' @importFrom stats median
 #'
 #' @param dat a list containing observed data from \code{n} subjects with
 #' components \code{t}, \code{di}, \code{X}. For graphical learning of the
@@ -101,12 +103,31 @@ GPTCM <- function(dat, n, p, L,
   zetas.mcmc <- matrix(0, nrow = 1 + nIter, ncol = (NCOL(dat$proportion) - 1) * (NCOL(dat$x1) + 1))
   zetas.mcmc[1, ] <- as.vector(zetas.current)
 
+  globalvariable <- list(
+    dat = dat,
+    proportion = proportion,
+    kappas = kappas, kappaA = hyperpar$kappaA, kappaB = hyperpar$kappaB,
+    lambdas = lambdas,
+    weibull.S = weibull.S,
+    betas.current = betas.current,
+    mu.current = mu.current,
+    thetas = thetas,
+    xi = xi,
+    zetas.current = zetas.current,
+    phi = phi,
+    vSq = vSq,
+    wSq = wSq,
+    tauSq = tauSq, 
+    L = L
+  )
+  list2env(globalvariable, .GlobalEnv)
+  
   ## MCMC iterations
   for (m in 1:nIter) {
     if (m %% tick == 0) {
       cat("MCMC iteration:", m, "\n")
     }
-
+    #new.env()
     ## update \xi's in cure fraction
     xi.mcmc.internal <- HI::arms(
       y.start = xi,
@@ -121,7 +142,7 @@ GPTCM <- function(dat, n, p, L,
     })
     # xi <- xi.mcmc.internal
 
-    vSq <- sampleV(2, hyperpar$vA, hyperpar$vB, xi)
+    vSq[-1] <- sampleV(2, hyperpar$vA, hyperpar$vB, xi)
     vSq.mcmc[1 + m, ] <- vSq[-1]
 
     thetas <- exp(dat$x0 %*% xi)
@@ -144,6 +165,10 @@ GPTCM <- function(dat, n, p, L,
     for (l in 1:(L - 1)) {
       for (j in 1:(p + 1)) {
         if (j == 1) wSq <- 10
+        # globalVariables(c("l", "j")) ## This is not safe
+        globalvariableJL <- list( j = j, l = l )
+        list2env(globalvariableJL, .GlobalEnv)
+        
         zetas.mcmc.internal <- HI::arms(
           y.start = zetas.current[j, l],
           myldens = logpost_zeta_jl,
@@ -187,6 +212,10 @@ GPTCM <- function(dat, n, p, L,
     ## update \beta_l of S_l(t) in non-cure fraction
     for (l in 1:L) {
       for (j in 1:p) {
+        # globalVariables(c("l", "j")) ## This is not safe
+        globalvariableJL <- list( j = j, l = l )
+        list2env(globalvariableJL, .GlobalEnv)
+        
         betas.mcmc.internal <- HI::arms(
           y.start = betas.current[j, l],
           myldens = logpost_beta_jl,
@@ -236,13 +265,14 @@ GPTCM <- function(dat, n, p, L,
   )
 
   ret$output$mcmc <- list(
-    xi.mcmc = xi.mcmc,
-    kappas.mcmc = kappas.mcmc,
-    phi.mcmc = phi.mcmc,
-    betas.mcmc = betas.mcmc,
-    tauSq.mcmc = tauSq.mcmc,
-    wSq.mcmc = wSq.mcmc,
-    vSq.mcmc = vSq.mcmc
+    xi = xi.mcmc,
+    kappas = kappas.mcmc,
+    phi = phi.mcmc,
+    betas = betas.mcmc,
+    tauSq = tauSq.mcmc,
+    wSq = wSq.mcmc,
+    zetas = zetas.mcmc,
+    vSq = vSq.mcmc
   )
 
   return(ret)

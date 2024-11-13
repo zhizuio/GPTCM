@@ -5,6 +5,8 @@
 #'
 #' @name sampleV
 #'
+#' @importFrom stats rgamma
+#' 
 #' @param n.sample
 #'
 #' @return An object of ...
@@ -18,7 +20,7 @@
 sampleV <- function(n.sample, externalvA, externalvB, externalXi) {
   vA.post <- externalvA + 0.5 * sum(externalXi[-1] != 0)
   vB.post <- externalvB + 0.5 * sum(externalXi[-1]^2)
-  v[-1] <- 1 / rgamma(n.sample, shape = vA.post, rate = vB.post)
+  v <- 1 / rgamma(n.sample, shape = vA.post, rate = vB.post)
 
   return(v)
 }

@@ -20,9 +20,9 @@ logpost_xi2 <- function(x, ...) {
 
   # vA.tmp <- vA + 0.5 * sum(x[-1]!=0)
   # vB.tmp <- vB + 0.5 * sum(x[-1]^2)
-  # v <- c(10, 1/rgamma(length(x)-1, shape = vA.tmp, rate = vB.tmp))
+  # vSq <- c(10, 1/rgamma(length(x)-1, shape = vA.tmp, rate = vB.tmp))
 
-  logprior <- -sum(x^2 / v / 2)
+  logprior <- -sum(x^2 / vSq / 2)
 
   thetas.tmp <- exp(dat$x0 %*% x)
   logpost.first <- sum(log(thetas.tmp[dat$survObj$event == 1]))

@@ -24,7 +24,7 @@ plotMCMC <- function(dat, datMCMC, estimator = "xi") {
   #nIter <- datMCMC$input$nIter
   #burnin <- datMCMC$input$burnin
 
-  if (estimator == "beta") {
+  if ("beta" %in% estimator) {
     betas.mcmc <- datMCMC$output$mcmc$betas
 
     ylabel <- paste0("expression(beta['", rep(1:p, L), ",", rep(1:L, each = p), "'])")
@@ -39,7 +39,7 @@ plotMCMC <- function(dat, datMCMC, estimator = "xi") {
     }
   }
 
-  if (estimator == "zeta") {
+  if ("zeta" %in% estimator) {
     zetas.mcmc <- datMCMC$output$mcmc$zetas
 
     ylabel <- paste0("expression(zeta['", rep(0:p, L - 1), ",", rep(1:(L - 1), each = p + 1), "'])")
@@ -54,7 +54,7 @@ plotMCMC <- function(dat, datMCMC, estimator = "xi") {
     }
   }
 
-  if (estimator == "xi") {
+  if ("xi" %in% estimator) {
     p <- dim(datMCMC$output$mcmc$xi)[2]
     xi.mcmc <- datMCMC$output$mcmc$xi
 
@@ -75,7 +75,7 @@ plotMCMC <- function(dat, datMCMC, estimator = "xi") {
     layout(matrix(1:length(estimator), ncol = 1))
     par(mar = c(2, 4.1, 2, 2))
     if ("kappa" %in% estimator) {
-      kappas.mcmc <- datMCMC$output$mcmc$xi
+      kappas.mcmc <- datMCMC$output$mcmc$kappas
       plot(kappas.mcmc,
         type = "l", lty = 1,
         ylab = expression(kappa), xlab = "MCMC iteration",
@@ -111,7 +111,7 @@ plotMCMC <- function(dat, datMCMC, estimator = "xi") {
       )
     }
 
-    if ("v" %in% estimator) {
+    if ("phi" %in% estimator) {
       phi.mcmc <- datMCMC$output$mcmc$phi
       plot(phi.mcmc,
         type = "l", lty = 1,

@@ -5,6 +5,8 @@
 #'
 #' @name sampleW
 #'
+#' @importFrom stats rgamma
+#' 
 #' @param n.sample
 #'
 #' @return An object of ...

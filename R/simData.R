@@ -5,6 +5,8 @@
 #'
 #' @name simData
 #'
+#' @importFrom stats rbinom rnorm runif rexp
+#' 
 #' @param n
 #'
 #' @return An object of ...

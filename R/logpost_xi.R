@@ -22,15 +22,15 @@ logpost_xi <- function(x, ...) {
   weibull.S.tmp <- weibull.S
 
   if (jj == 1) {
-    v <- 10
+    vSq <- 10
   } else {
     vA.tmp <- vA + 0.5 * sum(xi.tmp[-1] != 0)
     vB.tmp <- vB + 0.5 * sum(xi.tmp[-1]^2)
-    v <- 1 / rgamma(1, shape = vA.tmp, rate = vB.tmp)
-    # v <- 10
+    vSq <- 1 / rgamma(1, shape = vA.tmp, rate = vB.tmp)
+    # vSq <- 10
   }
-  if (is.na(v)) browser()
-  logprior <- -x^2 / v / 2
+  if (is.na(vSq)) browser()
+  logprior <- -x^2 / vSq / 2
   # logprior <- 0 # noninformative prior
 
   thetas.tmp <- exp(dat$x0 %*% xi.tmp)

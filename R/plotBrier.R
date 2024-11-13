@@ -5,7 +5,10 @@
 #'
 #' @name plotBrier
 #'
-#' @importFrom ggplot2 ggplot aes geom_step theme element_blank
+#' @importFrom stats median as.formula
+#' @importFrom ggplot2 ggplot aes aes_string geom_step theme element_blank xlab ylab theme_bw
+#' @importFrom graphics layout par abline
+#' @importFrom utils globalVariables
 #'
 #' @param dat
 #'
@@ -25,9 +28,9 @@ plotBrier <- function(dat, datMCMC) {
   burnin <- datMCMC$input$burnin
 
   # survival predictions based on posterior mean
-  xi.hat <- colMeans(datMCMC$output$mcmc$xi.mcmc[-c(1:burnin), ])
-  betas.hat <- matrix(colMeans(datMCMC$output$mcmc$betas.mcmc[-c(1:burnin), ]), ncol = L)
-  kappas.hat <- mean(datMCMC$output$mcmc$kappas.mcmc[-c(1:burnin)])
+  xi.hat <- colMeans(datMCMC$output$mcmc$xi[-c(1:burnin), ])
+  betas.hat <- matrix(colMeans(datMCMC$output$mcmc$betas[-c(1:burnin), ]), ncol = L)
+  kappas.hat <- mean(datMCMC$output$mcmc$kappas[-c(1:burnin)])
   thetas.hat <- exp(dat$x0 %*% xi.hat)
 
 
@@ -69,7 +72,12 @@ plotBrier <- function(dat, datMCMC) {
   fitCox.clin.X.mean <- survival::coxph(formula.tmp, data = survObj, y = TRUE, x = TRUE)
 
   # library(miCoPTCM) # good estimation for cure fraction; same BS as Cox.clin
-  resMY <- miCoPTCM::PTCMestimBF(Surv(time, event) ~ x01 + x02, data = survObj, varCov = matrix(0, nrow = 3, ncol = 3), init = rep(0, 3))
+  suppressWarnings(
+    resMY <- miCoPTCM::PTCMestimBF(Surv(time, event) ~ x01 + x02, 
+                                   data = survObj, 
+                                   varCov = matrix(0, nrow = 3, ncol = 3), 
+                                   init = rep(0, 3))
+  )
   Surv.PTCM <- exp(-exp(dat$x0 %*% resMY$coefficients) %*% t(resMY$estimCDF))
   #predPTCM.prob <- 1 - Surv.PTCM
 
@@ -91,7 +99,10 @@ plotBrier <- function(dat, datMCMC) {
   g1 <- g$Brier$score
   # g1 <- g1[g1$times <= 71, ]
   levels(g1$model)[1] <- "Kaplan-Meier"
-  g2 <- ggplot2::ggplot(g1, aes(times, Brier, group = model, color = model)) +
+  #utils::globalVariables(c("times", "Brier", "model"))
+  # NOTE: `aes_string()` was deprecated in ggplot2 3.0.0.
+  g2 <- ggplot2::ggplot(g1, aes_string(x = "times", y = "Brier", 
+                                group = "model", color = "model")) +
     xlab("Time") +
     ylab("Brier score") +
     geom_step(direction = "vh") + # , alpha=0.4) +

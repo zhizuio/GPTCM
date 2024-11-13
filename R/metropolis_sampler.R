@@ -4,6 +4,8 @@
 #' Random number generator via MH algorithm. Adapted from https://blog.djnavarro.net/posts/2023-04-12_metropolis-hastings/
 #'
 #' @name metropolis_sampler
+#' 
+#' @importFrom stats rweibull runif
 #'
 #' @param initial_value
 #'
