@@ -51,6 +51,7 @@ jobs:
       - name: Install dependencies
         run: |
           remotes::install_deps(dependencies = TRUE)
+          remotes::install_cran("rcmdcheck")
           remotes::install_github("cran/HI")
         shell: Rscript {0}
 
