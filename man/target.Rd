@@ -7,7 +7,15 @@
 target(x, theta, proportion, mu, kappas)
 }
 \arguments{
-\item{x}{}
+\item{x}{TBA}
+
+\item{theta}{TBA}
+
+\item{proportion}{TBA}
+
+\item{mu}{TBA}
+
+\item{kappas}{TBA}
 }
 \value{
 An object of ...

@@ -7,7 +7,13 @@
 sampleV(n.sample, externalvA, externalvB, externalXi)
 }
 \arguments{
-\item{n.sample}{}
+\item{n.sample}{TBA}
+
+\item{externalvA}{TBA}
+
+\item{externalvB}{TBA}
+
+\item{externalXi}{TBA}
 }
 \value{
 An object of ...

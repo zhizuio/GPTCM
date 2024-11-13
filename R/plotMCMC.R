@@ -7,7 +7,10 @@
 #'
 #' @importFrom ggplot2 ggplot aes geom_step theme element_blank
 #'
-#' @param dat
+#' @param dat TBA
+#' @param datMCMC TBA
+#' @param estimator TBA
+#' @param ... TBA
 #'
 #' @return A \code{ggplot2::ggplot} object. See \code{?ggplot2::ggplot} for more
 #' details of the object.

@@ -7,7 +7,13 @@
 simData(n = 200, p = 10, L = 3, Sigma = 0)
 }
 \arguments{
-\item{n}{}
+\item{n}{TBA}
+
+\item{p}{TBA}
+
+\item{L}{TBA}
+
+\item{Sigma}{TBA}
 }
 \value{
 An object of ...

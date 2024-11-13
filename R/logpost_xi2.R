@@ -5,7 +5,7 @@
 #'
 #' @name logpost_xi2
 #'
-#' @param x
+#' @param x proposal value
 #'
 #' @return An object of ...
 #'
@@ -15,7 +15,7 @@
 #' x <- 1
 #'
 #' @export
-logpost_xi2 <- function(x, ...) {
+logpost_xi2 <- function(x) {
   weibull.S.tmp <- weibull.S
 
   # vA.tmp <- vA + 0.5 * sum(x[-1]!=0)

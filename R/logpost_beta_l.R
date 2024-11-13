@@ -5,7 +5,7 @@
 #'
 #' @name logpost_beta_l
 #'
-#' @param x
+#' @param x proposal value
 #'
 #' @return An object of ...
 #'
@@ -15,7 +15,7 @@
 #' x <- 1
 #'
 #' @export
-logpost_beta_l <- function(x, ...) {
+logpost_beta_l <- function(x) {
   # browser()
   betas.tmp <- betas.current
   # if(!is.na(x))

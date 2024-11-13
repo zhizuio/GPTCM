@@ -7,7 +7,13 @@
 sampleTau(n.sample, externalTauA, externalTauB, externalBetas)
 }
 \arguments{
-\item{n.sample}{}
+\item{n.sample}{TBA}
+
+\item{externalTauA}{TBA}
+
+\item{externalTauB}{TBA}
+
+\item{externalBetas}{TBA}
 }
 \value{
 An object of ...

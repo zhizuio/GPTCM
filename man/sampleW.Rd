@@ -7,7 +7,13 @@
 sampleW(n.sample, externalwA, externalwB, externalZetas)
 }
 \arguments{
-\item{n.sample}{}
+\item{n.sample}{TBA}
+
+\item{externalwA}{TBA}
+
+\item{externalwB}{TBA}
+
+\item{externalZetas}{TBA}
 }
 \value{
 An object of ...

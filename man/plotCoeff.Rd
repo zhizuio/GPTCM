@@ -7,7 +7,13 @@
 plotCoeff(dat, datMCMC, estimator = "beta", ...)
 }
 \arguments{
-\item{dat}{}
+\item{dat}{TBA}
+
+\item{datMCMC}{TBA}
+
+\item{estimator}{TBA}
+
+\item{...}{TBA}
 }
 \value{
 An object of ...

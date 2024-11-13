@@ -6,6 +6,8 @@
 # * https://r-pkgs.org/testing-design.html#sec-tests-files-overview
 # * https://testthat.r-lib.org/articles/special-files.html
 
+#' @importFrom remotes install_github
+
 library(testthat)
 library(GPTCM)
 remotes::install_github("cran/HI")

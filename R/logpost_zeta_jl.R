@@ -5,7 +5,7 @@
 #'
 #' @name logpost_zeta_jl
 #'
-#' @param x
+#' @param x proposal value
 #'
 #' @return An object of ...
 #'
@@ -15,7 +15,7 @@
 #' x <- 1
 #'
 #' @export
-logpost_zeta_jl <- function(x, ...) {
+logpost_zeta_jl <- function(x) {
   zetas.tmp <- zetas.current
   if (!is.na(x)) {
     zetas.tmp[j, l] <- x

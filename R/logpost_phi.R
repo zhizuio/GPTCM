@@ -5,7 +5,7 @@
 #'
 #' @name logpost_phi
 #'
-#' @param x
+#' @param x proposal value
 #'
 #' @return An object of ...
 #'
@@ -15,7 +15,7 @@
 #' x <- 1
 #'
 #' @export
-logpost_phi <- function(x, ...) {
+logpost_phi <- function(x) {
   concentrations <- # dat$proportion # Here 'dat$proportion' should be replaced by updated alr
     proportion * x
   normalizingConst <- log(gamma(rowSums(concentrations))) -

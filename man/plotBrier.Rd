@@ -5,12 +5,18 @@
 \alias{plotMCMC}
 \title{Time-dependent Brier scores}
 \usage{
-plotBrier(dat, datMCMC)
+plotBrier(dat, datMCMC, ...)
 
 plotMCMC(dat, datMCMC, estimator = "xi")
 }
 \arguments{
-\item{dat}{}
+\item{dat}{TBA}
+
+\item{datMCMC}{TBA}
+
+\item{...}{TBA}
+
+\item{estimator}{TBA}
 }
 \value{
 A \code{ggplot2::ggplot} object. See \code{?ggplot2::ggplot} for more

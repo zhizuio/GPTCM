@@ -4,10 +4,10 @@
 \alias{logpost_kappas}
 \title{Log posterior}
 \usage{
-logpost_kappas(x, ...)
+logpost_kappas(x)
 }
 \arguments{
-\item{x}{}
+\item{x}{proposal value}
 }
 \value{
 An object of ...

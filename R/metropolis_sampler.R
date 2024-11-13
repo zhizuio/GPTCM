@@ -7,7 +7,16 @@
 #' 
 #' @importFrom stats rweibull runif
 #'
-#' @param initial_value
+#' @param initial_value TBA
+#' @param n TBA
+#' @param proposal_shape TBA
+#' @param proposal_scale TBA
+#' @param theta TBA
+#' @param proportion TBA
+#' @param mu TBA
+#' @param kappas TBA
+#' @param burnin TBA
+#' @param lag TBA
 #'
 #' @return An object of ...
 #'

@@ -5,7 +5,11 @@
 #'
 #' @name target
 #'
-#' @param x
+#' @param x TBA
+#' @param theta TBA
+#' @param proportion TBA
+#' @param mu TBA
+#' @param kappas TBA
 #'
 #' @return An object of ...
 #'

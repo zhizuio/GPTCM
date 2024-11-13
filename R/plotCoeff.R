@@ -10,7 +10,10 @@
 #' @importFrom utils capture.output
 #' @importFrom scales alpha
 #' 
-#' @param dat
+#' @param dat TBA
+#' @param datMCMC TBA
+#' @param estimator TBA
+#' @param ... TBA
 #'
 #' @return An object of ...
 #'

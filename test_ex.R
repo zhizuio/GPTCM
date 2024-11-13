@@ -23,36 +23,36 @@ fit <- GPTCM(dat, n, p, L,
 # survival predictions based on posterior mean
 library(survival)
 b <- plotBrier(dat, datMCMC = fit)
-pdf(paste0("sim_brierSigma",Sigma,".pdf"), height = 4, width = 5)
+#pdf(paste0("sim_brierSigma",Sigma,".pdf"), height = 4, width = 5)
 b
-dev.off()
+#dev.off()
 
 # MCMC diagnosis
-pdf(paste0("gptcm_xiHat_diagnosis_Sigma",Sigma,"_M",M,".pdf"), height = 5, width = 5)
+#pdf(paste0("gptcm_xiHat_diagnosis_Sigma",Sigma,"_M",M,".pdf"), height = 5, width = 5)
 plotMCMC(dat, datMCMC = fit, estimator = "xi")
-dev.off()
+#dev.off()
 
-pdf(paste0("gptcm_tauKappaPhi_diagnosis_Sigma",Sigma,"_M",M,".pdf"), height = 5, width = 5)
+#pdf(paste0("gptcm_tauKappaPhi_diagnosis_Sigma",Sigma,"_M",M,".pdf"), height = 5, width = 5)
 plotMCMC(dat, datMCMC = fit, estimator = c("kappa", "tau", "w", "phi"))
-dev.off()
+#dev.off()
 
 # Final estimates
 
-pdf(paste0("gptcm_betaHat_Sigma",Sigma,"_M",M,".pdf"), height = 4, width = 8)
-#pdf("gptcm_betaHat_noGamma.pdf", height = 4, width = 8)
+#pdf(paste0("gptcm_betaHat_Sigma",Sigma,"_M",M,".pdf"), height = 4, width = 8)
+##pdf("gptcm_betaHat_noGamma.pdf", height = 4, width = 8)
 plotCoeff(dat, datMCMC = fit, estimator = "beta")
-dev.off()
+#dev.off()
 
-pdf(paste0("gptcm_zetaHat_Sigma",Sigma,"_M",M,".pdf"), height = 5, width = 7)
+#pdf(paste0("gptcm_zetaHat_Sigma",Sigma,"_M",M,".pdf"), height = 5, width = 7)
 plotCoeff(dat, datMCMC = fit, estimator = "zeta")
-dev.off()
+#dev.off()
 
 # MCMC traceplots of betas
-pdf(paste0("gptcm_betaHat_diagnosis_Sigma",Sigma,"_M",M,".pdf"), height = 18, width = 8)
+#pdf(paste0("gptcm_betaHat_diagnosis_Sigma",Sigma,"_M",M,".pdf"), height = 18, width = 8)
 plotMCMC(dat, datMCMC = fit, estimator = "beta")
-dev.off()
+#dev.off()
 
 # MCMC traceplots of zetas
-pdf(paste0("gptcm_zetaHat_diagnosis_Sigma",Sigma,"_M",M,".pdf"), height = 18, width = 12)
+#pdf(paste0("gptcm_zetaHat_diagnosis_Sigma",Sigma,"_M",M,".pdf"), height = 18, width = 12)
 plotMCMC(dat, datMCMC = fit, estimator = "zeta")
-dev.off()
+#dev.off()

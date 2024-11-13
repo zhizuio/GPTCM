@@ -18,7 +18,25 @@ metropolis_sampler(
 )
 }
 \arguments{
-\item{initial_value}{}
+\item{initial_value}{TBA}
+
+\item{n}{TBA}
+
+\item{proposal_shape}{TBA}
+
+\item{proposal_scale}{TBA}
+
+\item{theta}{TBA}
+
+\item{proportion}{TBA}
+
+\item{mu}{TBA}
+
+\item{kappas}{TBA}
+
+\item{burnin}{TBA}
+
+\item{lag}{TBA}
 }
 \value{
 An object of ...

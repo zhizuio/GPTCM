@@ -5,12 +5,14 @@
 #'
 #' @name plotBrier
 #'
+#' @importFrom survival Surv coxph
+#' @importFrom riskRegression Score
 #' @importFrom stats median as.formula
 #' @importFrom ggplot2 ggplot aes aes_string geom_step theme element_blank xlab ylab theme_bw
 #' @importFrom graphics layout par abline
 #' @importFrom utils globalVariables
 #'
-#' @param dat
+#' @param dat TBA
 #'
 #' @return A \code{ggplot2::ggplot} object. See \code{?ggplot2::ggplot} for more
 #' details of the object.
@@ -20,7 +22,7 @@
 #' x <- 1
 #'
 #' @export
-plotBrier <- function(dat, datMCMC) {
+plotBrier <- function(dat, datMCMC, ...) {
   n <- dim(dat$XX)[1]
   #p <- dim(dat$XX)[2]
   L <- dim(dat$XX)[3]
@@ -56,7 +58,7 @@ plotBrier <- function(dat, datMCMC) {
   x.median <- apply(dat$XX, c(1, 2), median)
   colnames(x.median) <- paste0("x.median", 1:10)
   survObj <- data.frame(dat$survObj, x01 = dat$x0[, 2], x02 = dat$x0[, 3], x, x.median)
-  fitCox.clin <- survival::coxph(Surv(time, event) ~ x01 + x02, data = survObj, y = TRUE, x = TRUE)
+  fitCox.clin <- survival::coxph(survival::Surv(time, event) ~ x01 + x02, data = survObj, y = TRUE, x = TRUE)
 
   # pred.clin <- survival::survfit(fitCox.clin, data = survObj)
   formula.tmp <- as.formula(paste0("Surv(time, event) ~ ", paste0(colnames(x.median), collapse = "+")))

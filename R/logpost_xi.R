@@ -5,7 +5,7 @@
 #'
 #' @name logpost_xi
 #'
-#' @param x
+#' @param x proposal value
 #'
 #' @return An object of ...
 #'
@@ -15,7 +15,7 @@
 #' x <- 1
 #'
 #' @export
-logpost_xi <- function(x, ...) {
+logpost_xi <- function(x) {
   cat("Currently function 'logpost_xi()' is not implemented well!")
   xi.tmp <- xi
   xi.tmp[jj] <- x

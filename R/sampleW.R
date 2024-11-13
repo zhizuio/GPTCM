@@ -7,7 +7,10 @@
 #'
 #' @importFrom stats rgamma
 #' 
-#' @param n.sample
+#' @param n.sample TBA
+#' @param externalwA TBA
+#' @param externalwB TBA
+#' @param externalZetas TBA
 #'
 #' @return An object of ...
 #'

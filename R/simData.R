@@ -7,7 +7,10 @@
 #'
 #' @importFrom stats rbinom rnorm runif rexp
 #' 
-#' @param n
+#' @param n TBA
+#' @param p TBA
+#' @param L TBA
+#' @param Sigma TBA
 #'
 #' @return An object of ...
 #'

@@ -7,6 +7,7 @@
 #' @name GPTCM
 #' 
 #' @importFrom stats median
+#' @importFrom HI arms
 #'
 #' @param dat a list containing observed data from \code{n} subjects with
 #' components \code{t}, \code{di}, \code{X}. For graphical learning of the
@@ -14,6 +15,15 @@
 #' survival and covariates data. For subgroup models with or without graphical
 #' learning, \code{survObj} should be a list of multiple lists with each
 #' component list representing each subgroup's survival and covariates data
+#' @param n TBA
+#' @param p TBA
+#' @param L TBA
+#' @param hyperpar TBA
+#' @param initial TBA
+#' @param nIter TBA
+#' @param burnin TBA
+#' @param thin TBA
+#' @param tick TBA
 #'
 #'
 #' @return An object of ...

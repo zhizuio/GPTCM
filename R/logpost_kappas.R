@@ -5,7 +5,7 @@
 #'
 #' @name logpost_kappas
 #'
-#' @param x
+#' @param x proposal value
 #'
 #' @return An object of ...
 #'
@@ -15,7 +15,7 @@
 #' x <- 1
 #'
 #' @export
-logpost_kappas <- function(x, ...) {
+logpost_kappas <- function(x) {
   mu.tmp <- mu.current
   weibull.S.tmp <- weibull.S
 

@@ -4,10 +4,10 @@
 \alias{logpost_phi}
 \title{Log posterior}
 \usage{
-logpost_phi(x, ...)
+logpost_phi(x)
 }
 \arguments{
-\item{x}{}
+\item{x}{proposal value}
 }
 \value{
 An object of ...

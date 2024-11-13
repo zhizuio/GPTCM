@@ -24,6 +24,24 @@ Markov random field prior, \code{survObj} should be a list of the list with
 survival and covariates data. For subgroup models with or without graphical
 learning, \code{survObj} should be a list of multiple lists with each
 component list representing each subgroup's survival and covariates data}
+
+\item{n}{TBA}
+
+\item{p}{TBA}
+
+\item{L}{TBA}
+
+\item{hyperpar}{TBA}
+
+\item{initial}{TBA}
+
+\item{nIter}{TBA}
+
+\item{burnin}{TBA}
+
+\item{thin}{TBA}
+
+\item{tick}{TBA}
 }
 \value{
 An object of ...
