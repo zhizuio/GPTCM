@@ -11,7 +11,7 @@ Depends: R (>= 4.2.0)
 Encoding: UTF-8
 RoxygenNote: 7.3.2
 LinkingTo: testthat
-Imports: remotes, truncnorm, survival, riskRegression, ggplot2, miCoPTCM, MASS, Matrix, utils, stats, graphics
+Imports: remotes, truncnorm, survival, riskRegression, ggplot2, miCoPTCM, MASS, Matrix, scales, utils, stats, graphics
 Suggests: testthat
 Remotes: cran/HI
 NeedsCompilation: no

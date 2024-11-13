@@ -60,8 +60,8 @@ GPTCM <- function(dat, n, p, L,
     vSq <- c(10, 1, 1)
     kappas <- 0.9
 
-    betas.current <- matrix(0, nrow = NCOL(dat$x1), ncol = NCOL(dat$proportion))
-    mu.current <- matrix(0, nrow = NROW(dat$x1), ncol = NCOL(dat$proportion))
+    betas.current <- matrix(0, nrow = dim(dat$XX)[2], ncol = NCOL(dat$proportion))
+    mu.current <- matrix(0, nrow = dim(dat$XX)[1], ncol = NCOL(dat$proportion))
     for (l in 1:L) {
       mu.current[, l] <- exp(dat$beta0[l] + dat$XX[, , l] %*% betas.current[, l])
     }
@@ -69,8 +69,8 @@ GPTCM <- function(dat, n, p, L,
 
     ## proportion Dirichlet part
     phi <- 1
-    zetas.current <- matrix(0, nrow = NCOL(dat$x1) + 1, ncol = NCOL(dat$proportion) - 1) # include intercept
-    proportion <- matrix(0, nrow = NROW(dat$x1), ncol = NCOL(dat$proportion))
+    zetas.current <- matrix(0, nrow = dim(dat$XX)[2] + 1, ncol = NCOL(dat$proportion) - 1) # include intercept
+    proportion <- matrix(0, nrow = dim(dat$XX)[1], ncol = NCOL(dat$proportion))
     for (l in 1:(L - 1)) { # using the last cell type as reference
       proportion[, l] <- exp(cbind(1, dat$XX[, , l]) %*% zetas.current[, l]) /
         (1 + rowSums(sapply(1:(L - 1), function(xx) {
@@ -98,9 +98,9 @@ GPTCM <- function(dat, n, p, L,
   # tauSq.mcmc <- matrix(0, nrow = 1+nIter, ncol = 3)
   wSq.mcmc <- c(wSq, rep(0, nIter))
   vSq.mcmc <- matrix(0, nrow = 1 + nIter, ncol = 2)
-  betas.mcmc <- matrix(0, nrow = 1 + nIter, ncol = NCOL(dat$proportion) * NCOL(dat$x1))
+  betas.mcmc <- matrix(0, nrow = 1 + nIter, ncol = NCOL(dat$proportion) * dim(dat$XX)[2])
   betas.mcmc[1, ] <- as.vector(betas.current)
-  zetas.mcmc <- matrix(0, nrow = 1 + nIter, ncol = (NCOL(dat$proportion) - 1) * (NCOL(dat$x1) + 1))
+  zetas.mcmc <- matrix(0, nrow = 1 + nIter, ncol = (NCOL(dat$proportion) - 1) * (dim(dat$XX)[2] + 1))
   zetas.mcmc[1, ] <- as.vector(zetas.current)
 
   globalvariable <- list(

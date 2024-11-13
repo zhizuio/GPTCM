@@ -191,7 +191,8 @@ simData <- function(n = 200, p = 10, L = 3, Sigma = 0) {
     survObj = survObj, accepted = accepted,
     proportion = proportion, thetas = thetas,
     kappas = kappa0, mu = mu0,
-    x0 = x0, x1 = x1, x2 = x2, x3 = x3, XX = XX,
+    x0 = x0, #x1 = x1, x2 = x2, x3 = x3, 
+    XX = XX,
     xi = xi, beta0 = beta0, # zeta0=zeta0,
     betas = cbind(beta1, beta2, beta3),
     zetas = zetas
