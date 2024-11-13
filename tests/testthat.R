@@ -8,6 +8,7 @@
 
 library(testthat)
 library(GPTCM)
+remotes::install_github("cran/HI")
 library(HI)
 
 test_check("GPTCM")
