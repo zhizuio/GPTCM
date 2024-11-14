@@ -24,9 +24,9 @@
 #' @export
 plotBrier <- function(dat, datMCMC, ...) {
   n <- dim(dat$XX)[1]
-  #p <- dim(dat$XX)[2]
+  # p <- dim(dat$XX)[2]
   L <- dim(dat$XX)[3]
-  #nIter <- datMCMC$input$nIter
+  # nIter <- datMCMC$input$nIter
   burnin <- datMCMC$input$burnin
 
   # survival predictions based on posterior mean
@@ -75,13 +75,14 @@ plotBrier <- function(dat, datMCMC, ...) {
 
   # library(miCoPTCM) # good estimation for cure fraction; same BS as Cox.clin
   suppressWarnings(
-    resMY <- miCoPTCM::PTCMestimBF(Surv(time, event) ~ x01 + x02, 
-                                   data = survObj, 
-                                   varCov = matrix(0, nrow = 3, ncol = 3), 
-                                   init = rep(0, 3))
+    resMY <- miCoPTCM::PTCMestimBF(Surv(time, event) ~ x01 + x02,
+      data = survObj,
+      varCov = matrix(0, nrow = 3, ncol = 3),
+      init = rep(0, 3)
+    )
   )
   Surv.PTCM <- exp(-exp(dat$x0 %*% resMY$coefficients) %*% t(resMY$estimCDF))
-  #predPTCM.prob <- 1 - Surv.PTCM
+  # predPTCM.prob <- 1 - Surv.PTCM
 
   g <- riskRegression::Score(
     list(
@@ -101,10 +102,12 @@ plotBrier <- function(dat, datMCMC, ...) {
   g1 <- g$Brier$score
   # g1 <- g1[g1$times <= 71, ]
   levels(g1$model)[1] <- "Kaplan-Meier"
-  #utils::globalVariables(c("times", "Brier", "model"))
+  # utils::globalVariables(c("times", "Brier", "model"))
   # NOTE: `aes_string()` was deprecated in ggplot2 3.0.0.
-  g2 <- ggplot2::ggplot(g1, aes_string(x = "times", y = "Brier", 
-                                group = "model", color = "model")) +
+  g2 <- ggplot2::ggplot(g1, aes_string(
+    x = "times", y = "Brier",
+    group = "model", color = "model"
+  )) +
     xlab("Time") +
     ylab("Brier score") +
     geom_step(direction = "vh") + # , alpha=0.4) +

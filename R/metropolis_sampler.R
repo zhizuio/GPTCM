@@ -4,7 +4,7 @@
 #' Random number generator via MH algorithm. Adapted from https://blog.djnavarro.net/posts/2023-04-12_metropolis-hastings/
 #'
 #' @name metropolis_sampler
-#' 
+#'
 #' @importFrom stats rweibull runif
 #'
 #' @param initial_value TBA
@@ -68,7 +68,7 @@ metropolis_step <- function(x, proposal_shape, proposal_scale,
                             theta, proportion, mu, kappas) {
   proposed_x <- rweibull(1, shape = proposal_shape, scale = proposal_scale)
   accept_prob <- min(1, target(proposed_x, theta, proportion, mu, kappas) /
-                       target(x, theta, proportion, mu, kappas))
+    target(x, theta, proportion, mu, kappas))
   u <- runif(1)
   if (is.na(u <= accept_prob)) {
     value <- NA

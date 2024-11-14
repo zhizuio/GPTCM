@@ -5,10 +5,10 @@
 #' for sparse identification of high-dimensional covariates.
 #'
 #' @name GPTCM
-#' 
+#'
 #' @importFrom stats median
 #' @importFrom HI arms
-#' @import remotes 
+#' @import remotes
 #'
 #' @param dat a list containing observed data from \code{n} subjects with
 #' components \code{t}, \code{di}, \code{X}. For graphical learning of the
@@ -19,8 +19,8 @@
 #' @param n TBA
 #' @param p TBA
 #' @param L TBA
-#' @param dirichlet logical value; should the proportions be modeled via the 
-#' common (\code{dirichlet = FALSE}) or alternative (\code{dirichlet = TRUE}) 
+#' @param dirichlet logical value; should the proportions be modeled via the
+#' common (\code{dirichlet = FALSE}) or alternative (\code{dirichlet = TRUE})
 #' parametrization of the Dirichlet regression model
 #' @param hyperpar TBA
 #' @param initial TBA
@@ -99,7 +99,9 @@ GPTCM <- function(dat, n, p, L,
       for (ll in 1:L) {
         alphas[, ll] <- exp(cbind(1, dat$XX[, , ll]) %*% zetas.current[, ll])
       }
-      proportion <- apply(alphas, 2, function(xx){xx/rowSums(alphas)})
+      proportion <- apply(alphas, 2, function(xx) {
+        xx / rowSums(alphas)
+      })
     }
 
     betas <- mu.current / gamma(1 + 1 / kappas)
@@ -130,15 +132,15 @@ GPTCM <- function(dat, n, p, L,
     dat = dat,
     dirichlet = dirichlet,
     proportion = proportion,
-    kappas = kappas, 
+    kappas = kappas,
     kappaA = hyperpar$kappaA, kappaB = hyperpar$kappaB,
     lambdas = lambdas,
     weibull.S = weibull.S,
     betas.current = betas.current,
     mu.current = mu.current,
-    #thetas = thetas,
-    #xi = xi,
-    #phi = phi,
+    # thetas = thetas,
+    # xi = xi,
+    # phi = phi,
     zetas.current = zetas.current,
     vSq = vSq,
     wSq = wSq,
@@ -146,15 +148,15 @@ GPTCM <- function(dat, n, p, L,
     L = L
   )
   list2env(globalvariable, .GlobalEnv)
-  
+
   ## MCMC iterations
   for (m in 1:nIter) {
     if (m %% tick == 0) {
       cat("MCMC iteration:", m, "\n")
     }
-    
-    #new.env()
-    
+
+    # new.env()
+
     ## update \xi's in cure fraction
     xi.mcmc.internal <- HI::arms(
       y.start = xi,
@@ -169,16 +171,16 @@ GPTCM <- function(dat, n, p, L,
     })
     # xi <- xi.mcmc.internal
     xi.mcmc[1 + m, ] <- xi
-    globalvariable <- list( xi = xi )
+    globalvariable <- list(xi = xi)
     list2env(globalvariable, .GlobalEnv)
 
     vSq[-1] <- sampleV(2, hyperpar$vA, hyperpar$vB, xi)
     vSq.mcmc[1 + m, ] <- vSq[-1]
-    globalvariable <- list( vSq = vSq )
+    globalvariable <- list(vSq = vSq)
     list2env(globalvariable, .GlobalEnv)
 
     thetas <- exp(dat$x0 %*% xi)
-    globalvariable <- list( thetas = thetas )
+    globalvariable <- list(thetas = thetas)
     list2env(globalvariable, .GlobalEnv)
 
     ## update phi in Dirichlet measurement error model
@@ -193,17 +195,17 @@ GPTCM <- function(dat, n, p, L,
     phi <- median(phi.mcmc.internal[-c(1:(length(phi.mcmc.internal) / 2))]) # median
     phi <- median(c(phi, 0.1, 200 - 0.1))
     phi.mcmc[1 + m] <- phi
-    globalvariable <- list( phi = phi )
+    globalvariable <- list(phi = phi)
     list2env(globalvariable, .GlobalEnv)
 
     ## update \zeta_l of p_l in non-cure fraction; the last cell type as reference
-    for (l in 1:ifelse(dirichlet, L-1, L)) {
+    for (l in 1:ifelse(dirichlet, L - 1, L)) {
       for (j in 1:(p + 1)) {
         if (j == 1) wSq <- 10
         # globalVariables(c("l", "j")) ## This is not safe
-        globalvariableJL <- list( j = j, l = l )
+        globalvariableJL <- list(j = j, l = l)
         list2env(globalvariableJL, .GlobalEnv)
-        
+
         zetas.mcmc.internal <- HI::arms(
           y.start = zetas.current[j, l],
           myldens = logpost_zeta_jl,
@@ -216,7 +218,7 @@ GPTCM <- function(dat, n, p, L,
         # zeta.l.new <- zetas.mcmc.internal
         zetas.current[j, l] <- min(abs(zeta.l.new), 3 - 0.1) * sign(zeta.l.new)
         # wSq <- sampleW(1, hyperpar$wA, hyperpar$wB, zetas.current[j,l])
-        globalvariable <- list( zetas.current = zetas.current )
+        globalvariable <- list(zetas.current = zetas.current)
         list2env(globalvariable, .GlobalEnv)
       }
       if (dirichlet) {
@@ -227,14 +229,16 @@ GPTCM <- function(dat, n, p, L,
             })))
         }
         proportion[, L] <- 1 - rowSums(proportion[, -L])
-      } else {# use log-link for concentration parameters without reference category
+      } else { # use log-link for concentration parameters without reference category
         alphas <- matrix(NA, nrow = NROW(proportion), ncol = NCOL(proportion))
         for (ll in 1:L) {
           alphas[, ll] <- exp(cbind(1, dat$XX[, , ll]) %*% zetas.current[, ll])
         }
-        proportion <- apply(alphas, 2, function(xx){xx/rowSums(alphas)})
+        proportion <- apply(alphas, 2, function(xx) {
+          xx / rowSums(alphas)
+        })
       }
-      globalvariable <- list( proportion = proportion )
+      globalvariable <- list(proportion = proportion)
       list2env(globalvariable, .GlobalEnv)
     }
     zetas.mcmc[1 + m, ] <- as.vector(zetas.current)
@@ -242,7 +246,7 @@ GPTCM <- function(dat, n, p, L,
     ## update wSq, the variance of zetas
     wSq <- sampleW(1, hyperpar$wA, hyperpar$wB, zetas.current[-1, ])
     wSq.mcmc[1 + m] <- wSq
-    globalvariable <- list( wSq = wSq )
+    globalvariable <- list(wSq = wSq)
     list2env(globalvariable, .GlobalEnv)
 
     ## update kappa in noncure fraction
@@ -257,16 +261,16 @@ GPTCM <- function(dat, n, p, L,
     kappas <- median(kappas.mcmc.internal[-c(1:(length(kappas.mcmc.internal) / 2))])
     # kappas <- kappas.mcmc.internal
     kappas.mcmc[1 + m] <- median(c(kappas, 0.1 + 0.1, 10 - 0.1))
-    globalvariable <- list( kappas = kappas )
+    globalvariable <- list(kappas = kappas)
     list2env(globalvariable, .GlobalEnv)
 
     ## update \beta_l of S_l(t) in non-cure fraction
     for (l in 1:L) {
       for (j in 1:p) {
         # globalVariables(c("l", "j")) ## This is not safe
-        globalvariableJL <- list( j = j, l = l )
+        globalvariableJL <- list(j = j, l = l)
         list2env(globalvariableJL, .GlobalEnv)
-        
+
         betas.mcmc.internal <- HI::arms(
           y.start = betas.current[j, l],
           myldens = logpost_beta_jl,
@@ -283,19 +287,21 @@ GPTCM <- function(dat, n, p, L,
         # beta.l.new <- colMeans(betas.mcmc.internal[-c(1:(nrow(betas.mcmc.internal)/2)),])
         # betas.current[,l] <- sapply(beta.l.new, function(xx){min(abs(xx), 5-0.1) * sign(xx)} )
         # tauSq <- sampleTau(1, hyperpar$tauA, hyperpar$tauB, betas.current[j, l])
-        globalvariable <- list( betas.current = betas.current )
+        globalvariable <- list(betas.current = betas.current)
         list2env(globalvariable, .GlobalEnv)
       }
       mu.current[, l] <- exp(dat$XX[, , l] %*% betas.current[, l])
       lambdas[, l] <- mu.current[, l] / gamma(1 + 1 / kappas) # lambdas is a parameter in WEI3 distr.
       weibull.S[, l] <- exp(-(dat$survObj$time / lambdas[, l])^kappas)
       # tauSq[l] <- sampleTau(1, hyperpar$tauA, hyperpar$tauB, betas.current[, l])
-      globalvariable <- list( mu.current = mu.current,
-                              weibull.S = weibull.S)
+      globalvariable <- list(
+        mu.current = mu.current,
+        weibull.S = weibull.S
+      )
       list2env(globalvariable, .GlobalEnv)
     }
     betas.mcmc[1 + m, ] <- as.vector(betas.current)
-    globalvariable <- list( lambdas = lambdas )
+    globalvariable <- list(lambdas = lambdas)
     list2env(globalvariable, .GlobalEnv)
 
     ## update tauSq, the variance of betas
@@ -303,7 +309,7 @@ GPTCM <- function(dat, n, p, L,
     # tauSq.mcmc[1+m, ] <- tauSq
     tauSq <- sampleTau(1, hyperpar$tauA, hyperpar$tauB, betas.current)
     tauSq.mcmc[1 + m] <- tauSq
-    globalvariable <- list( tauSq = tauSq)
+    globalvariable <- list(tauSq = tauSq)
     list2env(globalvariable, .GlobalEnv)
   }
   cat("... Done!\n")

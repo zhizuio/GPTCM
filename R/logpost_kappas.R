@@ -6,7 +6,7 @@
 #' @name logpost_kappas
 #'
 #' @importFrom stats dgamma
-#' 
+#'
 #' @param x proposal value
 #'
 #' @return An object of ...

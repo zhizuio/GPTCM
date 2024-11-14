@@ -21,11 +21,11 @@
 #'
 #' @export
 plotMCMC <- function(dat, datMCMC, estimator = "xi") {
-  #n <- dim(dat$XX)[1]
+  # n <- dim(dat$XX)[1]
   p <- dim(dat$XX)[2]
   L <- dim(dat$XX)[3]
-  #nIter <- datMCMC$input$nIter
-  #burnin <- datMCMC$input$burnin
+  # nIter <- datMCMC$input$nIter
+  # burnin <- datMCMC$input$burnin
 
   if ("beta" %in% estimator) {
     betas.mcmc <- datMCMC$output$mcmc$betas

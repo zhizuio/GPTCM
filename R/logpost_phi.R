@@ -22,7 +22,7 @@ logpost_phi <- function(x) {
     rowSums(log(gamma(concentrations)))
 
   geometricTerm <- rowSums((concentrations - 1) * # log(dat$proportion) )
-                             log(proportion))
+    log(proportion))
 
   Delta <- 20
   logprior <- log(truncnorm::dtruncnorm(x, a = 0, sd = Delta / 3))

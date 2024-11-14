@@ -6,7 +6,7 @@
 #' @name sampleW
 #'
 #' @importFrom stats rgamma
-#' 
+#'
 #' @param n.sample TBA
 #' @param externalwA TBA
 #' @param externalwB TBA

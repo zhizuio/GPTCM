@@ -6,7 +6,7 @@
 #' @name simData
 #'
 #' @importFrom stats rbinom rnorm runif rexp
-#' 
+#'
 #' @param n TBA
 #' @param p TBA
 #' @param L TBA
@@ -41,7 +41,7 @@ simData <- function(n = 200, p = 10, L = 3, Sigma = 0, proportion.model = "alr")
   zeta3 <- c(0, 0, 1, -0.5, -0.7, 0, 1, 0, 0, 0)
 
   ## covariates
-  #means <- rep(0, p)
+  # means <- rep(0, p)
   if (Sigma[1] == 0) {
     rho0 <- 0.3 # correlation for each gene between cell types
     rho1 <- 0.1 # correlation for in 1st cell type
@@ -125,38 +125,38 @@ simData <- function(n = 200, p = 10, L = 3, Sigma = 0, proportion.model = "alr")
   mu2 <- exp(beta0[2] + x2 %*% matrix(beta2, ncol = 1))
   mu3 <- exp(beta0[3] + x3 %*% matrix(beta3, ncol = 1))
   mu0 <- cbind(mu1, mu2, mu3)
-  
+
   # simulate proportions from cloglog-link function; this is a bit model misspecification
-  if( proportion.model == "cloglog"){
-    p1 <- 1 - exp(-exp(zeta0[1] + x1 %*% matrix(zeta1, ncol=1)))
-    p2 <- 1 - exp(-exp(zeta0[2] + x2 %*% matrix(zeta2, ncol=1)))
-    p3 <- 1 - exp(-exp(zeta0[3] + x3 %*% matrix(zeta3, ncol=1)))
+  if (proportion.model == "cloglog") {
+    p1 <- 1 - exp(-exp(zeta0[1] + x1 %*% matrix(zeta1, ncol = 1)))
+    p2 <- 1 - exp(-exp(zeta0[2] + x2 %*% matrix(zeta2, ncol = 1)))
+    p3 <- 1 - exp(-exp(zeta0[3] + x3 %*% matrix(zeta3, ncol = 1)))
     proportion <- cbind(p1, p2, p3)
-    proportion <- t(apply(proportion, 1, function(pp) pp/sum(pp)))
+    proportion <- t(apply(proportion, 1, function(pp) pp / sum(pp)))
   }
   # simulate proportions from log-link function; this is a bit model misspecification
-  if( proportion.model == "log"){
-    p1 <- exp(zeta0[1] + x1 %*% matrix(zeta1, ncol=1))
-    p2 <- exp(zeta0[2] + x2 %*% matrix(zeta2, ncol=1))
-    p3 <- exp(zeta0[3] + x3 %*% matrix(zeta3, ncol=1))
+  if (proportion.model == "log") {
+    p1 <- exp(zeta0[1] + x1 %*% matrix(zeta1, ncol = 1))
+    p2 <- exp(zeta0[2] + x2 %*% matrix(zeta2, ncol = 1))
+    p3 <- exp(zeta0[3] + x3 %*% matrix(zeta3, ncol = 1))
     # p3 <- 1 - p1 - p2 # We cannot use this, since p1+p2 can be > 1
     proportion <- cbind(p1, p2, p3)
-    proportion <- t(apply(proportion, 1, function(pp) pp/sum(pp)))
+    proportion <- t(apply(proportion, 1, function(pp) pp / sum(pp)))
   }
 
   ## simulate proportions from Dirichlet distribution (n, alpha=1:L)
-  if( proportion.model == "dirichlet"){
-    alpha1 <- exp(zeta0[1] + x1 %*% matrix(zeta1, ncol=1))
-    alpha2 <- exp(zeta0[2] + x2 %*% matrix(zeta2, ncol=1))
-    alpha3 <- exp(zeta0[3] + x3 %*% matrix(zeta3, ncol=1))
+  if (proportion.model == "dirichlet") {
+    alpha1 <- exp(zeta0[1] + x1 %*% matrix(zeta1, ncol = 1))
+    alpha2 <- exp(zeta0[2] + x2 %*% matrix(zeta2, ncol = 1))
+    alpha3 <- exp(zeta0[3] + x3 %*% matrix(zeta3, ncol = 1))
     alpha0 <- alpha1 + alpha2 + alpha3
-    proportion <- cbind(alpha1/alpha0, alpha2/alpha0, alpha3/alpha0)
-    #proportion <- matrix(rgamma(L * n, t(1:L)), ncol = L, byrow=TRUE)
-    #proportion <- proportion / rowSums(proportion)
+    proportion <- cbind(alpha1 / alpha0, alpha2 / alpha0, alpha3 / alpha0)
+    # proportion <- matrix(rgamma(L * n, t(1:L)), ncol = L, byrow=TRUE)
+    # proportion <- proportion / rowSums(proportion)
   }
 
   ## the following is via logit/alr-link function
-  if( proportion.model == "alr"){
+  if (proportion.model == "alr") {
     proportion <- tmp <- matrix(nrow = n, ncol = L)
     for (l in 1:(L - 1)) {
       tmp[, l] <- exp(cbind(1, XX[, , l]) %*% zetas[, l])
@@ -212,7 +212,7 @@ simData <- function(n = 200, p = 10, L = 3, Sigma = 0, proportion.model = "alr")
     survObj = survObj, accepted = accepted,
     proportion = proportion, thetas = thetas,
     kappas = kappa0, mu = mu0,
-    x0 = x0, #x1 = x1, x2 = x2, x3 = x3, 
+    x0 = x0, # x1 = x1, x2 = x2, x3 = x3,
     XX = XX,
     xi = xi, beta0 = beta0, # zeta0=zeta0,
     betas = cbind(beta1, beta2, beta3),

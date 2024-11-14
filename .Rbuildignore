@@ -1,4 +1,6 @@
 ^data-raw$
+^results$
+^cleanup
 ^\.github$
 ^LICENSE$
 ^test_build.R

@@ -6,7 +6,7 @@
 #' @name sampleTau
 #'
 #' @importFrom stats rgamma
-#' 
+#'
 #' @param n.sample TBA
 #' @param externalTauA TBA
 #' @param externalTauB TBA

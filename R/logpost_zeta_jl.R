@@ -36,7 +36,9 @@ logpost_zeta_jl <- function(x) {
     for (ll in 1:L) {
       alphas[, ll] <- exp(cbind(1, dat$XX[, , ll]) %*% zetas.tmp[, ll])
     }
-    proportion.tmp <- apply(alphas, 2, function(xx){xx/rowSums(alphas)})
+    proportion.tmp <- apply(alphas, 2, function(xx) {
+      xx / rowSums(alphas)
+    })
   }
 
   # noncure density related censored part
@@ -54,7 +56,7 @@ logpost_zeta_jl <- function(x) {
 
   # Dirichlet density
   concentrations <- proportion.tmp * phi # some issue here, since the sum of each row is phi
-  normalizingConst <- #log(gamma(rowSums(concentrations))) -
+  normalizingConst <- # log(gamma(rowSums(concentrations))) -
     log(gamma(phi)) - rowSums(log(gamma(concentrations)))
   # normalizingConst <- -log(gamma(concentrations[,l])) # to be verified
 

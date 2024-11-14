@@ -49,7 +49,7 @@ logpost_beta_jl <- function(x) {
 
   thetas.tmp <- exp(dat$x0 %*% xi)
   logpost.second <- sum(thetas.tmp * # dat$proportion[, l]
-                          proportion[, l] * weibull.S.tmp[, l])
+    proportion[, l] * weibull.S.tmp[, l])
 
   logpost <- logpost.first + logpost.second + logprior
 
