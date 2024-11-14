@@ -24,6 +24,7 @@
 #' parametrization of the Dirichlet regression model
 #' @param hyperpar TBA
 #' @param kappaSampler TBA
+#' @param w0Sampler TBA
 #' @param initial TBA
 #' @param nIter TBA
 #' @param burnin TBA

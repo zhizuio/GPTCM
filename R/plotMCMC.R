@@ -44,6 +44,7 @@ plotMCMC <- function(dat, datMCMC, estimator = "xi") {
 
   if ("zeta" %in% estimator) {
     zetas.mcmc <- datMCMC$output$mcmc$zetas
+    dirichlet <- datMCMC$input$dirichlet
 
     ylabel <- paste0(
       "expression(zeta['", rep(0:p, ifelse(dirichlet, L - 1, L)), ",",

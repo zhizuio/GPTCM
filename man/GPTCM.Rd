@@ -42,6 +42,8 @@ parametrization of the Dirichlet regression model}
 
 \item{kappaSampler}{TBA}
 
+\item{w0Sampler}{TBA}
+
 \item{initial}{TBA}
 
 \item{nIter}{TBA}
