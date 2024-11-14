@@ -15,7 +15,7 @@ simData(n = 200, p = 10, L = 3, Sigma = 0, proportion.model = "alr")
 
 \item{Sigma}{TBA}
 
-\item{proportion.model}{TBA}
+\item{proportion.model}{One of \code{c("alr", "cloglog", "log", "dirichlet")}}
 }
 \value{
 An object of ...

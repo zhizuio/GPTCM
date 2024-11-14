@@ -9,6 +9,7 @@ GPTCM(
   n,
   p,
   L,
+  dirichlet = TRUE,
   hyperpar = NULL,
   initial = NULL,
   nIter = 1,
@@ -30,6 +31,10 @@ component list representing each subgroup's survival and covariates data}
 \item{p}{TBA}
 
 \item{L}{TBA}
+
+\item{dirichlet}{logical value; should the proportions be modeled via the 
+common (\code{dirichlet = FALSE}) or alternative (\code{dirichlet = TRUE}) 
+parametrization of the Dirichlet regression model}
 
 \item{hyperpar}{TBA}
 

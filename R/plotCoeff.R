@@ -55,14 +55,15 @@ plotCoeff <- function(dat, datMCMC, estimator = "beta", ...) {
     zetas.true <- dat$zetas[(p + 1):1, ]
     zetas_min <- min(zetas.mcmc, zetas.true)
     zetas_max <- max(zetas.mcmc, zetas.true)
+    dirichlet <- datMCMC$input$dirichlet
 
     # pdf(paste0("gptcm_zetaHat_Sigma",Sigma,"_M",M,".pdf"), height = 5, width = 7)
-    layout(matrix(1:(L - 1), nrow = 1))
-    for (l in 0:(L - 2)) {
+    layout(matrix(1:ifelse(dirichlet, L-1, L), nrow = 1))
+    for (l in 0:ifelse(dirichlet, L-2, L-1)) {
       plotCoeff0(zetas.mcmc[, l * (p + 1) + 1:(p + 1)][, (p + 1):1],
         zetas.true[, l + 1],
         xlim = c(zetas_min, zetas_max),
-        main = paste("Cell type", l),
+        main = paste("Cell type", l+1),
         label.y = c(paste0("x", p:1), "intecept")
       )
     }

@@ -11,7 +11,7 @@
 #' @param p TBA
 #' @param L TBA
 #' @param Sigma TBA
-#' @param proportion.model TBA
+#' @param proportion.model One of \code{c("alr", "cloglog", "log", "dirichlet")}
 #'
 #' @return An object of ...
 #'
@@ -99,9 +99,9 @@ simData <- function(n = 200, p = 10, L = 3, Sigma = 0, proportion.model = "alr")
   # xi <- c(-0.5, 1.5, 0.2) # effects of mandatory covariates for cured fraction
   xi <- c(0.3, 0.5, -0.9)
   beta0 <- rep(0, 3) # c(-1.5, 0.5, -1.) # intercepts in different cell types linked to survival
-  zeta0 <- c(-.5, -1) # intercepts in different cell types linked to proportions
+  zeta0 <- c(-.5, -1, 1.2) # intercepts in different cell types linked to proportions
   # zeta0 <- rep(0, 3)
-  zetas <- rbind(zeta0, cbind(zeta1, zeta2))
+  zetas <- rbind(zeta0, cbind(zeta1, zeta2, zeta3))
 
   # censoring function
   # - follow-up time 12 to 60 months
@@ -126,7 +126,7 @@ simData <- function(n = 200, p = 10, L = 3, Sigma = 0, proportion.model = "alr")
   mu3 <- exp(beta0[3] + x3 %*% matrix(beta3, ncol = 1))
   mu0 <- cbind(mu1, mu2, mu3)
   
-  # simulate proportions from cloglog-link function
+  # simulate proportions from cloglog-link function; this is a bit model misspecification
   if( proportion.model == "cloglog"){
     p1 <- 1 - exp(-exp(zeta0[1] + x1 %*% matrix(zeta1, ncol=1)))
     p2 <- 1 - exp(-exp(zeta0[2] + x2 %*% matrix(zeta2, ncol=1)))
@@ -134,8 +134,8 @@ simData <- function(n = 200, p = 10, L = 3, Sigma = 0, proportion.model = "alr")
     proportion <- cbind(p1, p2, p3)
     proportion <- t(apply(proportion, 1, function(pp) pp/sum(pp)))
   }
-  # simulate proportions from log-link function
-  if( proportion.model == "cloglog"){
+  # simulate proportions from log-link function; this is a bit model misspecification
+  if( proportion.model == "log"){
     p1 <- exp(zeta0[1] + x1 %*% matrix(zeta1, ncol=1))
     p2 <- exp(zeta0[2] + x2 %*% matrix(zeta2, ncol=1))
     p3 <- exp(zeta0[3] + x3 %*% matrix(zeta3, ncol=1))
@@ -146,6 +146,11 @@ simData <- function(n = 200, p = 10, L = 3, Sigma = 0, proportion.model = "alr")
 
   ## simulate proportions from Dirichlet distribution (n, alpha=1:L)
   if( proportion.model == "dirichlet"){
+    alpha1 <- exp(zeta0[1] + x1 %*% matrix(zeta1, ncol=1))
+    alpha2 <- exp(zeta0[2] + x2 %*% matrix(zeta2, ncol=1))
+    alpha3 <- exp(zeta0[3] + x3 %*% matrix(zeta3, ncol=1))
+    alpha0 <- alpha1 + alpha2 + alpha3
+    proportion <- cbind(alpha1/alpha0, alpha2/alpha0, alpha3/alpha0)
     #proportion <- matrix(rgamma(L * n, t(1:L)), ncol = L, byrow=TRUE)
     #proportion <- proportion / rowSums(proportion)
   }
@@ -160,6 +165,8 @@ simData <- function(n = 200, p = 10, L = 3, Sigma = 0, proportion.model = "alr")
     for (l in 1:(L - 1)) {
       proportion[, l] <- tmp[, l] / (1 + rowSums(tmp[, -L]))
     }
+    # the last category is as reference, no need data for zetas[,L]
+    zetas <- zetas[, -L]
   }
 
   ## fixed proportions for debug estimation of other parameters
@@ -180,7 +187,7 @@ simData <- function(n = 200, p = 10, L = 3, Sigma = 0, proportion.model = "alr")
 
   for (i in which(U > cure)) {
     ## M-H sampler for event time
-    out <- metropolis_sampler(
+    out <- metropolis_sampler( # If the target is set as Gompertz distr., it's a bit model misspecification
       initial_value = 10,
       n = 5,
       proposal_shape = 0.9,

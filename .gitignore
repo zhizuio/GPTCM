@@ -6,6 +6,7 @@
 
 test_build.R
 test_ex.R
+results*
 
 GPTCM/src/*.o
 GPTCM/src/*.so

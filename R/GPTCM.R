@@ -19,6 +19,9 @@
 #' @param n TBA
 #' @param p TBA
 #' @param L TBA
+#' @param dirichlet logical value; should the proportions be modeled via the 
+#' common (\code{dirichlet = FALSE}) or alternative (\code{dirichlet = TRUE}) 
+#' parametrization of the Dirichlet regression model
 #' @param hyperpar TBA
 #' @param initial TBA
 #' @param nIter TBA
@@ -36,6 +39,7 @@
 #'
 #' @export
 GPTCM <- function(dat, n, p, L,
+                  dirichlet = TRUE,
                   hyperpar = NULL,
                   initial = NULL,
                   nIter = 1,
@@ -80,15 +84,23 @@ GPTCM <- function(dat, n, p, L,
 
     ## proportion Dirichlet part
     phi <- 1
-    zetas.current <- matrix(0, nrow = dim(dat$XX)[2] + 1, ncol = NCOL(dat$proportion) - 1) # include intercept
+    zetas.current <- matrix(0, nrow = dim(dat$XX)[2] + 1, ncol = NCOL(dat$proportion)) # include intercept
     proportion <- matrix(0, nrow = dim(dat$XX)[1], ncol = NCOL(dat$proportion))
-    for (l in 1:(L - 1)) { # using the last cell type as reference
-      proportion[, l] <- exp(cbind(1, dat$XX[, , l]) %*% zetas.current[, l]) /
-        (1 + rowSums(sapply(1:(L - 1), function(xx) {
-          exp(cbind(1, dat$XX[, , xx]) %*% zetas.current[, xx])
-        })))
+    if (dirichlet) { # the 2 cases can be wrapped into a function
+      for (l in 1:(L - 1)) { # using the last cell type as reference
+        proportion[, l] <- exp(cbind(1, dat$XX[, , l]) %*% zetas.current[, l]) /
+          (1 + rowSums(sapply(1:(L - 1), function(xx) {
+            exp(cbind(1, dat$XX[, , xx]) %*% zetas.current[, xx])
+          })))
+      }
+      proportion[, L] <- 1 - rowSums(proportion[, -L])
+    } else { # use log-link for concentration parameters without reference category
+      alphas <- matrix(NA, nrow = NROW(proportion), ncol = NCOL(proportion))
+      for (ll in 1:L) {
+        alphas[, ll] <- exp(cbind(1, dat$XX[, , ll]) %*% zetas.current[, ll])
+      }
+      proportion <- apply(alphas, 2, function(xx){xx/rowSums(alphas)})
     }
-    proportion[, L] <- 1 - rowSums(proportion[, -L])
 
     betas <- mu.current / gamma(1 + 1 / kappas)
     weibull.S <- matrix(nrow = n, ncol = 3)
@@ -111,11 +123,12 @@ GPTCM <- function(dat, n, p, L,
   vSq.mcmc <- matrix(0, nrow = 1 + nIter, ncol = 2)
   betas.mcmc <- matrix(0, nrow = 1 + nIter, ncol = NCOL(dat$proportion) * dim(dat$XX)[2])
   betas.mcmc[1, ] <- as.vector(betas.current)
-  zetas.mcmc <- matrix(0, nrow = 1 + nIter, ncol = (NCOL(dat$proportion) - 1) * (dim(dat$XX)[2] + 1))
+  zetas.mcmc <- matrix(0, nrow = 1 + nIter, ncol = NCOL(dat$proportion) * (dim(dat$XX)[2] + 1))
   zetas.mcmc[1, ] <- as.vector(zetas.current)
 
   globalvariable <- list(
     dat = dat,
+    dirichlet = dirichlet,
     proportion = proportion,
     kappas = kappas, 
     kappaA = hyperpar$kappaA, kappaB = hyperpar$kappaB,
@@ -184,7 +197,7 @@ GPTCM <- function(dat, n, p, L,
     list2env(globalvariable, .GlobalEnv)
 
     ## update \zeta_l of p_l in non-cure fraction; the last cell type as reference
-    for (l in 1:(L - 1)) {
+    for (l in 1:ifelse(dirichlet, L-1, L)) {
       for (j in 1:(p + 1)) {
         if (j == 1) wSq <- 10
         # globalVariables(c("l", "j")) ## This is not safe
@@ -206,13 +219,21 @@ GPTCM <- function(dat, n, p, L,
         globalvariable <- list( zetas.current = zetas.current )
         list2env(globalvariable, .GlobalEnv)
       }
-      for (ll in 1:(L - 1)) { # the l-th subtype proportion is updated, and the all composition should be updated
-        proportion[, ll] <- exp(cbind(1, dat$XX[, , ll]) %*% zetas.current[, ll]) /
-          (1 + rowSums(sapply(1:(L - 1), function(xx) {
-            exp(cbind(1, dat$XX[, , xx]) %*% zetas.current[, xx])
-          })))
+      if (dirichlet) {
+        for (ll in 1:(L - 1)) { # the l-th subtype proportion is updated, and the all composition should be updated
+          proportion[, ll] <- exp(cbind(1, dat$XX[, , ll]) %*% zetas.current[, ll]) /
+            (1 + rowSums(sapply(1:(L - 1), function(xx) {
+              exp(cbind(1, dat$XX[, , xx]) %*% zetas.current[, xx])
+            })))
+        }
+        proportion[, L] <- 1 - rowSums(proportion[, -L])
+      } else {# use log-link for concentration parameters without reference category
+        alphas <- matrix(NA, nrow = NROW(proportion), ncol = NCOL(proportion))
+        for (ll in 1:L) {
+          alphas[, ll] <- exp(cbind(1, dat$XX[, , ll]) %*% zetas.current[, ll])
+        }
+        proportion <- apply(alphas, 2, function(xx){xx/rowSums(alphas)})
       }
-      proportion[, L] <- 1 - rowSums(proportion[, -L])
       globalvariable <- list( proportion = proportion )
       list2env(globalvariable, .GlobalEnv)
     }
@@ -290,6 +311,7 @@ GPTCM <- function(dat, n, p, L,
   ret <- list(input = list(), output = list(), call = cl)
   class(ret) <- "GPTCM"
 
+  ret$input$dirichlet <- dirichlet
   ret$input$nIter <- nIter
   ret$input$burnin <- burnin
   ret$input$hyperpar <- hyperpar

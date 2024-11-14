@@ -23,13 +23,21 @@ logpost_zeta_jl <- function(x) {
 
   # update proportions with a new proposal zeta
   proportion.tmp <- proportion
-  for (ll in 1:(L - 1)) {
-    proportion.tmp[, ll] <- exp(cbind(1, dat$XX[, , ll]) %*% zetas.tmp[, ll]) /
-      (1 + rowSums(sapply(1:(L - 1), function(xx) {
-        exp(cbind(1, dat$XX[, , xx]) %*% zetas.tmp[, xx])
-      })))
+  if (dirichlet) { # use logit/alr-link with the last category as reference
+    for (ll in 1:(L - 1)) {
+      proportion.tmp[, ll] <- exp(cbind(1, dat$XX[, , ll]) %*% zetas.tmp[, ll]) /
+        (1 + rowSums(sapply(1:(L - 1), function(xx) {
+          exp(cbind(1, dat$XX[, , xx]) %*% zetas.tmp[, xx])
+        })))
+    }
+    proportion.tmp[, L] <- 1 - rowSums(proportion.tmp[, -L])
+  } else { # use log-link for concentration parameters without reference category
+    alphas <- matrix(NA, nrow = NROW(proportion), ncol = NCOL(proportion))
+    for (ll in 1:L) {
+      alphas[, ll] <- exp(cbind(1, dat$XX[, , ll]) %*% zetas.tmp[, ll])
+    }
+    proportion.tmp <- apply(alphas, 2, function(xx){xx/rowSums(alphas)})
   }
-  proportion.tmp[, L] <- 1 - rowSums(proportion.tmp[, -L])
 
   # noncure density related censored part
   logpost.first <- 0
@@ -46,8 +54,8 @@ logpost_zeta_jl <- function(x) {
 
   # Dirichlet density
   concentrations <- proportion.tmp * phi # some issue here, since the sum of each row is phi
-  normalizingConst <- log(gamma(rowSums(concentrations))) -
-    rowSums(log(gamma(concentrations)))
+  normalizingConst <- #log(gamma(rowSums(concentrations))) -
+    log(gamma(phi)) - rowSums(log(gamma(concentrations)))
   # normalizingConst <- -log(gamma(concentrations[,l])) # to be verified
 
   geometricTerm <- rowSums((concentrations - 1) * log(dat$proportion))
