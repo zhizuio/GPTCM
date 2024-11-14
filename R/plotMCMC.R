@@ -45,7 +45,10 @@ plotMCMC <- function(dat, datMCMC, estimator = "xi") {
   if ("zeta" %in% estimator) {
     zetas.mcmc <- datMCMC$output$mcmc$zetas
 
-    ylabel <- paste0("expression(zeta['", rep(0:p, L - 1), ",", rep(1:(L - 1), each = p + 1), "'])")
+    ylabel <- paste0(
+      "expression(zeta['", rep(0:p, ifelse(dirichlet, L - 1, L)), ",",
+      rep(1:ifelse(dirichlet, L - 1, L), each = p + 1), "'])"
+    )
     layout(matrix(1:NCOL(zetas.mcmc), nrow = p + 1))
     par(mar = c(2, 4.1, 2, 2))
     for (j in 1:NCOL(zetas.mcmc)) {

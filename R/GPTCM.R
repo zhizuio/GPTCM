@@ -23,6 +23,7 @@
 #' common (\code{dirichlet = FALSE}) or alternative (\code{dirichlet = TRUE})
 #' parametrization of the Dirichlet regression model
 #' @param hyperpar TBA
+#' @param kappaSampler TBA
 #' @param initial TBA
 #' @param nIter TBA
 #' @param burnin TBA
@@ -41,6 +42,8 @@
 GPTCM <- function(dat, n, p, L,
                   dirichlet = TRUE,
                   hyperpar = NULL,
+                  kappaSampler = "IGamma",
+                  w0Sampler = "IGamma",
                   initial = NULL,
                   nIter = 1,
                   burnin = 0,
@@ -62,16 +65,34 @@ GPTCM <- function(dat, n, p, L,
     hyperpar$wB <- 20
     hyperpar$vA <- 10
     hyperpar$vB <- 20
-    # hyperpar$kappaA <- 3; hyperpar$kappaB <- 1 # This is for Gamma prior
-    # hyperpar$kappaA <- 3; hyperpar$kappaB <- 10#5#10 # This is for Inverse-Gamma prior
-    hyperpar$kappaA <- 5
-    hyperpar$kappaB <- 20
+    if (kappaSampler == "Gamma") {
+      hyperpar$kappaA <- 3
+      hyperpar$kappaB <- 1 # This is for Gamma prior
+    } else {
+      if (kappaSampler == "IGamma") {
+        hyperpar$kappaA <- 5
+        hyperpar$kappaB <- 20 # This is for Inverse-Gamma prior
+      } else {
+        stop("Argument 'kappaSampler' is either 'Gamma' or 'IGamma'!")
+      }
+    }
+    if (w0Sampler == "IGamma") {
+      hyperpar$w0A <- hyperpar$wA
+      hyperpar$w0B <- hyperpar$wB
+    }
   }
 
   # initialization of parameters
   if (is.null(initial)) {
     tauSq <- 1
     wSq <- 1
+    if (w0Sampler == "IGamma") {
+      w0Sq <- 1
+    } else {
+      if (is.numeric(w0Sampler)) {
+        w0Sq <- w0Sampler
+      }
+    }
     vSq <- c(10, 1, 1)
     kappas <- 0.9
 
@@ -132,6 +153,7 @@ GPTCM <- function(dat, n, p, L,
     dat = dat,
     dirichlet = dirichlet,
     proportion = proportion,
+    kappaSampler = kappaSampler,
     kappas = kappas,
     kappaA = hyperpar$kappaA, kappaB = hyperpar$kappaB,
     lambdas = lambdas,
@@ -143,7 +165,7 @@ GPTCM <- function(dat, n, p, L,
     # phi = phi,
     zetas.current = zetas.current,
     vSq = vSq,
-    wSq = wSq,
+    wSq = wSq, w0Sq = w0Sq,
     tauSq = tauSq,
     L = L
   )
@@ -201,7 +223,7 @@ GPTCM <- function(dat, n, p, L,
     ## update \zeta_l of p_l in non-cure fraction; the last cell type as reference
     for (l in 1:ifelse(dirichlet, L - 1, L)) {
       for (j in 1:(p + 1)) {
-        if (j == 1) wSq <- 10
+        # if (j == 1) wSq <- 10 # Fixed value 10 seems not good for Dirichlet's common parametrization
         # globalVariables(c("l", "j")) ## This is not safe
         globalvariableJL <- list(j = j, l = l)
         list2env(globalvariableJL, .GlobalEnv)
@@ -244,9 +266,12 @@ GPTCM <- function(dat, n, p, L,
     zetas.mcmc[1 + m, ] <- as.vector(zetas.current)
 
     ## update wSq, the variance of zetas
+    if (w0Sampler == "IGamma") {
+      w0Sq <- sampleW(1, hyperpar$w0A, hyperpar$w0B, zetas.current[1, ])
+    }
     wSq <- sampleW(1, hyperpar$wA, hyperpar$wB, zetas.current[-1, ])
     wSq.mcmc[1 + m] <- wSq
-    globalvariable <- list(wSq = wSq)
+    globalvariable <- list(wSq = wSq, w0Sq = w0Sq)
     list2env(globalvariable, .GlobalEnv)
 
     ## update kappa in noncure fraction

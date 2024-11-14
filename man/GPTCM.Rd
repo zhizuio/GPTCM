@@ -11,6 +11,8 @@ GPTCM(
   L,
   dirichlet = TRUE,
   hyperpar = NULL,
+  kappaSampler = "IGamma",
+  w0Sampler = "IGamma",
   initial = NULL,
   nIter = 1,
   burnin = 0,
@@ -32,11 +34,13 @@ component list representing each subgroup's survival and covariates data}
 
 \item{L}{TBA}
 
-\item{dirichlet}{logical value; should the proportions be modeled via the 
-common (\code{dirichlet = FALSE}) or alternative (\code{dirichlet = TRUE}) 
+\item{dirichlet}{logical value; should the proportions be modeled via the
+common (\code{dirichlet = FALSE}) or alternative (\code{dirichlet = TRUE})
 parametrization of the Dirichlet regression model}
 
 \item{hyperpar}{TBA}
+
+\item{kappaSampler}{TBA}
 
 \item{initial}{TBA}
 

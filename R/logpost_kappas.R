@@ -24,8 +24,11 @@ logpost_kappas <- function(x) {
   weibull.lambdas <- mu.tmp / gamma(1 + 1 / x)
   weibull.S.tmp[, l] <- exp(-(dat$survObj$time / weibull.lambdas[, l])^x)
 
-  # logprior <- dgamma(x, kappaA, kappaB, log = TRUE)
-  logprior <- log(1 / dgamma(x, kappaA, kappaB))
+  if (kappaSampler == "Gamma") {
+    logprior <- dgamma(x, kappaA, kappaB, log = TRUE)
+  } else {
+    logprior <- log(1 / dgamma(x, kappaA, kappaB))
+  }
 
   logpost.first <- logpost.second <- 0
   for (ll in 1:3) {

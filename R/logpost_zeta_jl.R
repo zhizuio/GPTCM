@@ -42,29 +42,32 @@ logpost_zeta_jl <- function(x) {
   }
 
   # noncure density related censored part
-  logpost.first <- 0
+  logpost.first <- logpost.second <- 0
   for (ll in 1:L) {
-    logpost.first <- logpost.first +
-      proportion.tmp[, ll] *
-        lambdas[, ll]^(-kappas) * weibull.S[, ll]
+    tmp <- proportion.tmp[, ll] * weibull.S[, ll]
+    logpost.first <- logpost.first + lambdas[, ll]^(-kappas) * tmp
+    logpost.second <- logpost.second + tmp
   }
 
   logpost.first <- sum(log(logpost.first[dat$survObj$event == 1]))
 
   # cure/noncure density combined the censored and noncensored events
-  logpost.second <- sum(thetas * proportion.tmp[, l] * weibull.S[, l])
+  # logpost.second <- sum(thetas * proportion.tmp[, l] * weibull.S[, l])
+  logpost.second <- sum(thetas * logpost.second)
 
   # Dirichlet density
   concentrations <- proportion.tmp * phi # some issue here, since the sum of each row is phi
   normalizingConst <- # log(gamma(rowSums(concentrations))) -
-    log(gamma(phi)) - rowSums(log(gamma(concentrations)))
+    log(gamma(phi)) -
+    rowSums(log(gamma(concentrations)))
   # normalizingConst <- -log(gamma(concentrations[,l])) # to be verified
 
   geometricTerm <- rowSums((concentrations - 1) * log(dat$proportion))
   # geometricTerm <- (concentrations[,l] - 1) * log(dat$proportion[,l]) # to be verified
 
   # prior
-  logprior <- -x^2 / wSq / 2
+  w.tmp <- ifelse(j == 1, w0Sq, wSq)
+  logprior <- -x^2 / w.tmp / 2
 
   # sum all fractions
   logpost <- logpost.first + logpost.second +
