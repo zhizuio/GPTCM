@@ -11,6 +11,7 @@
 #' @param p TBA
 #' @param L TBA
 #' @param Sigma TBA
+#' @param kappas value of the Weibull's shape parameter
 #' @param proportion.model One of \code{c("alr", "cloglog", "log", "dirichlet")}
 #'
 #' @return An object of ...
@@ -21,7 +22,9 @@
 #' x <- 1
 #'
 #' @export
-simData <- function(n = 200, p = 10, L = 3, Sigma = 0, proportion.model = "alr") {
+simData <- function(n = 200, p = 10, L = 3,
+                    Sigma = 0, kappas = 2,
+                    proportion.model = "alr") {
   ## predefined functions
   Expo <- function(times, surv) {
     z1 <- -log(surv[1])
@@ -39,6 +42,15 @@ simData <- function(n = 200, p = 10, L = 3, Sigma = 0, proportion.model = "alr")
   zeta1 <- c(0.7, -0.7, 0.5, -0.5, 1, 0, 0, 0, 0, 0)
   zeta2 <- c(-0.5, 0.5, 0, 1, 0, -1, 0, 0, 0, 0)
   zeta3 <- c(0, 0, 1, -0.5, -0.7, 0, 1, 0, 0, 0)
+
+  if (p < 10) {
+    beta1 <- beta1[1:p]
+    beta2 <- beta2[1:p]
+    beta3 <- beta3[1:p]
+    zeta1 <- zeta1[1:p]
+    zeta2 <- zeta2[1:p]
+    zeta3 <- zeta3[1:p]
+  }
 
   ## covariates
   # means <- rep(0, p)
@@ -173,11 +185,11 @@ simData <- function(n = 200, p = 10, L = 3, Sigma = 0, proportion.model = "alr")
   # proportion <- matrix(c(0.13, 0.53, 0.34), nrow = n, ncol = 3, byrow = TRUE)
   colnames(proportion) <- paste0("p", 1:3)
 
-  kappa0 <- 2 # 0.9
+  # kappas <- 2 # 0.9
   ## simulate censoring times
   ## to be updated: dim(mu0)=n x 3; how can dim(cens)=n x 3? No, not use rWEI3 but M-H sampler to get times
   # browser()
-  # cens <- as.vector( sapply(1:n, function(i) gamlss.dist::rWEI3(1, mu=mu0[i], sigma=kappa0)) )
+  # cens <- as.vector( sapply(1:n, function(i) gamlss.dist::rWEI3(1, mu=mu0[i], sigma=kappas)) )
 
   ## simulate event times by M-H algorithm
   U <- runif(n)
@@ -195,7 +207,7 @@ simData <- function(n = 200, p = 10, L = 3, Sigma = 0, proportion.model = "alr")
       theta = thetas[i],
       proportion = proportion[i, ],
       mu = mu0[i, ],
-      kappas = kappa0,
+      kappas = kappas,
       burnin = 100,
       lag = 10
     )
@@ -210,8 +222,10 @@ simData <- function(n = 200, p = 10, L = 3, Sigma = 0, proportion.model = "alr")
 
   return(list(
     survObj = survObj, accepted = accepted,
-    proportion = proportion, thetas = thetas,
-    kappas = kappa0, mu = mu0,
+    proportion.model = proportion.model,
+    proportion = proportion,
+    thetas = thetas,
+    kappas = kappas, mu = mu0,
     x0 = x0, # x1 = x1, x2 = x2, x3 = x3,
     XX = XX,
     xi = xi, beta0 = beta0, # zeta0=zeta0,

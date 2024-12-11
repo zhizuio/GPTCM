@@ -18,9 +18,9 @@
 logpost_beta_jl <- function(x) {
   # browser()
   betas.tmp <- betas.current
-  if (!is.na(x)) {
-    betas.tmp[j, l] <- x
-  }
+  # if (!is.na(x)) {
+  betas.tmp[j, l] <- x
+  # }
 
   mu.tmp <- mu.current
   mu.tmp[, l] <- exp(dat$XX[, , l] %*% betas.tmp[, l])
@@ -47,8 +47,8 @@ logpost_beta_jl <- function(x) {
 
   logpost.first <- sum(log(logpost.first[dat$survObj$event == 1]))
 
-  thetas.tmp <- exp(dat$x0 %*% xi)
-  logpost.second <- sum(thetas.tmp * # dat$proportion[, l]
+  # thetas.tmp <- exp(dat$x0 %*% xi)
+  logpost.second <- sum(thetas * # thetas.tmp *  dat$proportion[, l]
     proportion[, l] * weibull.S.tmp[, l])
 
   logpost <- logpost.first + logpost.second + logprior

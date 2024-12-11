@@ -4,7 +4,14 @@
 \alias{simData}
 \title{Simulate data}
 \usage{
-simData(n = 200, p = 10, L = 3, Sigma = 0, proportion.model = "alr")
+simData(
+  n = 200,
+  p = 10,
+  L = 3,
+  Sigma = 0,
+  kappas = 2,
+  proportion.model = "alr"
+)
 }
 \arguments{
 \item{n}{TBA}
@@ -14,6 +21,8 @@ simData(n = 200, p = 10, L = 3, Sigma = 0, proportion.model = "alr")
 \item{L}{TBA}
 
 \item{Sigma}{TBA}
+
+\item{kappas}{value of the Weibull's shape parameter}
 
 \item{proportion.model}{One of \code{c("alr", "cloglog", "log", "dirichlet")}}
 }

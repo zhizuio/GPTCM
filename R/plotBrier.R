@@ -8,7 +8,7 @@
 #' @importFrom survival Surv coxph
 #' @importFrom riskRegression Score
 #' @importFrom stats median as.formula
-#' @importFrom ggplot2 ggplot aes aes_string geom_step theme element_blank xlab ylab theme_bw
+#' @importFrom ggplot2 ggplot aes geom_step theme element_blank xlab ylab theme_bw
 #' @importFrom graphics layout par abline
 #' @importFrom utils globalVariables
 #'
@@ -24,7 +24,7 @@
 #' @export
 plotBrier <- function(dat, datMCMC, ...) {
   n <- dim(dat$XX)[1]
-  # p <- dim(dat$XX)[2]
+  p <- dim(dat$XX)[2]
   L <- dim(dat$XX)[3]
   # nIter <- datMCMC$input$nIter
   burnin <- datMCMC$input$burnin
@@ -54,9 +54,9 @@ plotBrier <- function(dat, datMCMC, ...) {
 
   # re-organize clinical variables for classical Cox and PTCM models
   x <- apply(dat$XX, c(1, 2), mean)
-  colnames(x) <- paste0("x", 1:10)
+  colnames(x) <- paste0("x", 1:p)
   x.median <- apply(dat$XX, c(1, 2), median)
-  colnames(x.median) <- paste0("x.median", 1:10)
+  colnames(x.median) <- paste0("x.median", 1:p)
   survObj <- data.frame(dat$survObj, x01 = dat$x0[, 2], x02 = dat$x0[, 3], x, x.median)
   fitCox.clin <- survival::coxph(survival::Surv(time, event) ~ x01 + x02, data = survObj, y = TRUE, x = TRUE)
 
@@ -65,12 +65,12 @@ plotBrier <- function(dat, datMCMC, ...) {
   fitCox.X.median <- survival::coxph(formula.tmp, data = survObj, y = TRUE, x = TRUE)
   # pred.X.median <- survival::survfit(fitCox.X.median, data = survObj)
 
-  formula.tmp <- as.formula(paste0("Surv(time, event) ~ ", paste0(paste0("x", 1:10), collapse = "+")))
+  formula.tmp <- as.formula(paste0("Surv(time, event) ~ ", paste0(paste0("x", 1:p), collapse = "+")))
   fitCox.X.mean <- survival::coxph(formula.tmp, data = survObj, y = TRUE, x = TRUE)
   # formula.tmp <- as.formula(paste0("Surv(time, event) ~ x01+x02+", paste0(colnames(x.median), collapse = "+")))
   # fitCox.clin.X.median <- survival::coxph(formula.tmp, data = survObj, y=TRUE, x = TRUE)
 
-  formula.tmp <- as.formula(paste0("Surv(time, event) ~ x01+x02+", paste0(paste0("x", 1:10), collapse = "+")))
+  formula.tmp <- as.formula(paste0("Surv(time, event) ~ x01+x02+", paste0(paste0("x", 1:p), collapse = "+")))
   fitCox.clin.X.mean <- survival::coxph(formula.tmp, data = survObj, y = TRUE, x = TRUE)
 
   # library(miCoPTCM) # good estimation for cure fraction; same BS as Cox.clin
@@ -82,7 +82,7 @@ plotBrier <- function(dat, datMCMC, ...) {
     )
   )
   Surv.PTCM <- exp(-exp(dat$x0 %*% resMY$coefficients) %*% t(resMY$estimCDF))
-  # predPTCM.prob <- 1 - Surv.PTCM
+  predPTCM.prob <- 1 - Surv.PTCM
 
   g <- riskRegression::Score(
     list(
@@ -91,7 +91,7 @@ plotBrier <- function(dat, datMCMC, ...) {
       "Cox.X.median" = fitCox.X.median,
       # "Cox.clin.X.median"=fitCox.clin.X.median,
       "Cox.clin.X.mean" = fitCox.clin.X.mean,
-      # "PTCM.clin"=predPTCM.prob,
+      "PTCM.clin" = predPTCM.prob,
       "GPTCM" = pred.prob
     ),
     formula = Surv(time, event) ~ 1,
@@ -104,9 +104,9 @@ plotBrier <- function(dat, datMCMC, ...) {
   levels(g1$model)[1] <- "Kaplan-Meier"
   # utils::globalVariables(c("times", "Brier", "model"))
   # NOTE: `aes_string()` was deprecated in ggplot2 3.0.0.
-  g2 <- ggplot2::ggplot(g1, aes_string(
-    x = "times", y = "Brier",
-    group = "model", color = "model"
+  g2 <- ggplot2::ggplot(g1, aes(
+    # x = "times", y = "Brier", group = "model", color = "model"
+    x = times, y = Brier, group = model, color = model
   )) +
     xlab("Time") +
     ylab("Brier score") +

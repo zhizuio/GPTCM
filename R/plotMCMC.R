@@ -43,8 +43,20 @@ plotMCMC <- function(dat, datMCMC, estimator = "xi") {
   }
 
   if ("zeta" %in% estimator) {
-    zetas.mcmc <- datMCMC$output$mcmc$zetas
     dirichlet <- datMCMC$input$dirichlet
+    if (dirichlet) {
+      zetas.mcmc <- datMCMC$output$mcmc$zetas[, 1:((p + 1) * (L - 1))]
+      ylabel <- paste0(
+        "expression(zeta['", rep(0:p, L - 1), ",",
+        rep(1:(L - 1), each = p + 1), "'])"
+      )
+    } else {
+      zetas.mcmc <- datMCMC$output$mcmc$zetas
+      ylabel <- paste0(
+        "expression(zeta['", rep(0:p, L), ",",
+        rep(1:L, each = p + 1), "'])"
+      )
+    }
 
     ylabel <- paste0(
       "expression(zeta['", rep(0:p, ifelse(dirichlet, L - 1, L)), ",",

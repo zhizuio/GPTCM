@@ -18,13 +18,13 @@
 #'
 #' @export
 logpost_kappas <- function(x) {
-  mu.tmp <- mu.current
-  weibull.S.tmp <- weibull.S
+  # mu.tmp <- mu.current
+  # weibull.S.tmp <- weibull.S
+  #
+  # weibull.lambdas <- mu.tmp / gamma(1 + 1 / x)
+  # weibull.S.tmp[, l] <- exp(-(dat$survObj$time / weibull.lambdas[, l])^x)
 
-  weibull.lambdas <- mu.tmp / gamma(1 + 1 / x)
-  weibull.S.tmp[, l] <- exp(-(dat$survObj$time / weibull.lambdas[, l])^x)
-
-  if (kappaSampler == "Gamma") {
+  if (kappaPrior == "Gamma") {
     logprior <- dgamma(x, kappaA, kappaB, log = TRUE)
   } else {
     logprior <- log(1 / dgamma(x, kappaA, kappaB))
@@ -32,10 +32,13 @@ logpost_kappas <- function(x) {
 
   logpost.first <- logpost.second <- 0
   for (ll in 1:3) {
+    weibull.lambdas.tmp <- mu.current[, ll] / gamma(1 + 1 / x)
+    weibull.S.tmp <- exp(-(dat$survObj$time / weibull.lambdas.tmp)^x)
+
     logpost.first <- logpost.first + # dat$proportion[,ll] *
-      proportion[, ll] * weibull.lambdas[, ll]^(-x) * weibull.S.tmp[, ll]
+      proportion[, ll] * weibull.lambdas.tmp^(-x) * weibull.S.tmp
     logpost.second <- logpost.second + # dat$proportion[,ll] *
-      proportion[, ll] * weibull.S.tmp[, ll]
+      proportion[, ll] * weibull.S.tmp
   }
 
   logpost.first <- x * dat$survObj$time^(x - 1) * logpost.first

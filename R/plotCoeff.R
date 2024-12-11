@@ -42,7 +42,7 @@ plotCoeff <- function(dat, datMCMC, estimator = "beta", ...) {
     for (l in 0:(L - 1)) {
       plotCoeff0(betas.mcmc[, l * p + 1:p][, p:1], betas.true[, l + 1],
         xlim = c(betas_min, betas_max),
-        main = paste("Cell type", l),
+        main = paste("Cell type", l + 1),
         label.y = paste0("x", p:1)
       )
     }
