@@ -9,7 +9,7 @@ GPTCM(
   n,
   p,
   L,
-  proportion.model = FALSE,
+  proportion.model = TRUE,
   dirichlet = TRUE,
   method = "Bayes",
   hyperpar = NULL,

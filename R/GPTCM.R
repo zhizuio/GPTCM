@@ -173,19 +173,26 @@ GPTCM <- function(dat, n, p, L,
 
     globalvariable <- list(
       proportion = dat$proportion,
+      proportion.model = proportion.model,
       X0 = dat$x0,
       X = dat$XX,
       survObj = dat$survObj
     )
     list2env(globalvariable, .GlobalEnv)
-    initial_values <- c(kappas, phi, xi, as.vector(betas.current), as.vector(zetas.current[, -L]))
-    # initial_values <- c(dat$kappas, 3, dat$xi, as.vector(dat$betas), as.vector(dat$zetas[, -L]))
+    if (proportion.model) {
+      initial_values <- c(kappas, xi, as.vector(betas.current), phi, as.vector(zetas.current[, -L]))
+      # initial_values <- c(dat$kappas, 3, dat$xi, as.vector(dat$betas), as.vector(dat$zetas[, -L]))
+    } else {
+      initial_values <- c(kappas, xi, as.vector(betas.current))
+    }
     bound.l <- rep(-5, length(initial_values))
     bound.l[1] <- 1e-2
-    bound.l[2] <- 1e-2
     bound.u <- rep(5, length(initial_values))
     bound.u[1] <- 10
-    bound.u[2] <- 500
+    if (proportion.model) {
+      bound.l[1 + NCOL(X0) + p * L + 1] <- 1e-2
+      bound.u[1 + NCOL(X0) + p * L + 1] <- 500
+    }
 
     mle <- nlminb(
       start = initial_values,
@@ -195,10 +202,12 @@ GPTCM <- function(dat, n, p, L,
     )
     par <- mle$par
     kappas.mcmc <- par[1]
-    phi.mcmc <- par[2]
-    xi.mcmc <- par[2 + 1:NCOL(X0)]
-    betas.mcmc <- matrix(par[2 + NCOL(X0) + 1:(p * L)], ncol = L)
-    zetas.mcmc <- matrix(par[-c(1:(2 + NCOL(X0) + p * L))], nrow = p + 1)
+    xi.mcmc <- par[1 + 1:NCOL(X0)]
+    betas.mcmc <- matrix(par[1 + NCOL(X0) + 1:(p * L)], ncol = L)
+    if (proportion.model) {
+      phi.mcmc <- par[1 + NCOL(X0) + p * L + 1]
+      zetas.mcmc <- matrix(par[-c(1:(1 + NCOL(X0) + p * L + 1))], nrow = p + 1)
+    }
   } else {
     globalvariable <- list(
       dat = dat,

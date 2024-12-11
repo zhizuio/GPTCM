@@ -26,10 +26,12 @@ loglikelihood <- function(par) {
     loglik <- -Inf
   } else {
     kappas <- par[1]
-    phi <- par[2]
-    xi <- par[2 + 1:d]
-    betas <- matrix(par[2 + d + 1:(p * L)], ncol = L)
-    zetas <- matrix(par[-c(1:(2 + d + p * L))], nrow = p + 1)
+    xi <- par[1 + 1:d]
+    betas <- matrix(par[1 + d + 1:(p * L)], ncol = L)
+    if (proportion.model) {
+      phi <- par[1 + d + p * L + 1]
+      zetas <- matrix(par[-c(1:(+d + p * L + 1))], nrow = p + 1)
+    }
 
     thetas <- as.vector(exp(X0 %*% xi))
     # lambdas <- mu <- matrix(0, nrow = n, ncol = L)
@@ -42,12 +44,15 @@ loglikelihood <- function(par) {
 
       f <- f + proportion[, l] * (lambdas.l)^(-kappas) *
         exp(-(survObj$time / lambdas.l)^kappas)
-
-      if (l < L) {
-        proportion.tmp[, l] <- exp(cbind(1, X[, , l]) %*% zetas[, l]) /
-          (1 + rowSums(sapply(1:(L - 1), function(xx) {
-            exp(cbind(1, X[, , xx]) %*% zetas[, xx])
-          })))
+      if (proportion.model) {
+        if (l < L) {
+          proportion.tmp[, l] <- exp(cbind(1, X[, , l]) %*% zetas[, l]) /
+            (1 + rowSums(sapply(1:(L - 1), function(xx) {
+              exp(cbind(1, X[, , xx]) %*% zetas[, xx])
+            })))
+        }
+      } else {
+        proportion.tmp <- proportion
       }
 
       survival.l <- exp(-(survObj$time / lambdas.l)^kappas)
@@ -70,11 +75,15 @@ loglikelihood <- function(par) {
     log.f.pop <- log(thetas) + log.f + log.survival.pop
 
     # Dirichlet part
-    concentrations <- proportion.tmp * phi
-    if (any(is.na(gamma(concentrations)))) browser()
-    normalizingConst <- log(gamma(phi)) - rowSums(log(gamma(concentrations)))
-    geometricTerm <- rowSums((concentrations - 1) * log(proportion))
-    log.dirichlet <- normalizingConst + geometricTerm
+    if (proportion.model) {
+      concentrations <- proportion.tmp * phi
+      if (any(is.na(gamma(concentrations)))) browser()
+      normalizingConst <- log(gamma(phi)) - rowSums(log(gamma(concentrations)))
+      geometricTerm <- rowSums((concentrations - 1) * log(proportion))
+      log.dirichlet <- normalizingConst + geometricTerm
+    } else {
+      log.dirichlet <- 0
+    }
 
     # log-likelihood
     loglik <- sum(log.f.pop[survObj$event == 1]) +
