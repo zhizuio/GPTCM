@@ -1,3 +1,10 @@
+# GPTCM 0.0.5
+
+* Add Bayesian variable selection (BVS), not yet finished
+* Using log(concentrations) for modeling proportions by default
+* In function `GPTCM()`, transforming proportions data with values (very close to) 0 or 1 in the same way as DirichletReg::DR_data()
+* Using log-scale for every fraction of the Dirichlet density to avoid numeric issues
+
 # GPTCM 0.0.4
 
 * Bring back R-package `HI` 

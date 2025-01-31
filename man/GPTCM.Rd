@@ -2,6 +2,7 @@
 % Please edit documentation in R/GPTCM.R
 \name{GPTCM}
 \alias{GPTCM}
+\alias{GPTCM-package}
 \title{Fit Bayesian GPTCM Model}
 \usage{
 GPTCM(
@@ -13,7 +14,7 @@ GPTCM(
   dirichlet = TRUE,
   method = "Bayes",
   hyperpar = NULL,
-  kappaPrior = "IGamma",
+  kappaPrior = "Gamma",
   kappaSampler = "arms",
   w0Sampler = "IGamma",
   initial = NULL,
@@ -42,7 +43,7 @@ not. If (\code{proportion.model = FALSE}), the argument \code{dirichlet} will
 be invalid}
 
 \item{dirichlet}{logical value; should the proportions be modeled via the
-common (\code{dirichlet = FALSE}) or alternative (\code{dirichlet = TRUE})
+common (\code{dirichlet = TRUE}) or alternative (\code{dirichlet = FALSE})
 parametrization of the Dirichlet regression model}
 
 \item{method}{either `MLE` or `Bayes`}

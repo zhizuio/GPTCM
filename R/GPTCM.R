@@ -5,7 +5,10 @@
 #' for sparse identification of high-dimensional covariates.
 #'
 #' @name GPTCM
-#'
+#' @useDynLib GPTCM
+#' @aliases GPTCM-package
+#' 
+#' @importFrom Rcpp evalCpp
 #' @importFrom stats median nlminb
 #' @importFrom HI arms
 #' @import remotes
@@ -23,7 +26,7 @@
 #' not. If (\code{proportion.model = FALSE}), the argument \code{dirichlet} will
 #' be invalid
 #' @param dirichlet logical value; should the proportions be modeled via the
-#' common (\code{dirichlet = FALSE}) or alternative (\code{dirichlet = TRUE})
+#' common (\code{dirichlet = TRUE}) or alternative (\code{dirichlet = FALSE})
 #' parametrization of the Dirichlet regression model
 #' @param method either `MLE` or `Bayes`
 #' @param hyperpar TBA
@@ -50,7 +53,7 @@ GPTCM <- function(dat, n, p, L,
                   dirichlet = TRUE,
                   method = "Bayes",
                   hyperpar = NULL,
-                  kappaPrior = "IGamma",
+                  kappaPrior = "Gamma",
                   kappaSampler = "arms",
                   w0Sampler = "IGamma",
                   initial = NULL,
@@ -91,6 +94,15 @@ GPTCM <- function(dat, n, p, L,
       hyperpar$w0A <- hyperpar$wA
       hyperpar$w0B <- hyperpar$wB
     }
+    # hyperparameters for variable selection's probabilities' Beta priors
+    hyperpar$a_pi <- 0.5
+    hyperpar$b_pi <- 0.5
+  }
+  
+  # transform proportions data if including values very close to 0 or 1
+  # This is the same as in DirichletReg::DR_data
+  if (any(dat$proportion < 1e-10) || any(dat$proportion > 1 - 1e-10)) {
+    dat$proportion <- (dat$proportion * (n - 1) + 1 / L) / n
   }
 
   # initialization of parameters
@@ -106,40 +118,51 @@ GPTCM <- function(dat, n, p, L,
     }
     vSq <- c(10, 1, 1)
     kappas <- 0.9
-
-    betas.current <- matrix(0, nrow = dim(dat$XX)[2], ncol = NCOL(dat$proportion))
+    
+    betas.initial <- matrix(0, nrow = dim(dat$XX)[2], ncol = NCOL(dat$proportion))
+    gammas.initial <- matrix(as.numeric(betas.initial != 0), 
+                             nrow = dim(dat$XX)[2], ncol = NCOL(dat$proportion))
+    
     mu.current <- matrix(0, nrow = dim(dat$XX)[1], ncol = NCOL(dat$proportion))
     for (l in 1:L) {
-      mu.current[, l] <- exp(dat$beta0[l] + dat$XX[, , l] %*% betas.current[, l])
+      mu.current[, l] <- exp(dat$beta0[l] + dat$XX[, , l] %*% betas.initial[, l])
     }
     lambdas <- mu.current / gamma(1 + 1 / kappas) # lambdas is a parameter in WEI3 distr.
 
     ## proportion Dirichlet part
     phi <- 1
     zetas.current <- matrix(0, nrow = dim(dat$XX)[2] + 1, ncol = NCOL(dat$proportion)) # include intercept
-
+    
+    proportion <- dat$proportion
     if (proportion.model) {
-      proportion <- matrix(0, nrow = dim(dat$XX)[1], ncol = NCOL(dat$proportion))
-      if (dirichlet) { # the 2 cases can be wrapped into a function
-        for (l in 1:(L - 1)) { # using the last cell type as reference
+      #proportion <- matrix(0, nrow = dim(dat$XX)[1], ncol = NCOL(dat$proportion))
+      if (dirichlet) { # use log-link for concentration parameters without reference category
+        # alphas <- matrix(NA, nrow = NROW(proportion), ncol = NCOL(proportion))
+        # for (ll in 1:L) {
+        #   alphas[, ll] <- exp(cbind(1, dat$XX[, , ll]) %*% [, ll])
+        # }
+        # proportion <- apply(alphas, 2, function(xx) {
+        #   xx / rowSums(alphas)
+        # })
+        alphas <- sapply(1:L, function(ll)
+          {exp(cbind(1, dat$XX[, , ll]) %*% zetas.current[, ll])}
+        )
+        # eps1 <- 170
+        # alphas[alphas > eps1] <- eps1
+        proportion <- alphas / rowSums(alphas)
+        #proportion <- exp(logAlphas - log(rowSums(exp(logAlphas))))
+      } else { # using the last cell type as reference
+        for (l in 1:(L - 1)) { 
           proportion[, l] <- exp(cbind(1, dat$XX[, , l]) %*% zetas.current[, l]) /
             (1 + rowSums(sapply(1:(L - 1), function(xx) {
               exp(cbind(1, dat$XX[, , xx]) %*% zetas.current[, xx])
             })))
         }
         proportion[, L] <- 1 - rowSums(proportion[, -L])
-      } else { # use log-link for concentration parameters without reference category
-        alphas <- matrix(NA, nrow = NROW(proportion), ncol = NCOL(proportion))
-        for (ll in 1:L) {
-          alphas[, ll] <- exp(cbind(1, dat$XX[, , ll]) %*% zetas.current[, ll])
-        }
-        proportion <- apply(alphas, 2, function(xx) {
-          xx / rowSums(alphas)
-        })
       }
-    } else {
-      proportion <- dat$proportion
-    }
+    } #else {
+      #proportion <- dat$proportion
+    #}
 
     betas <- mu.current / gamma(1 + 1 / kappas)
     weibull.S <- matrix(nrow = n, ncol = 3)
@@ -161,7 +184,12 @@ GPTCM <- function(dat, n, p, L,
   wSq.mcmc <- c(wSq, rep(0, nIter))
   vSq.mcmc <- matrix(0, nrow = 1 + nIter, ncol = 2)
   betas.mcmc <- matrix(0, nrow = 1 + nIter, ncol = NCOL(dat$proportion) * dim(dat$XX)[2])
-  betas.mcmc[1, ] <- as.vector(betas.current)
+  betas.mcmc[1, ] <- as.vector(betas.initial)
+  betas.current <- betas.initial
+    
+  gammas.mcmc <- matrix(0, nrow = 1 + nIter, ncol = NCOL(dat$proportion) * dim(dat$XX)[2])
+  gammas.mcmc[1, ] <- as.vector(gammas.initial)
+  
   zetas.mcmc <- matrix(0, nrow = 1 + nIter, ncol = NCOL(dat$proportion) * (dim(dat$XX)[2] + 1))
   zetas.mcmc[1, ] <- as.vector(zetas.current)
 
@@ -172,7 +200,7 @@ GPTCM <- function(dat, n, p, L,
     # proportion <- dat$proportion
 
     globalvariable <- list(
-      proportion = dat$proportion,
+      proportion.obs = dat$proportion,
       proportion.model = proportion.model,
       X0 = dat$x0,
       X = dat$XX,
@@ -180,8 +208,16 @@ GPTCM <- function(dat, n, p, L,
     )
     list2env(globalvariable, .GlobalEnv)
     if (proportion.model) {
-      initial_values <- c(kappas, xi, as.vector(betas.current), phi, as.vector(zetas.current[, -L]))
-      # initial_values <- c(dat$kappas, 3, dat$xi, as.vector(dat$betas), as.vector(dat$zetas[, -L]))
+      if (dirichlet) {
+        initial_values <- c(kappas, xi, as.vector(betas.current), 
+                            phi, as.vector(zetas.current))
+        #initial_values[1 + NCOL(X0) + p * L + 1] <- NA
+      } else {
+        stop("Modeling with the ALR transformation for proportions data has 
+             not yet completely implemented!")
+        initial_values <- c(dat$kappas, 3, dat$xi, 
+                            as.vector(dat$betas), as.vector(dat$zetas[, -L]))
+      }
     } else {
       initial_values <- c(kappas, xi, as.vector(betas.current))
     }
@@ -201,12 +237,13 @@ GPTCM <- function(dat, n, p, L,
       upper = bound.u
     )
     par <- mle$par
-    kappas.mcmc <- par[1]
-    xi.mcmc <- par[1 + 1:NCOL(X0)]
-    betas.mcmc <- matrix(par[1 + NCOL(X0) + 1:(p * L)], ncol = L)
+    mle <- list()
+    mle$kappas <- par[1]
+    mle$xi <- par[1 + 1:NCOL(X0)]
+    mle$betas <- matrix(par[1 + NCOL(X0) + 1:(p * L)], ncol = L)
     if (proportion.model) {
-      phi.mcmc <- par[1 + NCOL(X0) + p * L + 1]
-      zetas.mcmc <- matrix(par[-c(1:(1 + NCOL(X0) + p * L + 1))], nrow = p + 1)
+      mle$phi <- par[1 + NCOL(X0) + p * L + 1]
+      mle$zetas <- matrix(par[-c(1:(1 + NCOL(X0) + p * L + 1))], nrow = p + 1)
     }
   } else {
     globalvariable <- list(
@@ -268,22 +305,27 @@ GPTCM <- function(dat, n, p, L,
 
       ## update \zeta_l of p_l in non-cure fraction; the last cell type as reference
       if (proportion.model) {
-        ## update phi in Dirichlet measurement error model
-        phi.mcmc.internal <- arms(
-          y.start = phi,
-          myldens = logpost_phi,
-          indFunc = convex_support_phi,
-          n.sample = 10
-        )
-        ## n.sample = 20 will result in less variation
-        # phi <- mean(phi.mcmc.internal)#[-c(1:(length(phi.mcmc.internal)/2))])#median
-        phi <- median(phi.mcmc.internal[-c(1:(length(phi.mcmc.internal) / 2))]) # median
-        phi <- median(c(phi, 0.1, 200 - 0.1))
-        phi.mcmc[1 + m] <- phi
-        globalvariable <- list(phi = phi)
-        list2env(globalvariable, .GlobalEnv)
-
-        for (l in 1:ifelse(dirichlet, L - 1, L)) {
+        
+        ## update phi if using Dirichlet (alternative parametrization) measurement error model
+        if (!dirichlet) {
+          phi.mcmc.internal <- arms(
+            y.start = phi,
+            myldens = logpost_phi,
+            indFunc = convex_support_phi,
+            n.sample = 10
+          )
+          if(m==10)browser()
+          ## n.sample = 20 will result in less variation
+          # phi <- mean(phi.mcmc.internal)#[-c(1:(length(phi.mcmc.internal)/2))])#median
+          phi <- median(phi.mcmc.internal[-c(1:(length(phi.mcmc.internal) / 2))]) # median
+          phi <- median(c(phi, 0.1, 200 - 0.1))
+          phi.mcmc[1 + m] <- phi
+          globalvariable <- list(phi = phi)
+          list2env(globalvariable, .GlobalEnv)
+        }
+        
+        # update coefficients of the Dirichlet model
+        for (l in 1:ifelse(dirichlet, L, L - 1)) {
           for (j in 1:(p + 1)) {
             # if (j == 1) wSq <- 10 # Fixed value 10 seems not good for Dirichlet's common parametrization
             # globalVariables(c("l", "j")) ## This is not safe
@@ -305,7 +347,24 @@ GPTCM <- function(dat, n, p, L,
             globalvariable <- list(zetas.current = zetas.current)
             list2env(globalvariable, .GlobalEnv)
           }
-          if (dirichlet) {
+          if (dirichlet) { 
+            ## use log-link for concentration parameters without reference category
+            # alphas <- matrix(NA, nrow = NROW(proportion), ncol = NCOL(proportion))
+            # for (ll in 1:L) { 
+            #   alphas[, ll] <- exp(cbind(1, dat$XX[, , ll]) %*% zetas.current[, ll])
+            # }
+            # proportion <- apply(alphas, 2, function(xx) {
+            #   xx / rowSums(alphas)
+            # })
+            
+            alphas <- sapply(1:L, function(ll)
+              {exp(cbind(1, dat$XX[, , ll]) %*% zetas.current[, ll])}
+            )
+            # eps1 <- 170
+            # alphas[alphas > eps1] <- eps1
+            proportion <- alphas / rowSums(alphas)
+            # proportion <- exp(logAlphas - log(rowSums(exp(logAlphas))))
+          } else { 
             for (ll in 1:(L - 1)) { # the l-th subtype proportion is updated, and the all composition should be updated
               proportion[, ll] <- exp(cbind(1, dat$XX[, , ll]) %*% zetas.current[, ll]) /
                 (1 + rowSums(sapply(1:(L - 1), function(xx) {
@@ -313,19 +372,16 @@ GPTCM <- function(dat, n, p, L,
                 })))
             }
             proportion[, L] <- 1 - rowSums(proportion[, -L])
-          } else { # use log-link for concentration parameters without reference category
-            alphas <- matrix(NA, nrow = NROW(proportion), ncol = NCOL(proportion))
-            for (ll in 1:L) {
-              alphas[, ll] <- exp(cbind(1, dat$XX[, , ll]) %*% zetas.current[, ll])
-            }
-            proportion <- apply(alphas, 2, function(xx) {
-              xx / rowSums(alphas)
-            })
           }
+          # if (any(proportion < 1e-10) || any(proportion > 1 - 1e-10)) {
+          #   proportion <- (proportion * (n - 1) + 1 / L) / n
+          # }
           globalvariable <- list(proportion = proportion)
           list2env(globalvariable, .GlobalEnv)
         }
         zetas.mcmc[1 + m, ] <- as.vector(zetas.current)
+        #globalvariable <- list(proportion = proportion)
+        #list2env(globalvariable, .GlobalEnv)
 
         ## update wSq, the variance of zetas
         if (w0Sampler == "IGamma") {
@@ -359,6 +415,13 @@ GPTCM <- function(dat, n, p, L,
       # lambdas <- mu.current / gamma(1 + 1 / kappas)
       globalvariable <- list(kappas = kappas) # , lambdas = lambdas)
       list2env(globalvariable, .GlobalEnv)
+      
+      ## update Gammas with Rcpp function
+      # outCpp <- sampleGamma(gammas.current, FALSE, hyperpar$a_pi, hyperpar$b_pi)
+      # gammas.current <- outCpp$Gammas
+      # browser()
+      # 
+      # gammas.mcmc[1 + m, ] <- as.vector(gammas.current)
 
       ## update \beta_jl of S_l(t) in non-cure fraction
       for (l in 1:L) {
@@ -443,18 +506,20 @@ GPTCM <- function(dat, n, p, L,
       betas = matrix(colMeans(betas.mcmc[-c(1:(nrow(betas.mcmc) / 2)), ]), ncol = L),
       thetas = exp(dat$x0 %*% xi)
     )
+    
+    ret$output$mcmc <- list(
+      xi = xi.mcmc,
+      kappas = kappas.mcmc,
+      phi = phi.mcmc,
+      betas = betas.mcmc,
+      zetas = zetas.mcmc,
+      tauSq = tauSq.mcmc,
+      wSq = wSq.mcmc,
+      vSq = vSq.mcmc
+    )
+  } else {
+    ret$output$mle <- mle
   }
-
-  ret$output$mcmc <- list(
-    xi = xi.mcmc,
-    kappas = kappas.mcmc,
-    phi = phi.mcmc,
-    betas = betas.mcmc,
-    zetas = zetas.mcmc,
-    tauSq = tauSq.mcmc,
-    wSq = wSq.mcmc,
-    vSq = vSq.mcmc
-  )
 
   return(ret)
 }

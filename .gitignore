@@ -3,9 +3,12 @@
 .vscode/*
 .Rhistory
 .DS_Store
+.RData
 
 test_build.R
 test_ex.R
+
+anRpackage*
 results*
 
 GPTCM/src/*.o

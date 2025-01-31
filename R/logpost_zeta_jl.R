@@ -20,10 +20,32 @@ logpost_zeta_jl <- function(x) {
   if (!is.na(x)) {
     zetas.tmp[j, l] <- x
   }
-
+  
+  ## set bounds to avoid numeric issues
+  # eps <- 1e-10
+  # eps1 <- 170
+  
   # update proportions with a new proposal zeta
   proportion.tmp <- proportion
-  if (dirichlet) { # use logit/alr-link with the last category as reference
+  if (dirichlet) { 
+    ## use log-link for concentration parameters without reference category
+    logAlphas <- matrix(NA, nrow = NROW(proportion), ncol = NCOL(proportion))
+    # for (ll in 1:L) {
+    #   alphas[, ll] <- exp(cbind(1, dat$XX[, , ll]) %*% zetas.tmp[, ll])
+    # }
+    # proportion.tmp <- apply(alphas, 2, function(xx) {
+    #   xx / rowSums(alphas)
+    # })
+    logAlphas <- sapply(1:L, function(ll)
+      {cbind(1, dat$XX[, , ll]) %*% zetas.tmp[, ll]}
+    )
+    # alphas[alphas > eps1] <- eps1
+    # proportion.tmp <- alphas / rowSums(alphas)
+    
+    # proportion.tmp <- exp(logAlphas - rowSums(logAlphas))
+    proportion.tmp <- exp(logAlphas - log(rowSums(exp(logAlphas))))
+  } else { 
+    # use logit/alr-link with the last category as reference
     for (ll in 1:(L - 1)) {
       proportion.tmp[, ll] <- exp(cbind(1, dat$XX[, , ll]) %*% zetas.tmp[, ll]) /
         (1 + rowSums(sapply(1:(L - 1), function(xx) {
@@ -31,15 +53,12 @@ logpost_zeta_jl <- function(x) {
         })))
     }
     proportion.tmp[, L] <- 1 - rowSums(proportion.tmp[, -L])
-  } else { # use log-link for concentration parameters without reference category
-    alphas <- matrix(NA, nrow = NROW(proportion), ncol = NCOL(proportion))
-    for (ll in 1:L) {
-      alphas[, ll] <- exp(cbind(1, dat$XX[, , ll]) %*% zetas.tmp[, ll])
-    }
-    proportion.tmp <- apply(alphas, 2, function(xx) {
-      xx / rowSums(alphas)
-    })
+    logAlphas <- log(proportion.tmp * phi)
   }
+  # if (any(proportion.tmp < eps) || any(proportion.tmp > 1 - eps)) {
+  #   proportion.tmp <- (proportion.tmp * (NROW(proportion.tmp) - 1) + 
+  #                        1 / NCOL(proportion.tmp)) / NROW(proportion.tmp)
+  # }
 
   # noncure density related censored part
   logpost.first <- logpost.second <- 0
@@ -56,14 +75,22 @@ logpost_zeta_jl <- function(x) {
   logpost.second <- sum(thetas * logpost.second)
 
   # Dirichlet density
-  concentrations <- proportion.tmp * phi # some issue here, since the sum of each row is phi
-  normalizingConst <- # log(gamma(rowSums(concentrations))) -
-    log(gamma(phi)) -
-    rowSums(log(gamma(concentrations)))
-  # normalizingConst <- -log(gamma(concentrations[,l])) # to be verified
-
-  geometricTerm <- rowSums((concentrations - 1) * log(dat$proportion))
-  # geometricTerm <- (concentrations[,l] - 1) * log(dat$proportion[,l]) # to be verified
+  #concentrations <- proportion.tmp * phi # some issue here, since the sum of each row is phi
+  #normalizingConst <- # log(gamma(rowSums(concentrations))) -
+  #  log(gamma(phi)) -
+  #  rowSums(log(gamma(concentrations)))
+  
+  ## some numeric issue below
+  # alphas <- exp(logAlphas)
+  # normalizingConst <- log(gamma(rowSums(alphas))) -
+  #   rowSums(log(gamma(alphas)))
+  # geometricTerm <- rowSums((alphas - 1) * log(dat$proportion))
+  
+  #lmvbeta <- rowSums(lgamma(exp(logAlphas))) - lgamma(rowSums(exp(logAlphas)))
+  log.dirichlet <- #(-lmvbeta) +
+    lgamma(rowSums(exp(logAlphas))) - rowSums(lgamma(exp(logAlphas))) + 
+    rowSums((exp(logAlphas) -1) * log(dat$proportion))
+  log.dirichlet <- sum(log.dirichlet)
 
   # prior
   w.tmp <- ifelse(j == 1, w0Sq, wSq)
@@ -71,7 +98,9 @@ logpost_zeta_jl <- function(x) {
 
   # sum all fractions
   logpost <- logpost.first + logpost.second +
-    sum(normalizingConst + geometricTerm) + logprior
-
+    #sum(normalizingConst + geometricTerm) + 
+    log.dirichlet + logprior
+  
+  if(is.na(logpost))browser()
   return(logpost)
 }

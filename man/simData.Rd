@@ -10,7 +10,8 @@ simData(
   L = 3,
   Sigma = 0,
   kappas = 2,
-  proportion.model = "alr"
+  proportion.model = "alr",
+  phi = 10
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ simData(
 \item{kappas}{value of the Weibull's shape parameter}
 
 \item{proportion.model}{One of \code{c("alr", "cloglog", "log", "dirichlet")}}
+
+\item{phi}{TBA}
 }
 \value{
 An object of ...

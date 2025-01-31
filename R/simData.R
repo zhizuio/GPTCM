@@ -13,6 +13,7 @@
 #' @param Sigma TBA
 #' @param kappas value of the Weibull's shape parameter
 #' @param proportion.model One of \code{c("alr", "cloglog", "log", "dirichlet")}
+#' @param phi TBA
 #'
 #' @return An object of ...
 #'
@@ -24,7 +25,8 @@
 #' @export
 simData <- function(n = 200, p = 10, L = 3,
                     Sigma = 0, kappas = 2,
-                    proportion.model = "alr") {
+                    proportion.model = "alr",
+                    phi = 10) {
   ## predefined functions
   Expo <- function(times, surv) {
     z1 <- -log(surv[1])
@@ -161,10 +163,18 @@ simData <- function(n = 200, p = 10, L = 3,
     alpha1 <- exp(zeta0[1] + x1 %*% matrix(zeta1, ncol = 1))
     alpha2 <- exp(zeta0[2] + x2 %*% matrix(zeta2, ncol = 1))
     alpha3 <- exp(zeta0[3] + x3 %*% matrix(zeta3, ncol = 1))
-    alpha0 <- alpha1 + alpha2 + alpha3
-    proportion <- cbind(alpha1 / alpha0, alpha2 / alpha0, alpha3 / alpha0)
+    alphas <- cbind(alpha1, alpha2, alpha3)
+    #alpha0 <- alpha1 + alpha2 + alpha3
+    #proportion <- cbind(alpha1 / alpha0, alpha2 / alpha0, alpha3 / alpha0)
+    
+    ## Generate n-individual Dirichlet proportions
+    proportion <- matrix(nrow = n, ncol = L)
+    for (i in 1:n) {
+      proportion[i, ] <- sapply(1:L, function(l) rgamma(1, alphas[i, l]))
+    }
+    
     # proportion <- matrix(rgamma(L * n, t(1:L)), ncol = L, byrow=TRUE)
-    # proportion <- proportion / rowSums(proportion)
+    proportion <- proportion / rowSums(proportion)
   }
 
   ## the following is via logit/alr-link function
@@ -177,6 +187,13 @@ simData <- function(n = 200, p = 10, L = 3,
     for (l in 1:(L - 1)) {
       proportion[, l] <- tmp[, l] / (1 + rowSums(tmp[, -L]))
     }
+    
+    alphas <- proportion * phi
+    for (i in 1:n) {
+      proportion[i, ] <- sapply(1:L, function(l) rgamma(1, alphas[i, l]))
+    }
+    proportion <- proportion / rowSums(proportion)
+    
     # the last category is as reference, no need data for zetas[,L]
     zetas <- zetas[, -L]
   }
