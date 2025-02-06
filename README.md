@@ -72,7 +72,7 @@ ggsurv$plot <- ggsurv$plot +
 ggsurv
 ```
 
-<img src="man/figures/cran_km.png" width="50%" />
+<img src="man/figures/cran_km.png" width="70%" />
 
 After running our proposed GPTCM, we compare its the survival prediction performance with other approaches (i.e. Kaplan-Meier method without covariates, classic Cox model with two clinical covariates, Cox model with cell-type proportions data as covariates, Cox model with both clinical and cell-type proportion covariates, Cox model with clinical and aggregated (mean) cell-type-specific covariates, Cox model with clinical and aggregated (median) cell-type-specific covariates, mixture cure model with clinical and aggregated (mean) cell-type-specific covariates, mixture cure model with clinical and aggregated (median) cell-type-specific covariates). 
 The follow figure shows the prediction performance of time-dependent Brier scores. 
@@ -90,7 +90,7 @@ plotBrier(dat, datMCMC = fit,
           ylab = "Prediction error")
 ```
 
-<img src="man/figures/cran_brier.png" width="50%" />
+<img src="man/figures/cran_brier.png" width="70%" />
 
 The following figure shows the well estimated cell-type-specific effects associated with cell-type-specific progression. 
 
