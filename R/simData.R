@@ -25,7 +25,7 @@
 #' @export
 simData <- function(n = 200, p = 10, L = 3,
                     Sigma = 0, kappas = 2,
-                    proportion.model = "alr",
+                    proportion.model = "dirichlet",
                     phi = 10) {
   ## predefined functions
   Expo <- function(times, surv) {

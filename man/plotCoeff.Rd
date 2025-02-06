@@ -4,7 +4,14 @@
 \alias{plotCoeff}
 \title{Plots for estimated coefficients}
 \usage{
-plotCoeff(dat, datMCMC, estimator = "beta", ...)
+plotCoeff(
+  dat,
+  datMCMC,
+  estimator = "beta",
+  label.y = NULL,
+  legend.labs = NULL,
+  ...
+)
 }
 \arguments{
 \item{dat}{TBA}

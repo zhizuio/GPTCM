@@ -7,6 +7,7 @@
 
 test_build.R
 test_ex.R
+test_GrowthHouse.R
 
 anRpackage*
 results*

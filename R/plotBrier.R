@@ -22,7 +22,10 @@
 #' x <- 1
 #'
 #' @export
-plotBrier <- function(dat, datMCMC, ...) {
+plotBrier <- function(dat, datMCMC, 
+                      time.star = NULL, 
+                      xlab = "Time", 
+                      ylab = "Brier score", ...) {
   n <- dim(dat$XX)[1]
   p <- dim(dat$XX)[2]
   L <- dim(dat$XX)[3]
@@ -100,7 +103,9 @@ plotBrier <- function(dat, datMCMC, ...) {
     conf.int = FALSE, times = time_eval
   )
   g1 <- g$Brier$score
-  # g1 <- g1[g1$times <= 71, ]
+  if(!is.null(time.star)){
+    g1 <- g1[g1$times <= time.star, ]
+  }
   levels(g1$model)[1] <- "Kaplan-Meier"
   # utils::globalVariables(c("times", "Brier", "model"))
   # NOTE: `aes_string()` was deprecated in ggplot2 3.0.0.
@@ -108,8 +113,8 @@ plotBrier <- function(dat, datMCMC, ...) {
     # x = "times", y = "Brier", group = "model", color = "model"
     x = times, y = Brier, group = model, color = model
   )) +
-    xlab("Time") +
-    ylab("Brier score") +
+    xlab(xlab) +
+    ylab(ylab) +
     geom_step(direction = "vh") + # , alpha=0.4) +
     theme_bw() +
     theme(

@@ -1,3 +1,12 @@
+# GPTCM 0.0.7
+
+* Add Bayesian variable selection (BVS), continued...
+
+# GPTCM 0.0.6
+
+* Add Bayesian variable selection (BVS), not yet finished
+* When using `HI::arms()`, setting `n.sample=2`, but somehow not work, not know why
+
 # GPTCM 0.0.5
 
 * Add Bayesian variable selection (BVS), not yet finished

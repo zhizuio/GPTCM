@@ -7,19 +7,16 @@
 \usage{
 GPTCM(
   dat,
-  n,
-  p,
-  L,
   proportion.model = TRUE,
   dirichlet = TRUE,
   method = "Bayes",
   hyperpar = NULL,
-  kappaPrior = "Gamma",
+  kappaPrior = "IGamma",
   kappaSampler = "arms",
   w0Sampler = "IGamma",
   initial = NULL,
-  nIter = 1,
-  burnin = 0,
+  nIter = 500,
+  burnin = 200,
   thin = 1,
   tick = 100
 )
@@ -31,12 +28,6 @@ Markov random field prior, \code{survObj} should be a list of the list with
 survival and covariates data. For subgroup models with or without graphical
 learning, \code{survObj} should be a list of multiple lists with each
 component list representing each subgroup's survival and covariates data}
-
-\item{n}{TBA}
-
-\item{p}{TBA}
-
-\item{L}{TBA}
 
 \item{proportion.model}{logical value; should the proportions be modeled or
 not. If (\code{proportion.model = FALSE}), the argument \code{dirichlet} will

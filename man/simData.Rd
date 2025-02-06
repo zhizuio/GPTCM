@@ -10,7 +10,7 @@ simData(
   L = 3,
   Sigma = 0,
   kappas = 2,
-  proportion.model = "alr",
+  proportion.model = "dirichlet",
   phi = 10
 )
 }

@@ -5,7 +5,14 @@
 \alias{plotMCMC}
 \title{Time-dependent Brier scores}
 \usage{
-plotBrier(dat, datMCMC, ...)
+plotBrier(
+  dat,
+  datMCMC,
+  time.star = NULL,
+  xlab = "Time",
+  ylab = "Brier score",
+  ...
+)
 
 plotMCMC(dat, datMCMC, estimator = "xi")
 }

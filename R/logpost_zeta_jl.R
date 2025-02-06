@@ -23,7 +23,7 @@ logpost_zeta_jl <- function(x) {
   
   ## set bounds to avoid numeric issues
   # eps <- 1e-10
-  # eps1 <- 170
+  eps1 <- 170
   
   # update proportions with a new proposal zeta
   proportion.tmp <- proportion
@@ -36,14 +36,13 @@ logpost_zeta_jl <- function(x) {
     # proportion.tmp <- apply(alphas, 2, function(xx) {
     #   xx / rowSums(alphas)
     # })
-    logAlphas <- sapply(1:L, function(ll)
-      {cbind(1, dat$XX[, , ll]) %*% zetas.tmp[, ll]}
+    alphas <- sapply(1:L, function(ll)
+      {exp(cbind(1, dat$XX[, , ll]) %*% zetas.tmp[, ll])}
     )
-    # alphas[alphas > eps1] <- eps1
-    # proportion.tmp <- alphas / rowSums(alphas)
+    alphas[alphas > eps1] <- eps1
+    proportion.tmp <- alphas / rowSums(alphas)
     
-    # proportion.tmp <- exp(logAlphas - rowSums(logAlphas))
-    proportion.tmp <- exp(logAlphas - log(rowSums(exp(logAlphas))))
+    # proportion.tmp <- exp(logAlphas - log(rowSums(exp(logAlphas))))
   } else { 
     # use logit/alr-link with the last category as reference
     for (ll in 1:(L - 1)) {
@@ -53,7 +52,8 @@ logpost_zeta_jl <- function(x) {
         })))
     }
     proportion.tmp[, L] <- 1 - rowSums(proportion.tmp[, -L])
-    logAlphas <- log(proportion.tmp * phi)
+    alphas <- proportion.tmp * phi
+    # logAlphas <- log(proportion.tmp * phi)
   }
   # if (any(proportion.tmp < eps) || any(proportion.tmp > 1 - eps)) {
   #   proportion.tmp <- (proportion.tmp * (NROW(proportion.tmp) - 1) + 
@@ -87,9 +87,12 @@ logpost_zeta_jl <- function(x) {
   # geometricTerm <- rowSums((alphas - 1) * log(dat$proportion))
   
   #lmvbeta <- rowSums(lgamma(exp(logAlphas))) - lgamma(rowSums(exp(logAlphas)))
+  # log.dirichlet <- #(-lmvbeta) +
+  #   lgamma(rowSums(exp(logAlphas))) - rowSums(lgamma(exp(logAlphas))) + 
+  #   rowSums((exp(logAlphas) -1) * log(dat$proportion))
   log.dirichlet <- #(-lmvbeta) +
-    lgamma(rowSums(exp(logAlphas))) - rowSums(lgamma(exp(logAlphas))) + 
-    rowSums((exp(logAlphas) -1) * log(dat$proportion))
+    lgamma(rowSums(alphas)) - rowSums(lgamma(alphas)) + 
+    rowSums((alphas -1) * log(dat$proportion))
   log.dirichlet <- sum(log.dirichlet)
 
   # prior

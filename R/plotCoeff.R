@@ -23,27 +23,37 @@
 #' x <- 1
 #'
 #' @export
-plotCoeff <- function(dat, datMCMC, estimator = "beta", ...) {
+plotCoeff <- function(dat, datMCMC, 
+                      estimator = "beta", 
+                      label.y = NULL,
+                      legend.labs = NULL, ...) {
   # n <- dim(dat$XX)[1]
   p <- dim(dat$XX)[2]
   L <- dim(dat$XX)[3]
   # nIter <- datMCMC$input$nIter
   burnin <- datMCMC$input$burnin
-
+  
+  legend0 <- ifelse(is.null(legend.labs), 0, 1)
+  
   if (estimator == "beta") {
     betas.mcmc <- datMCMC$output$mcmc$betas[-c(1:burnin), ]
     # Final estimates
     betas.true <- dat$betas[p:1, ]
     betas_min <- min(betas.mcmc, betas.true)
     betas_max <- max(betas.mcmc, betas.true)
+    
+    if(is.null(label.y)){
+      label.y <- paste0("x", 1:p)
+    }
 
     # pdf(paste0("gptcm_betaHat_Sigma",Sigma,"_M",M,".pdf"), height = 4, width = 8)
-    layout(matrix(1:L, nrow = 1))
+    layout(matrix(1:(L + legend0), nrow = 1))
     for (l in 0:(L - 1)) {
       plotCoeff0(betas.mcmc[, l * p + 1:p][, p:1], betas.true[, l + 1],
         xlim = c(betas_min, betas_max),
+        legend.labs = legend.labs,
         main = paste("Cell type", l + 1),
-        label.y = paste0("x", p:1)
+        label.y = label.y[p:1]
       )
     }
     # dev.off()
@@ -56,19 +66,37 @@ plotCoeff <- function(dat, datMCMC, estimator = "beta", ...) {
     zetas_min <- min(zetas.mcmc, zetas.true)
     zetas_max <- max(zetas.mcmc, zetas.true)
     dirichlet <- datMCMC$input$dirichlet
-
+    
+    if(is.null(label.y)){
+      label.y <- c(paste0("x", 1:p), "intecept")
+    }
+    
     # pdf(paste0("gptcm_zetaHat_Sigma",Sigma,"_M",M,".pdf"), height = 5, width = 7)
-    layout(matrix(1:ifelse(dirichlet, L, L - 1), nrow = 1))
+    layout(matrix(1:(ifelse(dirichlet, L, L - 1) + legend0), nrow = 1))
     for (l in 0:ifelse(dirichlet, L - 1, L - 2)) {
       plotCoeff0(zetas.mcmc[, l * (p + 1) + 1:(p + 1)][, (p + 1):1],
         zetas.true[, l + 1],
         xlim = c(zetas_min, zetas_max),
+        legend.labs = legend.labs, 
         pars.name = "zeta",
         main = paste("Cell type", l + 1),
-        label.y = c(paste0("x", p:1), "intecept")
+        label.y = label.y[(p + 1):1]
       )
     }
     # dev.off()
+  }
+  
+  if (!is.null(legend.labs)) {
+    par(mar = c(5.1, 0, 4.1, 0))
+    plot(0, xaxt = 'n', yaxt = 'n', bty = 'n', pch = '', ylab = '', xlab = '')
+    legend("topleft",
+           bty = "n",
+           legend = legend.labs,
+           pch = c(4, 5, NA), 
+           lty = c(NA, NA, 1),
+           col = scales::alpha(c("red", "green", "green"), 0.7)
+    )
+    par(mar = c(5.1, 4.1, 4.1, 2.1))
   }
 }
 
@@ -76,6 +104,7 @@ plotCoeff <- function(dat, datMCMC, estimator = "beta", ...) {
 
 plotCoeff0 <- function(pars.mcmc, true.param,
                        credible.interval = TRUE,
+                       legend.labs = legend.labs, 
                        pars.name = "beta",
                        label.y = NULL,
                        main = "Type 1", ...) {
@@ -102,7 +131,7 @@ plotCoeff0 <- function(pars.mcmc, true.param,
     y = c(seq_along(true.param)),
     pch = 4,
     col = scales::alpha("red", 0.7),
-    xlab = "effect",
+    xlab = "Effect",
     ylab = "",
     # xlim = c(pars_min, pars_max),
     yaxt = "n",
@@ -114,17 +143,19 @@ plotCoeff0 <- function(pars.mcmc, true.param,
 
   # plotting posterior mean
   points(x = pars_mean, y = 1:ncol(pars.mcmc), pch = 5, col = scales::alpha("green", 0.7))
-  if (pars.name == "beta") {
-    legend("topleft",
-           legend = c(expression(beta), expression(hat(beta))),
-           pch = c(4, 5), col = scales::alpha(c("red", "green"), 0.7)
-    )
-  }
-  if (pars.name == "zeta") {
-    legend("topleft",
-           legend = c(expression(zeta), expression(hat(zeta))),
-           pch = c(4, 5), col = scales::alpha(c("red", "green"), 0.7)
-    )
+  if (is.null(legend.labs)) {
+    if (pars.name == "beta") {
+      legend("topleft",
+             legend = c(expression(beta), expression(hat(beta))),
+             pch = c(4, 5), col = scales::alpha(c("red", "green"), 0.7)
+      )
+    }
+    if (pars.name == "zeta") {
+      legend("topleft",
+             legend = c(expression(zeta), expression(hat(zeta))),
+             pch = c(4, 5), col = scales::alpha(c("red", "green"), 0.7)
+      )
+    }
   }
 
   # plotting 95% credible interval
