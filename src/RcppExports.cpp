@@ -11,6 +11,28 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// arms_gibbs
+arma::mat arms_gibbs(int n, arma::vec initialPoints, arma::vec minRange, arma::vec maxRange, bool metropolis, arma::vec& betaJ, double vA, double vB, const arma::mat datX0, const arma::mat datProportion, const arma::uvec datEvent, arma::mat& weibullS);
+RcppExport SEXP _GPTCM_arms_gibbs(SEXP nSEXP, SEXP initialPointsSEXP, SEXP minRangeSEXP, SEXP maxRangeSEXP, SEXP metropolisSEXP, SEXP betaJSEXP, SEXP vASEXP, SEXP vBSEXP, SEXP datX0SEXP, SEXP datProportionSEXP, SEXP datEventSEXP, SEXP weibullSSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type initialPoints(initialPointsSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type minRange(minRangeSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type maxRange(maxRangeSEXP);
+    Rcpp::traits::input_parameter< bool >::type metropolis(metropolisSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type betaJ(betaJSEXP);
+    Rcpp::traits::input_parameter< double >::type vA(vASEXP);
+    Rcpp::traits::input_parameter< double >::type vB(vBSEXP);
+    Rcpp::traits::input_parameter< const arma::mat >::type datX0(datX0SEXP);
+    Rcpp::traits::input_parameter< const arma::mat >::type datProportion(datProportionSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec >::type datEvent(datEventSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type weibullS(weibullSSEXP);
+    rcpp_result_gen = Rcpp::wrap(arms_gibbs(n, initialPoints, minRange, maxRange, metropolis, betaJ, vA, vB, datX0, datProportion, datEvent, weibullS));
+    return rcpp_result_gen;
+END_RCPP
+}
 // ars
 arma::vec ars(int n, arma::vec initialPoints, double minRange, double maxRange, unsigned int jj, arma::vec& xis, double vA, double vB, const arma::mat datX0, const arma::mat datProportion, const arma::uvec datEvent, arma::mat& weibullS);
 RcppExport SEXP _GPTCM_ars(SEXP nSEXP, SEXP initialPointsSEXP, SEXP minRangeSEXP, SEXP maxRangeSEXP, SEXP jjSEXP, SEXP xisSEXP, SEXP vASEXP, SEXP vBSEXP, SEXP datX0SEXP, SEXP datProportionSEXP, SEXP datEventSEXP, SEXP weibullSSEXP) {
@@ -56,9 +78,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// arsGibbs
-arma::mat arsGibbs(int n, arma::vec initialPoints, arma::vec minRange, arma::vec maxRange, arma::vec& xis, double vA, double vB, const arma::mat datX0, const arma::mat datProportion, const arma::uvec datEvent, arma::mat& weibullS);
-RcppExport SEXP _GPTCM_arsGibbs(SEXP nSEXP, SEXP initialPointsSEXP, SEXP minRangeSEXP, SEXP maxRangeSEXP, SEXP xisSEXP, SEXP vASEXP, SEXP vBSEXP, SEXP datX0SEXP, SEXP datProportionSEXP, SEXP datEventSEXP, SEXP weibullSSEXP) {
+// ars_gibbs
+arma::mat ars_gibbs(int n, arma::vec initialPoints, arma::vec minRange, arma::vec maxRange, arma::vec& xis, double vA, double vB, const arma::mat datX0, const arma::mat datProportion, const arma::uvec datEvent, arma::mat& weibullS);
+RcppExport SEXP _GPTCM_ars_gibbs(SEXP nSEXP, SEXP initialPointsSEXP, SEXP minRangeSEXP, SEXP maxRangeSEXP, SEXP xisSEXP, SEXP vASEXP, SEXP vBSEXP, SEXP datX0SEXP, SEXP datProportionSEXP, SEXP datEventSEXP, SEXP weibullSSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -73,7 +95,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::mat >::type datProportion(datProportionSEXP);
     Rcpp::traits::input_parameter< const arma::uvec >::type datEvent(datEventSEXP);
     Rcpp::traits::input_parameter< arma::mat& >::type weibullS(weibullSSEXP);
-    rcpp_result_gen = Rcpp::wrap(arsGibbs(n, initialPoints, minRange, maxRange, xis, vA, vB, datX0, datProportion, datEvent, weibullS));
+    rcpp_result_gen = Rcpp::wrap(ars_gibbs(n, initialPoints, minRange, maxRange, xis, vA, vB, datX0, datProportion, datEvent, weibullS));
     return rcpp_result_gen;
 END_RCPP
 }

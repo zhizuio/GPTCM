@@ -315,7 +315,7 @@ GPTCM <- function(dat,
         )
       } else {
         #browser()
-        xi.mcmc.internal <- arsGibbs(
+        xi.mcmc.internal <- ars_gibbs(
           4,
           c(0.1, 1, 2), # initializing meshgrid values for envelop search
           0.01, 3, ## problematic if lower bound negative, not know why?

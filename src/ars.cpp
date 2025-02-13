@@ -500,7 +500,7 @@ Rcpp::List ars_debug(
 //' @param initialPoints this can be a matrix in multivariate case
 //'
 // [[Rcpp::export]]
-arma::mat arsGibbs(
+arma::mat ars_gibbs(
   int n,
   arma::vec initialPoints,
   arma::vec minRange,
