@@ -70,10 +70,10 @@ arma::vec log_dens_xi(
 {
   arma::vec h = arma::zeros<arma::vec>(2); 
 
-  arma::vec xis0 = xis;
-  xis0.shed_row(0);
-  //stdvec xis0 = arma::conv_to<stdvec>::from(xis);
-  //xis0.erase(xis0.begin());
+  //arma::vec xis0 = xis;
+  //xis0.shed_row(0);
+  stdvec xis0 = arma::conv_to<stdvec>::from(xis);
+  xis0.erase(xis0.begin());
 
   xis[jj] = par;
   double vSq;
@@ -81,13 +81,13 @@ arma::vec log_dens_xi(
   {
     vSq = 10.;
   } else {
-    arma::uvec tmp = arma::find(xis0);
-    //int ans = std::count(xis0.begin(), xis0.end(), 0.);
-    //double vA_tmp = vA + 0.5 * (double)ans;
-    double vA_tmp = vA + 0.5 * arma::as_scalar(tmp.n_elem);
-    double vB_tmp = vB + 0.5 * arma::accu(xis0 % xis0);
-    //double vB_tmp = vB + 0.5 * 
-    //  std::inner_product( xis0.begin(), xis0.end(), xis0.begin(), 0. );
+    int ans = std::count(xis0.begin(), xis0.end(), 0.);
+    double vA_tmp = vA + 0.5 * (double)ans;
+    //arma::uvec tmp = arma::find(xis0);
+    //double vA_tmp = vA + 0.5 * (double)tmp.n_elem;//arma::as_scalar(tmp.n_elem);
+    //double vB_tmp = vB + 0.5 * arma::accu(xis0 % xis0);
+    double vB_tmp = vB + 0.5 * 
+      std::inner_product( xis0.begin(), xis0.end(), xis0.begin(), 0. );
     vSq = 1. / R::rgamma(vA_tmp, 1. / vB_tmp);
   }
 
@@ -99,15 +99,16 @@ arma::vec log_dens_xi(
   eta.elem(arma::find(eta > 700)).fill(700.);
   arma::vec thetas = arma::exp( eta );
   
-  double logpost_first = arma::accu( arma::log(thetas.elem(arma::find(datEvent == 1))) );
-  //double logpost_first = arma::accu( eta.elem(arma::find(datEvent == 1)) );
+  //double logpost_first = arma::accu( arma::log(thetas.elem(arma::find(datEvent == 1))) );
+  double logpost_first = arma::accu( eta.elem(arma::find(datEvent)) );
   double logpost_first2;
   if(jj != 0)
   {
     arma::uvec singleIdx_jj = { jj };
-    logpost_first2 = arma::accu( datX0.submat(arma::find(datEvent == 1), singleIdx_jj) );
+    logpost_first2 = arma::accu( datX0.submat(arma::find(datEvent), singleIdx_jj) );
   } else {
-    logpost_first2 = arma::accu(datEvent);
+    //logpost_first2 = arma::accu(datEvent);
+    logpost_first2 = std::count(datEvent.begin(), datEvent.end(), 1) + 0.;
   }
 
   arma::vec logpost_second = arma::zeros<arma::vec>(datProportion.n_rows);

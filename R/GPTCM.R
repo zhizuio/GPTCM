@@ -296,8 +296,9 @@ GPTCM <- function(dat,
         browser()
         xi.mcmc.internal <- arsGibbs(
           1,
-          seq(-1, 1, length = 5), # here can be a vector/matrix for initializing meshgrid values
-          -5, 5, ## problematic if lower bound negative, not know why?
+          #seq(-1, 1, length = 5), # here can be a vector/matrix for initializing meshgrid values
+          c(0.1, 1),
+          -0.5, 5, ## problematic if lower bound negative, not know why?
           xi,
           hyperpar$vA, hyperpar$vB,
           datX0,
@@ -308,8 +309,8 @@ GPTCM <- function(dat,
         jj <- 1
         xi.mcmc.internal <- ars(
           1,
-          c(-1,0.8),
-          -5.0, 5.0, ## problematic if lower bound negative, not know why?
+          c(0.1, 1),
+          0.01, 5.0, ## problematic if lower bound negative, not know why?
           jj,
           xi,
           hyperpar$vA, hyperpar$vB,
