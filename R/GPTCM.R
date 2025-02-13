@@ -35,6 +35,7 @@
 #' @param burnin TBA
 #' @param thin TBA
 #' @param tick TBA
+#' @param cpp logical, whether to use C++ code for faster computation
 #'
 #'
 #' @return An object of ...
@@ -57,7 +58,8 @@ GPTCM <- function(dat,
                   nIter = 500,
                   burnin = 200,
                   thin = 1,
-                  tick = 100) {
+                  tick = 100,
+                  cpp = FALSE) {
   # Validation
   stopifnot(burnin < nIter)
 
@@ -69,7 +71,8 @@ GPTCM <- function(dat,
   cl <- match.call()
 
   # set hyperparamters of all piors
-  if (is.null(hyperpar)) {
+  #if (is.null(hyperpar)) {
+    hyperpar <- list()
     hyperpar$tauA <- 20
     hyperpar$tauB <- 50
     # hyperpar$tauA <- 1.5; hyperpar$tauB <- 50; tauSq <- 1
@@ -83,13 +86,13 @@ GPTCM <- function(dat,
       hyperpar$kappaA <- 1
       hyperpar$kappaB <- 1 # This is for Gamma prior
     } else {
-      if (kappaPrior == "IGamma") {
+      # if (kappaPrior == "IGamma") {
         hyperpar$kappaA <- 5
         # hyperpar$kappaB <- 20 # This is for Inverse-Gamma prior
         hyperpar$kappaB <- 5
-      } else {
-        stop("Argument 'kappaPrior' is either 'Gamma' or 'IGamma'!")
-      }
+      # } else {
+      #   stop("Argument 'kappaPrior' is either 'Gamma' or 'IGamma'!")
+      # }
     }
     if (w0Sampler == "IGamma") {
       hyperpar$w0A <- hyperpar$wA
@@ -98,7 +101,7 @@ GPTCM <- function(dat,
     # hyperparameters for variable selection's probabilities' Beta priors
     hyperpar$a_pi <- 0.5
     hyperpar$b_pi <- 0.5
-  }
+  #}
   
   # transform proportions data if including values very close to 0 or 1
   # This is the same as in DirichletReg::DR_data
@@ -249,6 +252,8 @@ GPTCM <- function(dat,
   } else {
     globalvariable <- list(
       dat = dat,
+      datX0 = dat$x0,
+      datEvent = dat$survObj$event,
       proportion.model = proportion.model,
       dirichlet = dirichlet,
       proportion = proportion,
@@ -280,12 +285,41 @@ GPTCM <- function(dat,
       # new.env()
 
       ## update \xi's in cure fraction
-      xi.mcmc.internal <- arms(
-        y.start = xi,
-        myldens = logpost_xi2,
-        indFunc = convex_support,
-        n.sample = 5
-      )
+      if (!cpp) {
+        xi.mcmc.internal <- arms(
+          y.start = xi,
+          myldens = logpost_xi2,
+          indFunc = convex_support,
+          n.sample = 5
+        )
+      } else {
+        browser()
+        xi.mcmc.internal <- arsGibbs(
+          1,
+          seq(-1, 1, length = 5), # here can be a vector/matrix for initializing meshgrid values
+          -5, 5, ## problematic if lower bound negative, not know why?
+          xi,
+          hyperpar$vA, hyperpar$vB,
+          datX0,
+          dat$proportion,
+          datEvent,
+          weibull.S
+        )
+        jj <- 1
+        xi.mcmc.internal <- ars(
+          1,
+          c(-1,0.8),
+          -5.0, 5.0, ## problematic if lower bound negative, not know why?
+          jj,
+          xi,
+          hyperpar$vA, hyperpar$vB,
+          datX0,
+          dat$proportion,
+          datEvent,
+          weibull.S
+        )
+        browser()
+      }
       ## n.sample = 20 will result in less variation
       xi <- colMeans(matrix(xi.mcmc.internal, ncol = length(xi))) # [-c(1:(nrow(xi.mcmc.internal)/2)),])
       xi <- sapply(xi, function(xx) {

@@ -24,8 +24,10 @@ logpost_xi2 <- function(x) {
 
   logprior <- -sum(x^2 / vSq / 2)
 
-  thetas.tmp <- exp(dat$x0 %*% x)
-  logpost.first <- sum(log(thetas.tmp[dat$survObj$event == 1]))
+  # thetas.tmp <- exp(dat$x0 %*% x)
+  # logpost.first <- sum(log(thetas.tmp[dat$survObj$event == 1]))
+  thetas.tmp <- exp(datX0 %*% x)
+  logpost.first <- sum(log(thetas.tmp[datEvent == 1]))
 
   logpost.second <- 0
   for (ll in 1:3) {

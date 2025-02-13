@@ -18,7 +18,8 @@ GPTCM(
   nIter = 500,
   burnin = 200,
   thin = 1,
-  tick = 100
+  tick = 100,
+  cpp = FALSE
 )
 }
 \arguments{
@@ -56,6 +57,8 @@ parametrization of the Dirichlet regression model}
 \item{thin}{TBA}
 
 \item{tick}{TBA}
+
+\item{cpp}{logical, whether to use C++ code for faster computation}
 }
 \value{
 An object of ...
