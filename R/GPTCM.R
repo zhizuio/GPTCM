@@ -62,6 +62,7 @@ GPTCM <- function(dat,
                   cpp = FALSE) {
   # Validation
   stopifnot(burnin < nIter)
+  stopifnot(burnin >= 1)
 
   n <- dim(dat$XX)[1] 
   p <- dim(dat$XX)[2] 
@@ -196,7 +197,25 @@ GPTCM <- function(dat,
   
   zetas.mcmc <- matrix(0, nrow = 1 + nIter, ncol = NCOL(dat$proportion) * (dim(dat$XX)[2] + 1))
   zetas.mcmc[1, ] <- as.vector(zetas.current)
-
+  
+  #################
+  ## Output objects
+  #################
+  
+  ret <- list(input = list(), output = list(), call = cl)
+  class(ret) <- "GPTCM"
+  
+  ret$input$dirichlet <- dirichlet
+  ret$input$nIter <- nIter
+  ret$input$burnin <- burnin
+  ret$input$hyperpar <- hyperpar
+  
+  
+  #################
+  ## Main steps: MLE or Bayesian inference
+  #################
+  
+  mle <- list()
   if (method == "MLE") {
     # X0 <- dat$x0
     # X <- dat$XX
@@ -241,7 +260,6 @@ GPTCM <- function(dat,
       upper = bound.u
     )
     par <- mle$par
-    mle <- list()
     mle$kappas <- par[1]
     mle$xi <- par[1 + 1:NCOL(X0)]
     mle$betas <- matrix(par[1 + NCOL(X0) + 1:(p * L)], ncol = L)
@@ -249,6 +267,9 @@ GPTCM <- function(dat,
       mle$phi <- par[1 + NCOL(X0) + p * L + 1]
       mle$zetas <- matrix(par[-c(1:(1 + NCOL(X0) + p * L + 1))], nrow = p + 1)
     }
+    
+    ret$output$mle <- mle
+    
   } else {
     globalvariable <- list(
       dat = dat,
@@ -293,13 +314,13 @@ GPTCM <- function(dat,
           n.sample = 5
         )
       } else {
-        browser()
+        #browser()
         xi.mcmc.internal <- arsGibbs(
           4,
           c(0.1, 1, 2), # initializing meshgrid values for envelop search
-          -3, 3,
+          0.01, 3, ## problematic if lower bound negative, not know why?
           #rep(-3, length(xi)), 
-          #rep(3, length(xi)),  ## problematic if lower bound negative, not know why?
+          #rep(3, length(xi)), 
           xi,
           hyperpar$vA, hyperpar$vB,
           datX0,
@@ -524,19 +545,10 @@ GPTCM <- function(dat,
       globalvariable <- list(tauSq = tauSq)
       list2env(globalvariable, .GlobalEnv)
     }
-  }
-  cat("... Done!\n")
-
-  ret <- list(input = list(), output = list(), call = cl)
-  class(ret) <- "GPTCM"
-
-  ret$input$dirichlet <- dirichlet
-  ret$input$nIter <- nIter
-  ret$input$burnin <- burnin
-  ret$input$hyperpar <- hyperpar
-
-  # survival predictions based on posterior mean
-  if (method == "Bayes") {
+    cat("... Done!\n")
+    
+    # survival predictions based on posterior mean
+    
     ret$output$posterior <- list(
       xi = colMeans(xi.mcmc[-c(1:(nIter / 2)), ]),
       kappas = mean(kappas.mcmc[-c(1:(nIter / 2))]),
@@ -555,8 +567,6 @@ GPTCM <- function(dat,
       wSq = wSq.mcmc,
       vSq = vSq.mcmc
     )
-  } else {
-    ret$output$mle <- mle
   }
 
   return(ret)

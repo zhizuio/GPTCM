@@ -1,6 +1,7 @@
 # GPTCM 0.0.7
 
-* Add Bayesian variable selection (BVS), continued...
+* Add C++ ARS for generating $\xi$, but it is strange that it fails when the lower bound is negative. 
+  But the final estimates of $\xi$ can be good even if it is negative, not know why?
 
 # GPTCM 0.0.6
 

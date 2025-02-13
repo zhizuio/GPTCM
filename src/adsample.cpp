@@ -551,8 +551,8 @@ arma::mat arsGibbs(
     for (unsigned int j = 0; j < p; ++j)
     {
       // # here 'initialPoints' can be a vector/matrix for initializing meshgrid values
-      //double minD = minRange[0]; double maxD = maxRange[0];
-      arma::vec tmp = ars(1, initialPoints, minRange[0], maxRange[0],
+      double minD = minRange[0]; double maxD = maxRange[0];
+      arma::vec tmp = ars(1, initialPoints, minD, maxD,
         j,
         xis, 
         vA, 
