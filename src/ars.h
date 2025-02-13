@@ -66,6 +66,8 @@ arma::vec ars_internal(
   const arma::uvec datEvent, 
   arma::mat& weibullS);
 
+
+// Rcpp exported functions do not need to be defined in a header file if they are passed in other C/C++ functions
 arma::vec ars(
   int n,
   arma::vec initialPoints,
@@ -81,6 +83,7 @@ arma::vec ars(
   const arma::uvec datEvent, 
   arma::mat& weibullS);
 
+/*
 Rcpp::List ars_debug(
   int n,
   arma::vec initialPoints,
@@ -96,6 +99,6 @@ Rcpp::List ars_debug(
   const arma::mat datProportion, 
   const arma::uvec datEvent, 
   arma::mat& weibullS);
-
+*/
 
 #endif
