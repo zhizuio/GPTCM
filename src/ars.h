@@ -11,6 +11,9 @@
 
 using namespace std;
 
+inline double upperbound1 = 70.;
+inline double upperbound2 = 69.;
+
 // (point value, gradient value)
 //typedef pair<double, double> pointgrad;
 

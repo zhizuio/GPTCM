@@ -7,8 +7,6 @@
 
 // [[Rcpp::depends(RcppArmadillo)]]
 
-inline double upperbound1 = 70.;
-inline double upperbound2 = 69.;
 
 // Evaluation function
 arma::vec log_dens_xi0(double par, 
