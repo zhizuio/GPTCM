@@ -295,10 +295,11 @@ GPTCM <- function(dat,
       } else {
         browser()
         xi.mcmc.internal <- arsGibbs(
-          1,
-          #seq(-1, 1, length = 5), # here can be a vector/matrix for initializing meshgrid values
-          c(0.1, 1),
-          -0.5, 5, ## problematic if lower bound negative, not know why?
+          4,
+          c(0.1, 1, 2), # initializing meshgrid values for envelop search
+          -3, 3,
+          #rep(-3, length(xi)), 
+          #rep(3, length(xi)),  ## problematic if lower bound negative, not know why?
           xi,
           hyperpar$vA, hyperpar$vB,
           datX0,
@@ -306,20 +307,20 @@ GPTCM <- function(dat,
           datEvent,
           weibull.S
         )
-        jj <- 1
-        xi.mcmc.internal <- ars(
-          1,
-          c(0.1, 1),
-          0.01, 5.0, ## problematic if lower bound negative, not know why?
-          jj,
-          xi,
-          hyperpar$vA, hyperpar$vB,
-          datX0,
-          dat$proportion,
-          datEvent,
-          weibull.S
-        )
-        browser()
+        # jj <- 1
+        # xi.mcmc.internal <- ars(
+        #   1,
+        #   c(0.1, 1),
+        #   0.01, 5.0, ## problematic if lower bound negative, not know why?
+        #   jj,
+        #   xi,
+        #   hyperpar$vA, hyperpar$vB,
+        #   datX0,
+        #   dat$proportion,
+        #   datEvent,
+        #   weibull.S
+        # )
+        # browser()
       }
       ## n.sample = 20 will result in less variation
       xi <- colMeans(matrix(xi.mcmc.internal, ncol = length(xi))) # [-c(1:(nrow(xi.mcmc.internal)/2)),])
@@ -429,21 +430,21 @@ GPTCM <- function(dat,
         globalvariable <- list(wSq = wSq, w0Sq = w0Sq)
         list2env(globalvariable, .GlobalEnv)
       }
-
+      
       ## update kappa in noncure fraction
-      if (kappaSampler == "arms") {
+      #if (kappaSampler == "arms") {
         kappas.mcmc.internal <- arms(
           y.start = kappas,
           myldens = logpost_kappas,
           indFunc = convex_support_kappas,
           n.sample = 20
         )
-      } else {
-        kappas.mcmc.internal <- slice(
-          n = 20, init_theta = kappas, TARGET = logpost_kappas,
-          w = 1, max_steps = 10, k_product = 1, type = "log"
-        ) # , lower=-5, upper=5)
-      }
+      # } else {
+      #   kappas.mcmc.internal <- slice(
+      #     n = 20, init_theta = kappas, TARGET = logpost_kappas,
+      #     w = 1, max_steps = 10, k_product = 1, type = "log"
+      #   ) # , lower=-5, upper=5)
+      # }
       ## n.sample = 20 will result in less variation
       # kappas <- mean(kappas.mcmc.internal)#[-c(1:(length(kappas.mcmc.internal)/2))])#median
       kappas <- median(kappas.mcmc.internal[-c(1:(length(kappas.mcmc.internal) / 2))])

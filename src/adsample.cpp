@@ -13,6 +13,8 @@ using namespace std;
 #include <RcppArmadillo.h>
 // [[Rcpp::depends(RcppArmadillo)]]
 
+inline double upperbound1 = 70.;
+inline double upperbound2 = 69.;
 
 // (point value, gradient value)
 //typedef pair<double, double> pointgrad;
@@ -96,7 +98,7 @@ arma::vec log_dens_xi(
   double logprior2 = - par / vSq;
 
   arma::vec eta = datX0 * xis;
-  eta.elem(arma::find(eta > 700)).fill(700.);
+  eta.elem(arma::find(eta > upperbound1)).fill(upperbound1);
   arma::vec thetas = arma::exp( eta );
   
   //double logpost_first = arma::accu( arma::log(thetas.elem(arma::find(datEvent == 1))) );
@@ -207,19 +209,19 @@ arma::vec ars_internal(
   // ie Q has the value of the integral over D following the / in equation (3).
   //
   auto env_area_pt = [&T, &H, &Hprime, &Z](int i) {
-    return std::exp(H[i] - T[i]*Hprime[i])* (std::exp(Z[i+1]*Hprime[i]) - std::exp(Z[i]*Hprime[i]))/Hprime[i];
-    /*
+    //return std::exp(H[i] - T[i]*Hprime[i])* (std::exp(Z[i+1]*Hprime[i]) - std::exp(Z[i]*Hprime[i]))/Hprime[i];
+    
     double e1 = H[i] - T[i] * Hprime[i];
     double e21 = Z[i+1] * Hprime[i];
     double e22 = Z[i] * Hprime[i];
     
-    double e1_trunc = e1 > 700. ? 700. : e1; // truncation by considering e1 > e2 or vice versa
-    //double e21_trunc = e21 > 700. ? 700. : e21; 
-    double e21_trunc = e21 < 700. ? e21 : (e21>e22 ? 700. : 690); 
-    double e22_trunc = e22 < 700. ? e22 : (e22>e21 ? 700. : 690); 
+    double e1_trunc = e1 > upperbound1 ? upperbound1 : e1; // truncation by considering e1 > e2 or vice versa
+    //double e21_trunc = e21 > upperbound1 ? upperbound1 : e21; 
+    double e21_trunc = e21 < upperbound1 ? e21 : (e21>e22 ? upperbound1 : upperbound2); 
+    double e22_trunc = e22 < upperbound1 ? e22 : (e22>e21 ? upperbound1 : upperbound2); 
 
     return std::exp(e1_trunc) * (std::exp(e21_trunc) - std::exp(e22_trunc)) / Hprime[i];
-    */
+    
   };
 
   // Qtot and Q are area under s_k(x) partitioned by Zs
@@ -245,16 +247,20 @@ arma::vec ars_internal(
       q_partial += Q[i++];
     
       // xstar is the x ordinate corresponding to w
-    double xstar = std::log((wq - q_partial) * Hprime[i] * std::exp(T[i]*Hprime[i] - H[i]) + std::exp(Z[i] * Hprime[i])) / Hprime[i];
-    /*
+    //double xstar = std::log((wq - q_partial) * Hprime[i] * std::exp(T[i]*Hprime[i] - H[i]) + std::exp(Z[i] * Hprime[i])) / Hprime[i];
+    
       double e1 = T[i] * Hprime[i] - H[i];
       double e2 = Z[i] * Hprime[i];
-      double e1_trunc = e1 < 700. ? e1 : 700.; // truncation by considering e1 > e2 or vice versa
-      double e2_trunc = e2 < 700. ? e2 : 700.; 
+      double e1_trunc = e1 < upperbound1 ? e1 : upperbound1; // truncation by considering e1 > e2 or vice versa
+      double e2_trunc = e2 < upperbound1 ? e2 : upperbound1; 
   
-    double xstar = std::log((wq - q_partial) * Hprime[i] * std::exp(e1_trunc) 
-    + std::exp(e2_trunc)) / Hprime[i];
-    */
+      //double tmp = std::log((wq - q_partial) * Hprime[i] * std::exp(e1_trunc) + std::exp(e2_trunc)) / Hprime[i];
+      // the following condition is needed due to the numerical truncation sometimes
+      //double xstar = (tmp > minD && tmp < maxD) ? tmp : ( (tmp > maxD) ? maxD : minD );
+      //double xstar = tmp > maxD ? maxD : ( tmp < minD ? minD : tmp );
+    double xstar = std::log((wq - q_partial) * Hprime[i] * std::exp(e1_trunc) + std::exp(e2_trunc)) / Hprime[i];
+
+    
 /*
     std::cout << "...debug  xstar=" << xstar << 
     "; wq=" << wq << 
@@ -544,6 +550,8 @@ arma::mat arsGibbs(
   {
     for (unsigned int j = 0; j < p; ++j)
     {
+      // # here 'initialPoints' can be a vector/matrix for initializing meshgrid values
+      //double minD = minRange[0]; double maxD = maxRange[0];
       arma::vec tmp = ars(1, initialPoints, minRange[0], maxRange[0],
         j,
         xis, 
