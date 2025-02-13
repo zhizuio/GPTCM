@@ -1,4 +1,4 @@
-// Gibbs sampling for mulivariate ARMS
+// Gibbs sampling for multivariate ARMS
 
 #include <cmath>
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{ars}
 \alias{ars}
-\title{Rcpp wrapper for adsamp algorithm}
+\title{Rcpp wrapper for ARS algorithm}
 \usage{
 ars(
   n,
@@ -31,5 +31,5 @@ ars(
 \item{log_dens}{log density function, a function with a single parameter}
 }
 \description{
-Rcpp wrapper for adsamp algorithm
+Rcpp wrapper for ARS algorithm
 }

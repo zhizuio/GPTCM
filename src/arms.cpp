@@ -4,14 +4,11 @@
 
 /* *********************************************************************** */
 
-#include <R.h>
-#include <Rinternals.h>
-#include           <stdio.h>
-#include           <math.h>
-#include           <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+#include <stdlib.h>
+#include <time.h>
 
-
-/* ********************************************************************************* */
 #include "arms.h"
 
 #ifdef __cplusplus
@@ -912,7 +909,9 @@ double u_random()
 
 /* to return a standard uniform random number */
 {
-  return (unif_rand());//((double)rand() + 0.5)/((double)RAND_MAX + 1.0);
+  //return (unif_rand());//((double)rand() + 0.5)/((double)RAND_MAX + 1.0);
+  srand(time(NULL)); // randomize seed from library '#include <time.h>'
+  return (double)rand() / (double)RAND_MAX; 
 }
 
 /* *********************************************************************** */
@@ -924,34 +923,3 @@ double u_random()
 #ifdef __cplusplus
 	}
 #endif
-
-/*
-//' Multivariate ARS via Gibbs sampler
-//'
-//' @param n number of variates to draw
-//' @param initialPoints this can be a matrix in multivariate case
-//'
-// [[Rcpp::export]]
-arma::mat armsGibbs(
-  int n,
-  arma::vec initialPoints,
-  arma::vec minRange,
-  arma::vec maxRange,
-  bool metropolis, 
-  
-  arma::vec& betasl, 
-  double vA, 
-  double vB, 
-  const arma::mat datX0, 
-  const arma::mat datProportion, 
-  const arma::uvec datEvent, 
-  arma::mat& weibullS) 
-{
-
-  unsigned int p = betas.n_elem;
-
-  arma::mat samp = arma::zeros<arma::mat>(n, p);
-
-  return samp;
-}
-  */

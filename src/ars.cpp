@@ -3,42 +3,14 @@
 //
 // Adapted from https://github.com/kuperov/adsample/blob/master/src/adsample.cpp (Alex Cooper, 2017)
 
-#include <cmath>
-#include <cstdlib>  // for abs()
-#include <vector>
-#include <utility>
+#include "ars.h"
 
-using namespace std;
-
-#include <RcppArmadillo.h>
 // [[Rcpp::depends(RcppArmadillo)]]
 
 inline double upperbound1 = 70.;
 inline double upperbound2 = 69.;
 
-// (point value, gradient value)
-//typedef pair<double, double> pointgrad;
-
-// callback to evaluate the (possibly expensive) log density function,
-// which returns the ordinate and the gradient evaluated at the abscissa x.
-// Note that while the gradient need not be normalized (it can differ from
-// the true gradient up to a constant multiple), the gradient and ordinate
-// must share the *same* constant.
-//typedef std::function<pointgrad(double x)> log_dens_callback;
-
-// container for the state of the algorithm, for returning state back to
-// R for debugging
-typedef struct {
-  int k;
-  vector<double> T;
-  vector<double> H;
-  vector<double> Hprime;
-  vector<double> Z;
-  vector<double> Q;
-} algo_state;
-
-typedef std::vector<double> stdvec;
-
+// Evaluation function
 arma::vec log_dens_xi0(double par, 
   unsigned int jj,
   arma::vec& xis, 
@@ -261,7 +233,7 @@ arma::vec ars_internal(
     double xstar = std::log((wq - q_partial) * Hprime[i] * std::exp(e1_trunc) + std::exp(e2_trunc)) / Hprime[i];
 
     
-/*
+    /*
     std::cout << "...debug  xstar=" << xstar << 
     "; wq=" << wq << 
     "; q_partial=" << q_partial << 
@@ -373,7 +345,7 @@ arma::vec ars_internal(
   return variates;
 }
 
-//' Rcpp wrapper for adsamp algorithm
+//' Rcpp wrapper for ARS algorithm
 //'
 //' @param n number of variates to draw
 //' @param log_dens log density function, a function with a single parameter
@@ -427,7 +399,7 @@ arma::vec ars(
   return Rcpp::NumericVector(samp.begin(), samp.end());
 }
 
-//' Duplicate wrapper for adsamp algorithm for debugging. This version
+//' Duplicate wrapper for ARS algorithm for debugging. This version
 //' returns the algorithm state as well as the variates.
 //'
 //' @param n number of variates to draw
@@ -492,89 +464,4 @@ Rcpp::List ars_debug(
   results["Hprime"] = state.Hprime;
   results["Q"] = state.Q;
   return results;
-}
-
-//' Multivariate ARS via Gibbs sampler
-//'
-//' @param n number of variates to draw
-//' @param initialPoints this can be a matrix in multivariate case
-//'
-// [[Rcpp::export]]
-arma::mat ars_gibbs(
-  int n,
-  arma::vec initialPoints,
-  arma::vec minRange,
-  arma::vec maxRange,
-  
-  arma::vec& xis, 
-  double vA, 
-  double vB, 
-  const arma::mat datX0, 
-  const arma::mat datProportion, 
-  const arma::uvec datEvent, 
-  arma::mat& weibullS) 
-{
-
-  unsigned int p = xis.n_elem;
-
-  // initial abscissae
-  /*arma::vec initT = initialPoints;
-
-  if (initialPoints.n_elem == 1) 
-  {
-    initT.insert_rows(1, initialPoints[0]*arma::ones<arma::vec>(p-1));
-  }*/
-  
-  // boundaries of the support of h
-  /*
-  arma::vec minD = minRange;
-  arma::vec maxD = maxRange;
-  
-  if (minRange.n_elem == 1)
-  {
-    //arma::vec minD(p, arma::fill::value(minRange));
-    minD.insert_rows(1, minRange[0]*arma::ones<arma::vec>(p-1));
-  }
-  if (maxRange.n_elem == 1)
-  {
-    //arma::vec maxD(p, arma::fill::value(maxRange));
-    maxD.insert_rows(1, maxRange[0]*arma::ones<arma::vec>(p-1));
-  } 
-  
-  std::cout << "...Debug minD=" << minD.t() << "\n" <<
-  "...maxD=" << maxD.t() << "\n";
-  */
-
-  arma::mat samp = arma::zeros<arma::mat>(n, p);
-  for (unsigned int i = 0; i < n; ++i)
-  {
-    for (unsigned int j = 0; j < p; ++j)
-    {
-      // # here 'initialPoints' can be a vector/matrix for initializing meshgrid values
-      double minD = minRange[0]; double maxD = maxRange[0];
-      arma::vec tmp = ars(1, initialPoints, minD, maxD,
-        j,
-        xis, 
-        vA, 
-        vB, 
-        datX0, 
-        datProportion, 
-        datEvent, 
-        weibullS);
-        /*arma::vec tmp = ars(1, initialPoints, maxD[j], maxD[j],
-          j,
-          xis, 
-          vA, 
-          vB, 
-          datX0, 
-          datProportion, 
-          datEvent, 
-          weibullS);*/
-
-          samp(i, j) = tmp[0];
-          xis[j] = tmp[0];
-    }
-  }
-
-  return samp;
 }

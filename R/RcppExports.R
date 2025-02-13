@@ -10,7 +10,7 @@ arms_gibbs <- function(n, initialPoints, minRange, maxRange, metropolis, betaJ, 
     .Call('_GPTCM_arms_gibbs', PACKAGE = 'GPTCM', n, initialPoints, minRange, maxRange, metropolis, betaJ, vA, vB, datX0, datProportion, datEvent, weibullS)
 }
 
-#' Rcpp wrapper for adsamp algorithm
+#' Rcpp wrapper for ARS algorithm
 #'
 #' @param n number of variates to draw
 #' @param log_dens log density function, a function with a single parameter
@@ -22,7 +22,7 @@ ars <- function(n, initialPoints, minRange, maxRange, jj, xis, vA, vB, datX0, da
     .Call('_GPTCM_ars', PACKAGE = 'GPTCM', n, initialPoints, minRange, maxRange, jj, xis, vA, vB, datX0, datProportion, datEvent, weibullS)
 }
 
-#' Duplicate wrapper for adsamp algorithm for debugging. This version
+#' Duplicate wrapper for ARS algorithm for debugging. This version
 #' returns the algorithm state as well as the variates.
 #'
 #' @param n number of variates to draw
@@ -36,7 +36,7 @@ ars_debug <- function(n, initialPoints, minRange, maxRange, maxiter, jj, xis, vA
     .Call('_GPTCM_ars_debug', PACKAGE = 'GPTCM', n, initialPoints, minRange, maxRange, maxiter, jj, xis, vA, vB, datX0, datProportion, datEvent, weibullS)
 }
 
-#' Multivariate ARS via Gibbs sampler
+#' Gibbs sampling for multivariate ARS
 #'
 #' @param n number of variates to draw
 #' @param initialPoints this can be a matrix in multivariate case

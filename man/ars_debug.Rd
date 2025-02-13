@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{ars_debug}
 \alias{ars_debug}
-\title{Duplicate wrapper for adsamp algorithm for debugging. This version
+\title{Duplicate wrapper for ARS algorithm for debugging. This version
 returns the algorithm state as well as the variates.}
 \usage{
 ars_debug(
@@ -35,6 +35,6 @@ ars_debug(
 \item{log_dens}{log density function, a function with a single parameter}
 }
 \description{
-Duplicate wrapper for adsamp algorithm for debugging. This version
+Duplicate wrapper for ARS algorithm for debugging. This version
 returns the algorithm state as well as the variates.
 }

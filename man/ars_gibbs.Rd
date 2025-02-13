@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{ars_gibbs}
 \alias{ars_gibbs}
-\title{Multivariate ARS via Gibbs sampler}
+\title{Gibbs sampling for multivariate ARS}
 \usage{
 ars_gibbs(
   n,
@@ -24,5 +24,5 @@ ars_gibbs(
 \item{initialPoints}{this can be a matrix in multivariate case}
 }
 \description{
-Multivariate ARS via Gibbs sampler
+Gibbs sampling for multivariate ARS
 }
