@@ -10,7 +10,7 @@ arms_gibbs(
   minRange,
   maxRange,
   metropolis,
-  betaJ,
+  currentPars,
   vA,
   vB,
   datX0,

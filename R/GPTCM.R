@@ -314,7 +314,19 @@ GPTCM <- function(dat,
           n.sample = 5
         )
       } else {
-        #browser()
+        browser()
+        xi.mcmc.internal <- arms_gibbs(
+          1,
+          c(0.1, 1, 2, 3), # initializing meshgrid values for envelop search
+          0.01, 3, 
+          0,
+          xi,
+          hyperpar$vA, hyperpar$vB,
+          datX0,
+          dat$proportion,
+          datEvent,
+          weibull.S
+        )
         xi.mcmc.internal <- ars_gibbs(
           4,
           c(0.1, 1, 2), # initializing meshgrid values for envelop search

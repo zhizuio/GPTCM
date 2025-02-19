@@ -9,7 +9,7 @@ ars_gibbs(
   initialPoints,
   minRange,
   maxRange,
-  xis,
+  par,
   vA,
   vB,
   datX0,

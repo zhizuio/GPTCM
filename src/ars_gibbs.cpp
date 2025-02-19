@@ -17,7 +17,7 @@ arma::mat ars_gibbs(
   arma::vec minRange,
   arma::vec maxRange,
   
-  arma::vec& xis, 
+  arma::vec& par, 
   double vA, 
   double vB, 
   const arma::mat datX0, 
@@ -26,7 +26,7 @@ arma::mat ars_gibbs(
   arma::mat& weibullS) 
 {
 
-  unsigned int p = xis.n_elem;
+  unsigned int p = par.n_elem;
 
   // initial abscissae
   /*arma::vec initT = initialPoints;
@@ -65,7 +65,7 @@ arma::mat ars_gibbs(
       double minD = minRange[0]; double maxD = maxRange[0];
       arma::vec tmp = ars(1, initialPoints, minD, maxD,
         j,
-        xis, 
+        par, 
         vA, 
         vB, 
         datX0, 
@@ -74,7 +74,7 @@ arma::mat ars_gibbs(
         weibullS);
         /*arma::vec tmp = ars(1, initialPoints, maxD[j], maxD[j],
           j,
-          xis, 
+          par, 
           vA, 
           vB, 
           datX0, 
@@ -83,7 +83,7 @@ arma::mat ars_gibbs(
           weibullS);*/
 
           samp(i, j) = tmp[0];
-          xis[j] = tmp[0];
+          par[j] = tmp[0];
     }
   }
 

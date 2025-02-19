@@ -6,8 +6,8 @@
 #' @param n number of variates to draw
 #' @param initialPoints this can be a matrix in multivariate case
 #'
-arms_gibbs <- function(n, initialPoints, minRange, maxRange, metropolis, betaJ, vA, vB, datX0, datProportion, datEvent, weibullS) {
-    .Call('_GPTCM_arms_gibbs', PACKAGE = 'GPTCM', n, initialPoints, minRange, maxRange, metropolis, betaJ, vA, vB, datX0, datProportion, datEvent, weibullS)
+arms_gibbs <- function(n, initialPoints, minRange, maxRange, metropolis, currentPars, vA, vB, datX0, datProportion, datEvent, weibullS) {
+    .Call('_GPTCM_arms_gibbs', PACKAGE = 'GPTCM', n, initialPoints, minRange, maxRange, metropolis, currentPars, vA, vB, datX0, datProportion, datEvent, weibullS)
 }
 
 #' Rcpp wrapper for ARS algorithm
@@ -41,8 +41,8 @@ ars_debug <- function(n, initialPoints, minRange, maxRange, maxiter, jj, xis, vA
 #' @param n number of variates to draw
 #' @param initialPoints this can be a matrix in multivariate case
 #'
-ars_gibbs <- function(n, initialPoints, minRange, maxRange, xis, vA, vB, datX0, datProportion, datEvent, weibullS) {
-    .Call('_GPTCM_ars_gibbs', PACKAGE = 'GPTCM', n, initialPoints, minRange, maxRange, xis, vA, vB, datX0, datProportion, datEvent, weibullS)
+ars_gibbs <- function(n, initialPoints, minRange, maxRange, par, vA, vB, datX0, datProportion, datEvent, weibullS) {
+    .Call('_GPTCM_ars_gibbs', PACKAGE = 'GPTCM', n, initialPoints, minRange, maxRange, par, vA, vB, datX0, datProportion, datEvent, weibullS)
 }
 
 sampleGamma <- function(Gammas, gamma_sampler_bandit, a_pi, b_pi) {
