@@ -13,9 +13,25 @@ inline double upperbound2 = 69.;
 
 typedef std::vector<double> stdvec;
 
+/*
+// redefine the struct dataS, since it cannot be imported from extern "C"{} in 'arms.cpp'
 typedef struct common_data
 {
-   /* members */
+   //
+   double *currentPars;
+   unsigned int jj;
+   double vA;
+   double vB;
+   double *datX0;
+   double *datProportion;
+   double *datEvent;
+   double *weibullS;
+}dataS;
+*/
+
+typedef struct common_data
+{
+   // members
    arma::vec currentPars;
    unsigned int jj;
    double vA;
@@ -25,30 +41,7 @@ typedef struct common_data
    arma::uvec datEvent;
    arma::mat weibullS;
 }dataS;
-/*
-dataS * create_mydata (
-  arma::vec currentPars,
-  unsigned int jj,
-  double vA, 
-  double vB,
-  arma::mat datX0,
-  arma::mat datProportion,
-  arma::uvec datEvent,
-  arma::mat weibullS)
-{
-  dataS *tmp = (dataS *)malloc(sizeof (dataS));
-  tmp->currentPars = currentPars;
-  tmp->jj = jj;
-  tmp->vA = vA;
-  tmp->vB = vB;
-  tmp->datX0 = datX0;
-  tmp->datProportion = datProportion;
-  tmp->datEvent = datEvent;
-  tmp->weibullS = weibullS;
 
-  return tmp;
-}
-*/
 void create_mydata(
   arma::vec currentPars,
   unsigned int jj,
@@ -78,9 +71,9 @@ double log_dens_xis(double par,
   arma::vec& xis, 
   double vA, 
   double vB, 
-  const arma::mat datX0, 
-  const arma::mat datProportion, 
-  const arma::uvec datEvent, 
+  arma::mat datX0, 
+  arma::mat datProportion, 
+  arma::uvec datEvent, 
   arma::mat& weibullS) {
 
     double logpost = 0.;
@@ -104,16 +97,26 @@ double myfunc(double par,
 }
 */
 
+// If 'myfunc()' has to be defined in C code, all vec/mat elements in 'struct common_data{}' and 'void create_mydata()' 
+//   need to be defined as 'double *', since array in C will copy big data and occupy too much memory
 double myfunc(
   double par, 
   void *abc_data) 
 {
   double h = 0.1; 
 
-  //dataS * mydata_parm = *(dataS *)mydata;
-  //dataS *mydata_parm = (dataS *)malloc( sizeof(dataS));
+  // dataS * mydata_parm = *(dataS *)mydata; // error: cannot initialize a variable of type 'dataS *' with an rvalue of type 'void *'
+  // *mydata_parm = &abc_data; // error: no viable overloaded '='
+
+  // Allocation of a zero-initialized memory block of (num*size) bytes
+  // 'calloc' returns a void* (generic pointer) on success of memory allocation; type-cast it due to illegal in C++ but illegal in C
   dataS *mydata_parm = (dataS *)calloc(sizeof(dataS), sizeof(dataS));
-  //*mydata_parm = &abc_data;
+  *mydata_parm = *(dataS *)abc_data;
+
+  std::cout << "...debug: myfunc start with h = " << h << 
+  ";  jj = " << mydata_parm->jj << 
+  //";  mydata_parm->weibullS.submat(0,0, 2, 2) = " << mydata_parm->weibullS.submat(0,0, 2, 2) << 
+  "\n";
 
   stdvec xis0 = arma::conv_to<stdvec>::from(mydata_parm->currentPars);
   xis0.erase(xis0.begin());
@@ -162,7 +165,7 @@ double myfunc(
 
   h = logpost_first + logpost_second_sum + logprior;
 
-  std::cout << "...debug: myfunc_h = " << h << "\n";
+  std::cout << "...debug: myfunc end with h = " << h << "\n";
   
   return h;
 }
@@ -185,29 +188,27 @@ arma::mat arms_gibbs(
   arma::vec currentPars, 
   double vA, 
   double vB, 
-  const arma::mat datX0, 
-  const arma::mat datProportion, 
-  const arma::uvec datEvent, 
+  arma::mat datX0, 
+  arma::mat datProportion, 
+  arma::uvec datEvent, 
   arma::mat weibullS) 
 {
 
-  unsigned int p = 1;//currentPars.n_elem;
+  unsigned int p = currentPars.n_elem; // = 1;
 
   int ninit = initialPoints.n_elem; // # here 'initialPoints' can be a vector/matrix (in univariate/multivariate cases) for initializing meshgrid values
   int dometrop = metropolis;
-  // double *xl; 
-  // double *xr; 
-  // double *xprev; 
-
-  //double myfunc = .1;
-
-  // structure holding data for (log-)density
-  //void *mydata = nullptr;
-  //dataS *mydata0;
-  //dataS *mydata0 = (dataS *)malloc(sizeof (dataS));
-  //void *mydata = &mydata0;
-
-//std::cout << "*mydata0.vA=" << mydata0->vA << "; *mydata0.datEvent" << mydata0->datEvent.t() << "\n"; 
+  
+  // convert arma::mat to C array
+  // TBA...
+  /*
+  double *datX0_c = NULL;
+  double *datProportion_c = NULL;
+  double *weibullS_c = NULL;
+  
+  double *currentPars_c = NULL;
+  double *datEvent_c = NULL;
+  */
 
   arma::mat samp = arma::zeros<arma::mat>(p, n);
   double minD;
@@ -226,6 +227,7 @@ arma::mat arms_gibbs(
 
       //dataS *mydata = create_mydata(currentPars, j, vA, vB, datX0, datProportion, datEvent, weibullS);
       dataS *mydata = (dataS *)malloc(sizeof (dataS));
+      //create_mydata(currentPars_c, j, vA, vB, datX0_c, datProportion_c, datEvent_c, weibullS_c, mydata);
       create_mydata(currentPars, j, vA, vB, datX0, datProportion, datEvent, weibullS, mydata);
 
       double tmp = 0.0;
@@ -234,8 +236,8 @@ arma::mat arms_gibbs(
         myfunc, mydata,
         dometrop, xprev, xsamp);
 
-      samp(j, i) = tmp;
-      currentPars[j] = tmp;
+      samp(j, i) = (double)err;
+      currentPars[j] = (double)err;
 
       free(mydata);
     }

@@ -316,10 +316,10 @@ GPTCM <- function(dat,
       } else {
         browser()
         xi.mcmc.internal <- arms_gibbs(
-          1,
-          c(0.1, 1, 2, 3), # initializing meshgrid values for envelop search
-          0.01, 3, 
-          0,
+          1, # number of MCMC samples
+          seq(-1, 1, length=10), # initializing meshgrid values for envelop search
+          0.01, 3, # lower and upper bounds
+          0, # metropolis step or not
           xi,
           hyperpar$vA, hyperpar$vB,
           datX0,
