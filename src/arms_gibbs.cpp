@@ -25,7 +25,7 @@ typedef struct common_data
    arma::uvec datEvent;
    arma::mat weibullS;
 }dataS;
-
+/*
 dataS * create_mydata (
   arma::vec currentPars,
   unsigned int jj,
@@ -48,7 +48,29 @@ dataS * create_mydata (
 
   return tmp;
 }
+*/
+void create_mydata(
+  arma::vec currentPars,
+  unsigned int jj,
+  double vA, 
+  double vB,
+  arma::mat datX0,
+  arma::mat datProportion,
+  arma::uvec datEvent,
+  arma::mat weibullS,
+  dataS *abc_data) 
+{
+  // create objects for conditional (log-)density
+  abc_data->currentPars = currentPars;
+  abc_data->jj = jj;
+  abc_data->vA = vA;
+  abc_data->vB = vB;
+  abc_data->datX0 = datX0;
+  abc_data->datProportion = datProportion;
+  abc_data->datEvent = datEvent;
+  abc_data->weibullS = weibullS;
 
+}
 
 // The following evaluation functions might have to be in C not C++ and be put into the extern arms C code
 double log_dens_xis(double par, 
@@ -84,19 +106,20 @@ double myfunc(double par,
 
 double myfunc(
   double par, 
-  void *mydata) 
+  void *abc_data) 
 {
-  double h; 
+  double h = 0.1; 
 
-  //struct dataS * mydata00 = *(struct dataS *)mydata;
-  //dataS * mydata00 = *(dataS *)mydata;
-  dataS * mydata00 = (dataS *)mydata;
+  //dataS * mydata_parm = *(dataS *)mydata;
+  //dataS *mydata_parm = (dataS *)malloc( sizeof(dataS));
+  dataS *mydata_parm = (dataS *)calloc(sizeof(dataS), sizeof(dataS));
+  //*mydata_parm = &abc_data;
 
-  stdvec xis0 = arma::conv_to<stdvec>::from(mydata00->currentPars);
+  stdvec xis0 = arma::conv_to<stdvec>::from(mydata_parm->currentPars);
   xis0.erase(xis0.begin());
 
-  arma::vec& xis = mydata00->currentPars;
-  unsigned int jj = mydata00->jj;
+  arma::vec& xis = mydata_parm->currentPars;
+  unsigned int jj = mydata_parm->jj;
 
   xis[jj] = par;
   double vSq;
@@ -105,8 +128,8 @@ double myfunc(
     vSq = 10.;
   } else {
     int ans = std::count(xis0.begin(), xis0.end(), 0.);
-    double vA_tmp = mydata00->vA + 0.5 * (double)ans;
-    double vB_tmp = mydata00->vB + 0.5 * 
+    double vA_tmp = mydata_parm->vA + 0.5 * (double)ans;
+    double vB_tmp = mydata_parm->vB + 0.5 * 
       std::inner_product( xis0.begin(), xis0.end(), xis0.begin(), 0. );
     vSq = 1. / R::rgamma(vA_tmp, 1. / vB_tmp);
   }
@@ -115,32 +138,32 @@ double myfunc(
   double logprior = - par * par / vSq / 2.;
   double logprior2 = - par / vSq;
 
-  arma::vec eta = mydata00->datX0 * xis;
+  arma::vec eta = mydata_parm->datX0 * xis;
   eta.elem(arma::find(eta > upperbound1)).fill(upperbound1);
   arma::vec thetas = arma::exp( eta );
 
-  double logpost_first = arma::accu( eta.elem(arma::find(mydata00->datEvent)) );
+  double logpost_first = arma::accu( eta.elem(arma::find(mydata_parm->datEvent)) );
   double logpost_first2;
   if(jj != 0)
   {
     arma::uvec singleIdx_jj = { jj };
-    logpost_first2 = arma::accu( mydata00->datX0.submat(arma::find(mydata00->datEvent), singleIdx_jj) );
+    logpost_first2 = arma::accu( mydata_parm->datX0.submat(arma::find(mydata_parm->datEvent), singleIdx_jj) );
   } else {
-    logpost_first2 = std::count(mydata00->datEvent.begin(), mydata00->datEvent.end(), 1) + 0.;
+    logpost_first2 = std::count(mydata_parm->datEvent.begin(), mydata_parm->datEvent.end(), 1) + 0.;
   }
 
-  arma::vec logpost_second = arma::zeros<arma::vec>(mydata00->datProportion.n_rows);
-  for(unsigned int ll=0; ll<mydata00->datProportion.n_cols; ++ll) 
+  arma::vec logpost_second = arma::zeros<arma::vec>(mydata_parm->datProportion.n_rows);
+  for(unsigned int ll=0; ll<mydata_parm->datProportion.n_cols; ++ll) 
   {
-    logpost_second += mydata00->datProportion.col(ll) % mydata00->weibullS.col(ll);
+    logpost_second += mydata_parm->datProportion.col(ll) % mydata_parm->weibullS.col(ll);
   }
 
   double logpost_second_sum = - arma::accu(thetas % (1. - logpost_second));
 
   h = logpost_first + logpost_second_sum + logprior;
 
-  free(mydata);
-
+  std::cout << "...debug: myfunc_h = " << h << "\n";
+  
   return h;
 }
 
@@ -159,13 +182,13 @@ arma::mat arms_gibbs(
 
   int metropolis, 
   
-  arma::vec& currentPars, 
+  arma::vec currentPars, 
   double vA, 
   double vB, 
   const arma::mat datX0, 
   const arma::mat datProportion, 
   const arma::uvec datEvent, 
-  arma::mat& weibullS) 
+  arma::mat weibullS) 
 {
 
   unsigned int p = 1;//currentPars.n_elem;
@@ -201,8 +224,12 @@ arma::mat arms_gibbs(
       double *xprev; xprev = &initi;
       double *xsamp = (double*)malloc(n * sizeof(double));
 
-      dataS *mydata = create_mydata(currentPars, j, vA, vB, datX0, datProportion, datEvent, weibullS);
-      double tmp = ARMS::arms_simple (
+      //dataS *mydata = create_mydata(currentPars, j, vA, vB, datX0, datProportion, datEvent, weibullS);
+      dataS *mydata = (dataS *)malloc(sizeof (dataS));
+      create_mydata(currentPars, j, vA, vB, datX0, datProportion, datEvent, weibullS, mydata);
+
+      double tmp = 0.0;
+      int err = ARMS::arms_simple (
         ninit, xl,  xr,
         myfunc, mydata,
         dometrop, xprev, xsamp);
