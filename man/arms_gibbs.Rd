@@ -6,10 +6,14 @@
 \usage{
 arms_gibbs(
   n,
-  initialPoints,
+  every,
+  ninit,
   minRange,
   maxRange,
   metropolis,
+  simple,
+  convex,
+  npoint,
   currentPars,
   vA,
   vB,
@@ -20,9 +24,15 @@ arms_gibbs(
 )
 }
 \arguments{
-\item{n}{number of variates to draw}
+\item{n}{Number of samples to draw}
 
-\item{initialPoints}{this can be a matrix in multivariate case}
+\item{every}{How many samples to draw for generating each sample; only the last 'n' draws will be kept; but it seems not work for every>1, not know why}
+
+\item{ninit}{Number of initials as meshgrid values for envelop search}
+
+\item{convex}{Adjustment for convexity (non-negative value, default 1.0)}
+
+\item{npoint}{Maximum number of envelope points}
 }
 \description{
 Multivariate ARMS via Gibbs sampler

@@ -10,6 +10,7 @@ GPTCM(
   proportion.model = TRUE,
   dirichlet = TRUE,
   method = "Bayes",
+  arms.simple = c(FALSE),
   hyperpar = NULL,
   kappaPrior = "IGamma",
   kappaSampler = "arms",
@@ -39,6 +40,10 @@ common (\code{dirichlet = TRUE}) or alternative (\code{dirichlet = FALSE})
 parametrization of the Dirichlet regression model}
 
 \item{method}{either `MLE` or `Bayes`}
+
+\item{arms.simple}{logical value; should the "adaptive rejection metropolis 
+sampling" or the "derivative-free adaptive rejection sampling with metropolis 
+step" (default) is used}
 
 \item{hyperpar}{TBA}
 

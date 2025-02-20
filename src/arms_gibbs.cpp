@@ -34,6 +34,8 @@ typedef struct common_data
    // members
    arma::vec currentPars;
    unsigned int jj;
+   double *xl;
+   double *xr;
    double vA;
    double vB;
    arma::mat datX0;
@@ -45,6 +47,8 @@ typedef struct common_data
 void create_mydata(
   arma::vec currentPars,
   unsigned int jj,
+  double *xl,
+  double *xr,
   double vA, 
   double vB,
   arma::mat datX0,
@@ -56,6 +60,8 @@ void create_mydata(
   // create objects for conditional (log-)density
   abc_data->currentPars = currentPars;
   abc_data->jj = jj;
+  abc_data->xl = xl;
+  abc_data->xr = xr;
   abc_data->vA = vA;
   abc_data->vB = vB;
   abc_data->datX0 = datX0;
@@ -103,7 +109,7 @@ double myfunc(
   double par, 
   void *abc_data) 
 {
-  double h = 0.1; 
+  double h = 0.0; 
 
   // dataS * mydata_parm = *(dataS *)mydata; // error: cannot initialize a variable of type 'dataS *' with an rvalue of type 'void *'
   // *mydata_parm = &abc_data; // error: no viable overloaded '='
@@ -113,59 +119,45 @@ double myfunc(
   dataS *mydata_parm = (dataS *)calloc(sizeof(dataS), sizeof(dataS));
   *mydata_parm = *(dataS *)abc_data;
 
-  std::cout << "...debug: myfunc start with h = " << h << 
-  ";  jj = " << mydata_parm->jj << 
-  //";  mydata_parm->weibullS.submat(0,0, 2, 2) = " << mydata_parm->weibullS.submat(0,0, 2, 2) << 
-  "\n";
-
-  stdvec xis0 = arma::conv_to<stdvec>::from(mydata_parm->currentPars);
-  xis0.erase(xis0.begin());
-
-  arma::vec& xis = mydata_parm->currentPars;
-  unsigned int jj = mydata_parm->jj;
-
-  xis[jj] = par;
-  double vSq;
-  if (jj == 0) 
-  {
-    vSq = 10.;
-  } else {
-    int ans = std::count(xis0.begin(), xis0.end(), 0.);
-    double vA_tmp = mydata_parm->vA + 0.5 * (double)ans;
-    double vB_tmp = mydata_parm->vB + 0.5 * 
-      std::inner_product( xis0.begin(), xis0.end(), xis0.begin(), 0. );
-    vSq = 1. / R::rgamma(vA_tmp, 1. / vB_tmp);
-  }
-
-  // compute the log density
-  double logprior = - par * par / vSq / 2.;
-  double logprior2 = - par / vSq;
-
-  arma::vec eta = mydata_parm->datX0 * xis;
-  eta.elem(arma::find(eta > upperbound1)).fill(upperbound1);
-  arma::vec thetas = arma::exp( eta );
-
-  double logpost_first = arma::accu( eta.elem(arma::find(mydata_parm->datEvent)) );
-  double logpost_first2;
-  if(jj != 0)
-  {
-    arma::uvec singleIdx_jj = { jj };
-    logpost_first2 = arma::accu( mydata_parm->datX0.submat(arma::find(mydata_parm->datEvent), singleIdx_jj) );
-  } else {
-    logpost_first2 = std::count(mydata_parm->datEvent.begin(), mydata_parm->datEvent.end(), 1) + 0.;
-  }
-
-  arma::vec logpost_second = arma::zeros<arma::vec>(mydata_parm->datProportion.n_rows);
-  for(unsigned int ll=0; ll<mydata_parm->datProportion.n_cols; ++ll) 
-  {
-    logpost_second += mydata_parm->datProportion.col(ll) % mydata_parm->weibullS.col(ll);
-  }
-
-  double logpost_second_sum = - arma::accu(thetas % (1. - logpost_second));
-
-  h = logpost_first + logpost_second_sum + logprior;
-
-  std::cout << "...debug: myfunc end with h = " << h << "\n";
+  //if (par >= *(mydata_parm->xl) && par <= *(mydata_parm->xr)) // this is judged in ARMS::initial()
+  //{
+    stdvec xis0 = arma::conv_to<stdvec>::from(mydata_parm->currentPars);
+    xis0.erase(xis0.begin());
+  
+    arma::vec& xis = mydata_parm->currentPars;
+    unsigned int jj = mydata_parm->jj;
+  
+    xis[jj] = par;
+    double vSq = 10.;
+    if (jj > 0) 
+    {
+      int ans = std::count(xis0.begin(), xis0.end(), 0.);
+      double vA_tmp = mydata_parm->vA + 0.5 * (double)ans;
+      double vB_tmp = mydata_parm->vB + 0.5 * 
+        std::inner_product( xis0.begin(), xis0.end(), xis0.begin(), 0. );
+      vSq = 1. / R::rgamma(vA_tmp, 1. / vB_tmp);
+    }
+  
+    // compute the log density
+    double logprior = - par * par / vSq / 2.;
+  
+    arma::vec eta = mydata_parm->datX0 * xis;
+    eta.elem(arma::find(eta > upperbound1)).fill(upperbound1);
+    arma::vec thetas = arma::exp( eta );
+  
+    double logpost_first = arma::accu( eta.elem(arma::find(mydata_parm->datEvent)) );
+    arma::vec logpost_second = arma::zeros<arma::vec>(mydata_parm->datProportion.n_rows);
+    for(unsigned int ll=0; ll<mydata_parm->datProportion.n_cols; ++ll) 
+    {
+      logpost_second += mydata_parm->datProportion.col(ll) % mydata_parm->weibullS.col(ll);
+    }
+  
+    double logpost_second_sum = - arma::accu(thetas % (1. - logpost_second));
+  
+    h = logpost_first + logpost_second_sum + logprior;
+  //} else {
+  //  h = -1.0e100;
+  //}
   
   return h;
 }
@@ -173,17 +165,24 @@ double myfunc(
 
 //' Multivariate ARMS via Gibbs sampler
 //'
-//' @param n number of variates to draw
-//' @param initialPoints this can be a matrix in multivariate case
+//' @param n Number of samples to draw
+//' @param every How many samples to draw for generating each sample; only the last 'n' draws will be kept; but it seems not work for every>1, not know why
+//' @param ninit Number of initials as meshgrid values for envelop search
+//' @param convex Adjustment for convexity (non-negative value, default 1.0)
+//' @param npoint Maximum number of envelope points
 //'
 // [[Rcpp::export]]
 arma::mat arms_gibbs(
   int n,
-  arma::vec initialPoints,
+  int every, 
+  int ninit,
   arma::vec minRange,
   arma::vec maxRange,
 
   int metropolis, 
+  bool simple,
+  double convex,
+  int npoint,
   
   arma::vec currentPars, 
   double vA, 
@@ -193,24 +192,27 @@ arma::mat arms_gibbs(
   arma::uvec datEvent, 
   arma::mat weibullS) 
 {
-
-  unsigned int p = currentPars.n_elem; // = 1;
-
-  int ninit = initialPoints.n_elem; // # here 'initialPoints' can be a vector/matrix (in univariate/multivariate cases) for initializing meshgrid values
-  int dometrop = metropolis;
-  
-  // convert arma::mat to C array
-  // TBA...
-  /*
-  double *datX0_c = NULL;
-  double *datProportion_c = NULL;
-  double *weibullS_c = NULL;
-  
-  double *currentPars_c = NULL;
-  double *datEvent_c = NULL;
+  /* IF every>1, all samples are the same; not know why
+  if (n > every)
+  {
+    std::printf("Arguments 'n' should not be larger than argument 'every'.\n");
+    exit (0);
+  }
   */
 
-  arma::mat samp = arma::zeros<arma::mat>(p, n);
+  //int ninit = initialPoints.n_elem; // # here 'initialPoints' can be a vector/matrix (in univariate/multivariate cases) for initializing meshgrid values
+
+  // number of parameters to be updated
+  unsigned int p = currentPars.n_elem; // = 1;
+
+  int dometrop = metropolis;
+  
+  // convert arma::mat to C double pointer or array
+  // TBA...
+
+  arma::mat samp = arma::zeros<arma::mat>(p, n + 1);
+  samp.col(0) = currentPars;
+
   double minD;
   double maxD;
   for (unsigned int i = 0; i < n; ++i)
@@ -221,30 +223,76 @@ arma::mat arms_gibbs(
       maxD = maxRange[0]; // [j]
       double *xl; xl = &minD;
       double *xr; xr = &maxD;
-      double initi = initialPoints[0]; // [j]
+      double initi = samp(j, i);  //samp(j, i)
       double *xprev; xprev = &initi;
-      double *xsamp = (double*)malloc(n * sizeof(double));
+      double *xsamp = (double*)malloc(every * sizeof(double));
+      double qcent[1], xcent[1];
+      int neval, ncent = 0;
 
       //dataS *mydata = create_mydata(currentPars, j, vA, vB, datX0, datProportion, datEvent, weibullS);
       dataS *mydata = (dataS *)malloc(sizeof (dataS));
-      //create_mydata(currentPars_c, j, vA, vB, datX0_c, datProportion_c, datEvent_c, weibullS_c, mydata);
-      create_mydata(currentPars, j, vA, vB, datX0, datProportion, datEvent, weibullS, mydata);
+      create_mydata(currentPars, j, xl, xr, vA, vB, datX0, datProportion, datEvent, weibullS, mydata);
 
-      double tmp = 0.0;
-      int err = ARMS::arms_simple (
-        ninit, xl,  xr,
-        myfunc, mydata,
-        dometrop, xprev, xsamp);
+      //*xprev = samp(j, i);
+      int err;
+      if (simple)
+      {
+        err = ARMS::arms_simple (
+          ninit, xl,  xr,
+          myfunc, mydata,
+          dometrop, xprev, xsamp);
+      } else {
+        arma::vec xinit0 = arma::linspace( minD+1.0e-10, maxD-1.0e-10, ninit );
+        double xinit[ninit];
+        for (unsigned int i = 0; i < ninit; ++i)
+          xinit[i] = xinit0[i];
 
-      samp(j, i) = (double)err;
-      currentPars[j] = (double)err;
+        err = ARMS::arms (
+          xinit, ninit, xl,  xr,
+          myfunc, mydata,
+          &convex, npoint,
+          dometrop, xprev, xsamp,
+          every, qcent, xcent, ncent, &neval);
+          /*
+          std::cout << "...debug arms(): ninit=" << ninit <<
+          "; xinit[0]="  << xinit[0] << 
+          "; xinit[4]="  << xinit[4] << 
+          "; xinit[ninit-1]="  << xinit[ninit-1] << 
+          "; xl=" << *xl << 
+          "; xr=" << *xr << 
+          "; convex=" << convex << 
+          "; npoint=" << npoint << 
+          "; dometrop=" << dometrop << 
+          "; xprev=" << *xprev << 
+          "; xsamp=" << *xsamp << 
+          "; every=" << every << 
+          "; qcent=" << *qcent << 
+          "; xcent=" << *xcent << 
+          "; ncent=" << ncent << 
+          "; neval=" << neval << 
+          "\n"; */
+      }
+
+      // check ARMS validity
+      if (err > 0)
+       std::printf("In ARMS::arms_(): error code in ARMS = %d.\n", err);
+      if (isnan(xsamp[every-1]))
+        std::printf("In ARMS::arms_(): NaN generated, possibly due to overflow in (log-)density (e.g. with densities involving exp(exp(...))).\n");
+      if (xsamp[n-1] < minD || xsamp[every-1] > maxD)
+        std::printf("In ARMS::arms_(): %d-th sample out of range [%f, %f] (fused domain). Got %f.\n", every, *xl, *xr, xsamp[every-1]);
+
+      //xprev = xsamp[every - 1];
+      //for (unsigned int i = 0; i < n; ++i) samp(j, i + 1) = xsamp[every - n + i];
+      currentPars[j] = xsamp[every - 1];
+      samp(j, i + 1) = xsamp[every - 1];
 
       free(mydata);
     }
   }
+  // remove the inital values in the first column of samp
+  samp.shed_col(0);
 
-  // free memory after usage
-  //free(mydata0);
+  //std::cout << "...debug sample=" << samp.col(0).t() << "\n";
 
   return samp;
 }

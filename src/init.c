@@ -8,14 +8,14 @@
 */
 
 /* .Call calls */
-extern SEXP _GPTCM_arms_gibbs(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP _GPTCM_arms_gibbs(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _GPTCM_ars(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _GPTCM_ars_debug(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _GPTCM_ars_gibbs(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _GPTCM_sampleGamma(SEXP, SEXP, SEXP, SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_GPTCM_arms_gibbs",  (DL_FUNC) &_GPTCM_arms_gibbs,  12},
+    {"_GPTCM_arms_gibbs",  (DL_FUNC) &_GPTCM_arms_gibbs,  16},
     {"_GPTCM_ars",         (DL_FUNC) &_GPTCM_ars,         12},
     {"_GPTCM_ars_debug",   (DL_FUNC) &_GPTCM_ars_debug,   13},
     {"_GPTCM_ars_gibbs",   (DL_FUNC) &_GPTCM_ars_gibbs,   11},

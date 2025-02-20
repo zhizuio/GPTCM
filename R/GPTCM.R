@@ -26,6 +26,9 @@
 #' common (\code{dirichlet = TRUE}) or alternative (\code{dirichlet = FALSE})
 #' parametrization of the Dirichlet regression model
 #' @param method either `MLE` or `Bayes`
+#' @param arms.simple logical value; should the "adaptive rejection metropolis 
+#' sampling" or the "derivative-free adaptive rejection sampling with metropolis 
+#' step" (default) is used
 #' @param hyperpar TBA
 #' @param kappaPrior TBA
 #' @param kappaSampler TBA
@@ -50,6 +53,7 @@ GPTCM <- function(dat,
                   proportion.model = TRUE,
                   dirichlet = TRUE,
                   method = "Bayes",
+                  arms.simple = c(FALSE),
                   hyperpar = NULL,
                   kappaPrior = "IGamma",
                   kappaSampler = "arms",
@@ -314,12 +318,17 @@ GPTCM <- function(dat,
           n.sample = 5
         )
       } else {
-        browser()
+        #browser()
         xi.mcmc.internal <- arms_gibbs(
-          1, # number of MCMC samples
-          seq(-1, 1, length=10), # initializing meshgrid values for envelop search
-          0.01, 3, # lower and upper bounds
-          0, # metropolis step or not
+          1, # number of samples to draw, now only 1
+          1, # number of MCMC for generating each ARMS sample, only keeping the last one
+          10, #  number of initials as meshgrid values for envelop search
+          #seq(-1, 1, length=10), # initial values
+          -10, 10, # lower and upper bounds
+          1, # 0/1 metropolis step or not
+          arms.simple[1],
+          1, # adjustment for convexity
+          100, # maximum number of envelope points
           xi,
           hyperpar$vA, hyperpar$vB,
           datX0,
@@ -327,19 +336,19 @@ GPTCM <- function(dat,
           datEvent,
           weibull.S
         )
-        xi.mcmc.internal <- ars_gibbs(
-          4,
-          c(0.1, 1, 2), # initializing meshgrid values for envelop search
-          0.01, 3, ## problematic if lower bound negative, not know why?
-          #rep(-3, length(xi)), 
-          #rep(3, length(xi)), 
-          xi,
-          hyperpar$vA, hyperpar$vB,
-          datX0,
-          dat$proportion,
-          datEvent,
-          weibull.S
-        )
+        # xi.mcmc.internal <- ars_gibbs(
+        #   4,
+        #   c(0.1, 1, 2), # initializing meshgrid values for envelop search
+        #   0.01, 3, ## problematic if lower bound negative, not know why?
+        #   #rep(-3, length(xi)), 
+        #   #rep(3, length(xi)), 
+        #   xi,
+        #   hyperpar$vA, hyperpar$vB,
+        #   datX0,
+        #   dat$proportion,
+        #   datEvent,
+        #   weibull.S
+        # )
         # jj <- 1
         # xi.mcmc.internal <- ars(
         #   1,
