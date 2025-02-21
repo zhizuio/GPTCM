@@ -13,6 +13,18 @@ arms_gibbs_xi <- function(n, every, ninit, minRange, maxRange, metropolis, simpl
     .Call('_GPTCM_arms_gibbs_xi', PACKAGE = 'GPTCM', n, every, ninit, minRange, maxRange, metropolis, simple, convex, npoint, currentPars, vA, vB, datX0, datProportion, datEvent, weibullS)
 }
 
+#' Multivariate ARMS via Gibbs sampler for beta
+#'
+#' @param n Number of samples to draw
+#' @param every How many samples to draw for generating each sample; only the last 'n' draws will be kept; but it seems not work for every>1, not know why
+#' @param ninit Number of initials as meshgrid values for envelop search
+#' @param convex Adjustment for convexity (non-negative value, default 1.0)
+#' @param npoint Maximum number of envelope points
+#'
+arms_gibbs_beta <- function(n, every, ninit, minRange, maxRange, metropolis, simple, convex, npoint, currentPars, vA, vB, tauSq, kappa, datX, datTheta, datMu, datProportion, datEvent, datTime, weibullS) {
+    .Call('_GPTCM_arms_gibbs_beta', PACKAGE = 'GPTCM', n, every, ninit, minRange, maxRange, metropolis, simple, convex, npoint, currentPars, vA, vB, tauSq, kappa, datX, datTheta, datMu, datProportion, datEvent, datTime, weibullS)
+}
+
 #' Rcpp wrapper for ARS algorithm
 #'
 #' @param n number of variates to draw

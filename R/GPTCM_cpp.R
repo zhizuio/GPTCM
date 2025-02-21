@@ -318,9 +318,9 @@ GPTCM_cpp <- function(dat,
           100, # maximum number of envelope points
           xi,
           hyperpar$vA, hyperpar$vB,
-          datX0,
+          dat$x0,
           dat$proportion,
-          datEvent,
+          dat$survObj$event,
           weibull.S
         )
       ## n.sample = 20 will result in less variation
@@ -463,56 +463,81 @@ GPTCM_cpp <- function(dat,
       # gammas.mcmc[1 + m, ] <- as.vector(gammas.current)
 
       ## update \beta_jl of S_l(t) in non-cure fraction
-      for (l in 1:L) {
-        for (j in 1:p) {
-          # globalVariables(c("l", "j")) ## This is not safe
-          globalvariableJL <- list(j = j, l = l)
-          list2env(globalvariableJL, .GlobalEnv)
-
-          betas.mcmc.internal <- arms(
-            y.start = betas.current[j, l],
-            myldens = logpost_beta_jl,
-            indFunc = convex_support,
-            # y.start = betas.current[, l],
-            # myldens = logpost_beta_l,
-            n.sample = 20
-          )
-          ## n.sample = 20 will result in less variation
-          # beta.l.new <- mean(betas.mcmc.internal)#[-c(1:(length(betas.mcmc.internal)/2))]) #median
-          beta.l.new <- median(betas.mcmc.internal[-c(1:(length(betas.mcmc.internal) / 2))]) # median
-          # beta.l.new <- betas.mcmc.internal
-          betas.current[j, l] <- min(abs(beta.l.new), 3 - 0.1) * sign(beta.l.new)
-          ## force irrelevant betas to be zero
-          # betas.current[j, l] <- ifelse(dat$betas[j, l] == 0, 0, betas.current[j, l])
-
-          # beta.l.new <- colMeans(betas.mcmc.internal[-c(1:(nrow(betas.mcmc.internal)/2)),])
-          # betas.current[,l] <- sapply(beta.l.new, function(xx){min(abs(xx), 5-0.1) * sign(xx)} )
-          # tauSq <- sampleTau(1, hyperpar$tauA, hyperpar$tauB, betas.current[j, l])
-
-          # globalvariable <- list(betas.current = betas.current)
-          # list2env(globalvariable, .GlobalEnv)
-
-          mu.current[, l] <- exp(dat$XX[, , l] %*% betas.current[, l]) # should this and following be out of this for-loop-j?
-          lambdas[, l] <- mu.current[, l] / gamma(1 + 1 / kappas)
-
-          weibull.S[, l] <- exp(-(dat$survObj$time / lambdas[, l])^kappas)
-          globalvariable <- list(
-            betas.current = betas.current # ,
-            # mu.current = mu.current, # no need to enter GlobalEnv, since it's updated in logpost_beta_jl()
-            # weibull.S = weibull.S
-          )
-          list2env(globalvariable, .GlobalEnv)
-        }
-        # mu.current[, l] <- exp(dat$XX[, , l] %*% betas.current[, l])
-        # lambdas[, l] <- mu.current[, l] / gamma(1 + 1 / kappas) # lambdas is a parameter in WEI3 distr.
-        # weibull.S[, l] <- exp(-(dat$survObj$time / lambdas[, l])^kappas)
-        # # tauSq[l] <- sampleTau(1, hyperpar$tauA, hyperpar$tauB, betas.current[, l])
-        globalvariable <- list(
-          mu.current = mu.current,
-          weibull.S = weibull.S
-        )
-        list2env(globalvariable, .GlobalEnv)
+      #browser()
+      betas.mcmc.internal <- arms_gibbs_beta(
+        1, # number of samples to draw, now only 1
+        1, # number of MCMC for generating each ARMS sample, only keeping the last one
+        10, #  number of initials as meshgrid values for envelop search
+        #seq(-1, 1, length=10), # initial values
+        -10, 10, # lower and upper bounds
+        1, # 0/1 metropolis step or not
+        arms.simple[1],
+        1, # adjustment for convexity
+        100, # maximum number of envelope points
+        betas.current,
+        hyperpar$vA, hyperpar$vB, tauSq, kappas,
+        dat$XX,
+        thetas, mu.current, 
+        dat$proportion,
+        dat$survObj$event, dat$survObj$time,
+        weibull.S
+      )
+      betas.current <- betas.mcmc.internal
+      for(ll in 1:L){
+        mu.current[, l] <- exp(dat$XX[, , l] %*% betas.current[, l]) # should this and following be out of this for-loop-j?
+        lambdas[, l] <- mu.current[, l] / gamma(1 + 1 / kappas)
+        weibull.S[, l] <- exp(-(dat$survObj$time / lambdas[, l])^kappas)
       }
+      # for (l in 1:L) {
+      #   for (j in 1:p) {
+      #     # globalVariables(c("l", "j")) ## This is not safe
+      #     globalvariableJL <- list(j = j, l = l)
+      #     list2env(globalvariableJL, .GlobalEnv)
+      # 
+      #     betas.mcmc.internal <- arms(
+      #       y.start = betas.current[j, l],
+      #       myldens = logpost_beta_jl,
+      #       indFunc = convex_support,
+      #       # y.start = betas.current[, l],
+      #       # myldens = logpost_beta_l,
+      #       n.sample = 20
+      #     )
+      #     ## n.sample = 20 will result in less variation
+      #     # beta.l.new <- mean(betas.mcmc.internal)#[-c(1:(length(betas.mcmc.internal)/2))]) #median
+      #     beta.l.new <- median(betas.mcmc.internal[-c(1:(length(betas.mcmc.internal) / 2))]) # median
+      #     # beta.l.new <- betas.mcmc.internal
+      #     betas.current[j, l] <- min(abs(beta.l.new), 3 - 0.1) * sign(beta.l.new)
+      #     ## force irrelevant betas to be zero
+      #     # betas.current[j, l] <- ifelse(dat$betas[j, l] == 0, 0, betas.current[j, l])
+      # 
+      #     # beta.l.new <- colMeans(betas.mcmc.internal[-c(1:(nrow(betas.mcmc.internal)/2)),])
+      #     # betas.current[,l] <- sapply(beta.l.new, function(xx){min(abs(xx), 5-0.1) * sign(xx)} )
+      #     # tauSq <- sampleTau(1, hyperpar$tauA, hyperpar$tauB, betas.current[j, l])
+      # 
+      #     # globalvariable <- list(betas.current = betas.current)
+      #     # list2env(globalvariable, .GlobalEnv)
+      # 
+      #     mu.current[, l] <- exp(dat$XX[, , l] %*% betas.current[, l]) # should this and following be out of this for-loop-j?
+      #     lambdas[, l] <- mu.current[, l] / gamma(1 + 1 / kappas)
+      # 
+      #     weibull.S[, l] <- exp(-(dat$survObj$time / lambdas[, l])^kappas)
+      #     globalvariable <- list(
+      #       betas.current = betas.current # ,
+      #       # mu.current = mu.current, # no need to enter GlobalEnv, since it's updated in logpost_beta_jl()
+      #       # weibull.S = weibull.S
+      #     )
+      #     list2env(globalvariable, .GlobalEnv)
+      #   }
+      #   # mu.current[, l] <- exp(dat$XX[, , l] %*% betas.current[, l])
+      #   # lambdas[, l] <- mu.current[, l] / gamma(1 + 1 / kappas) # lambdas is a parameter in WEI3 distr.
+      #   # weibull.S[, l] <- exp(-(dat$survObj$time / lambdas[, l])^kappas)
+      #   # # tauSq[l] <- sampleTau(1, hyperpar$tauA, hyperpar$tauB, betas.current[, l])
+      #   globalvariable <- list(
+      #     mu.current = mu.current,
+      #     weibull.S = weibull.S
+      #   )
+      #   list2env(globalvariable, .GlobalEnv)
+      # }
       betas.mcmc[1 + m, ] <- as.vector(betas.current)
       globalvariable <- list(lambdas = lambdas, mu.current = mu.current, weibull.S = weibull.S) # do we need mu&S her?
       list2env(globalvariable, .GlobalEnv)
