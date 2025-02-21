@@ -12,7 +12,7 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // arms_gibbs_xi
-arma::mat arms_gibbs_xi(int n, int every, int ninit, arma::vec minRange, arma::vec maxRange, int metropolis, bool simple, double convex, int npoint, arma::vec currentPars, double vA, double vB, arma::mat datX0, arma::mat datProportion, arma::uvec datEvent, arma::mat weibullS);
+arma::mat arms_gibbs_xi(int n, int every, int ninit, arma::vec minRange, arma::vec maxRange, int metropolis, bool simple, double convex, int npoint, arma::vec currentPars, double vA, double vB, arma::mat datX0, arma::mat datProportion, arma::ivec datEvent, arma::mat weibullS);
 RcppExport SEXP _GPTCM_arms_gibbs_xi(SEXP nSEXP, SEXP everySEXP, SEXP ninitSEXP, SEXP minRangeSEXP, SEXP maxRangeSEXP, SEXP metropolisSEXP, SEXP simpleSEXP, SEXP convexSEXP, SEXP npointSEXP, SEXP currentParsSEXP, SEXP vASEXP, SEXP vBSEXP, SEXP datX0SEXP, SEXP datProportionSEXP, SEXP datEventSEXP, SEXP weibullSSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -31,7 +31,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type vB(vBSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type datX0(datX0SEXP);
     Rcpp::traits::input_parameter< arma::mat >::type datProportion(datProportionSEXP);
-    Rcpp::traits::input_parameter< arma::uvec >::type datEvent(datEventSEXP);
+    Rcpp::traits::input_parameter< arma::ivec >::type datEvent(datEventSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type weibullS(weibullSSEXP);
     rcpp_result_gen = Rcpp::wrap(arms_gibbs_xi(n, every, ninit, minRange, maxRange, metropolis, simple, convex, npoint, currentPars, vA, vB, datX0, datProportion, datEvent, weibullS));
     return rcpp_result_gen;

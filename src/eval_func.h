@@ -16,34 +16,31 @@
   typedef struct common_data
   {
     // members
-    arma::vec currentPars;
+    double *currentPars;
     unsigned int jj;
+
+    int l;
+    int p;
+    int L;
+    int N;
+    double tauSq;
+    double kappa;
+    double *datTheta; 
+    double *datMu; 
+    double *datTime; 
+
     double *xl;
     double *xr;
     double vA;
     double vB;
-    arma::mat datX;
-    arma::mat datProportion;
-    arma::uvec datEvent;
-    arma::mat weibullS;
+    double *datX;
+    double *datProportion;
+    int *datEvent;
+    double *weibullS;
   }dataS;
 
-  void create_mydata
-  (
-    arma::vec currentPars,
-    unsigned int jj,
-    double *xl,
-    double *xr,
-    double vA, 
-    double vB,
-    arma::mat datX,
-    arma::mat datProportion,
-    arma::uvec datEvent,
-    arma::mat weibullS,
-    dataS *abc_data
-  );
 
-  double myfunc
+  double log_dens_xis
   (
     double par, 
     void *abc_data

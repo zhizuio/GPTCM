@@ -7,36 +7,9 @@
 
 
 
-void create_mydata(
-  arma::vec currentPars,
-  unsigned int jj,
-  double *xl,
-  double *xr,
-  double vA, 
-  double vB,
-  arma::mat datX,
-  arma::mat datProportion,
-  arma::uvec datEvent,
-  arma::mat weibullS,
-  dataS *abc_data) 
-{
-  // create objects for conditional (log-)density
-  abc_data->currentPars = currentPars;
-  abc_data->jj = jj;
-  abc_data->xl = xl;
-  abc_data->xr = xr;
-  abc_data->vA = vA;
-  abc_data->vB = vB;
-  abc_data->datX = datX;
-  abc_data->datProportion = datProportion;
-  abc_data->datEvent = datEvent;
-  abc_data->weibullS = weibullS;
-
-}
-
 // If 'myfunc()' has to be defined in C code, all vec/mat elements in 'struct common_data{}' and 'void create_mydata()' 
 //   need to be defined as 'double *', since array in C will copy big data and occupy too much memory
-double myfunc(
+double log_dens_xis(
   double par, 
   void *abc_data) 
 {
@@ -52,10 +25,11 @@ double myfunc(
 
   //if (par >= *(mydata_parm->xl) && par <= *(mydata_parm->xr)) // this is judged in ARMS::initial()
   //{
-    stdvec xis0 = arma::conv_to<stdvec>::from(mydata_parm->currentPars);
+    arma::vec xis = arma::vec(mydata_parm->currentPars, mydata_parm->p, false);
+    //stdvec xis0 = arma::conv_to<stdvec>::from(mydata_parm->currentPars);
+    stdvec xis0 = arma::conv_to<stdvec>::from(xis);
     xis0.erase(xis0.begin());
-  
-    arma::vec& xis = mydata_parm->currentPars;
+
     unsigned int jj = mydata_parm->jj;
   
     xis[jj] = par;
@@ -71,16 +45,26 @@ double myfunc(
   
     // compute the log density
     double logprior = - par * par / vSq / 2.;
+
+    //arma::mat X(mydata_parm->datX, n, p, false);  // use auxiliary memory
+    //std::cout << "...X:\n" << X << "\n";
   
-    arma::vec eta = mydata_parm->datX * xis;
+    //arma::vec eta = mydata_parm->datX * xis;
+    arma::vec eta = arma::mat(mydata_parm->datX, mydata_parm->N, mydata_parm->p, false) * xis;
     eta.elem(arma::find(eta > upperbound1)).fill(upperbound1);
     arma::vec thetas = arma::exp( eta );
   
-    double logpost_first = arma::accu( eta.elem(arma::find(mydata_parm->datEvent)) );
-    arma::vec logpost_second = arma::zeros<arma::vec>(mydata_parm->datProportion.n_rows);
-    for(unsigned int ll=0; ll<mydata_parm->datProportion.n_cols; ++ll) 
+    //double logpost_first = arma::accu( eta.elem(arma::find(mydata_parm->datEvent)) );
+    double logpost_first = arma::accu( eta.elem(arma::find(
+      arma::ivec(mydata_parm->datEvent, mydata_parm->N, false)
+    )) );
+    arma::vec logpost_second = arma::zeros<arma::vec>(mydata_parm->N);
+    arma::mat datProportion(mydata_parm->datProportion, mydata_parm->N, mydata_parm->L, false);
+    arma::mat weibullS(mydata_parm->weibullS, mydata_parm->N, mydata_parm->L, false);
+    for(unsigned int ll=0; ll<mydata_parm->L; ++ll) 
     {
-      logpost_second += mydata_parm->datProportion.col(ll) % mydata_parm->weibullS.col(ll);
+      //logpost_second += mydata_parm->datProportion.col(ll) % mydata_parm->weibullS.col(ll);
+      logpost_second += datProportion.col(ll) % weibullS.col(ll);
     }
   
     double logpost_second_sum = - arma::accu(thetas % (1. - logpost_second));

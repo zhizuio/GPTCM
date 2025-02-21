@@ -35,7 +35,7 @@ arma::mat arms_gibbs_xi(
   double vB, 
   arma::mat datX0, 
   arma::mat datProportion, 
-  arma::uvec datEvent, 
+  arma::ivec datEvent, 
   arma::mat weibullS) 
 {
   /* IF every>1, all samples are the same; not know why
@@ -49,9 +49,34 @@ arma::mat arms_gibbs_xi(
   //int ninit = initialPoints.n_elem; // # here 'initialPoints' can be a vector/matrix (in univariate/multivariate cases) for initializing meshgrid values
 
   // number of parameters to be updated
-  unsigned int p = currentPars.n_elem; // = 1;
+  int p = currentPars.n_elem; // = 1;
+  int L = datProportion.n_cols;
+  int N = datProportion.n_rows;
+
+  double minD;
+  double maxD;
+  minD = minRange[0]; // [j]
+  maxD = maxRange[0]; // [j]
+  double *xl; xl = &minD;
+  double *xr; xr = &maxD;
 
   int dometrop = metropolis;
+
+  //dataS *mydata = create_mydata(currentPars, j, vA, vB, datX0, datProportion, datEvent, weibullS);
+  dataS *mydata = (dataS *)malloc(sizeof (dataS));
+  //create_mydata(currentPars, j, xl, xr, vA, vB, datX0, datProportion, datEvent, weibullS, mydata);
+  mydata->currentPars = currentPars.memptr();
+  mydata->p = p;
+  mydata->L = L;
+  mydata->N = N;
+  mydata->xl = xl;
+  mydata->xr = xr;
+  mydata->vA = vA;
+  mydata->vB = vB;
+  mydata->datX = datX0.memptr();
+  mydata->datProportion = datProportion.memptr();
+  mydata->datEvent = datEvent.memptr();
+  mydata->weibullS = weibullS.memptr();
   
   // convert arma::mat to C double pointer or array
   // TBA...
@@ -59,25 +84,16 @@ arma::mat arms_gibbs_xi(
   arma::mat samp = arma::zeros<arma::mat>(p, n + 1);
   samp.col(0) = currentPars;
 
-  double minD;
-  double maxD;
   for (unsigned int i = 0; i < n; ++i)
   {
     for (unsigned int j = 0; j < p; ++j)
     {
-      minD = minRange[0]; // [j]
-      maxD = maxRange[0]; // [j]
-      double *xl; xl = &minD;
-      double *xr; xr = &maxD;
+      mydata->jj = j;
       double initi = samp(j, i);  //samp(j, i)
       double *xprev; xprev = &initi;
       double *xsamp = (double*)malloc(every * sizeof(double));
       double qcent[1], xcent[1];
       int neval, ncent = 0;
-
-      //dataS *mydata = create_mydata(currentPars, j, vA, vB, datX0, datProportion, datEvent, weibullS);
-      dataS *mydata = (dataS *)malloc(sizeof (dataS));
-      create_mydata(currentPars, j, xl, xr, vA, vB, datX0, datProportion, datEvent, weibullS, mydata);
 
       //*xprev = samp(j, i);
       int err;
@@ -85,7 +101,7 @@ arma::mat arms_gibbs_xi(
       {
         err = ARMS::arms_simple (
           ninit, xl,  xr,
-          myfunc, mydata,
+          log_dens_xis, mydata,
           dometrop, xprev, xsamp);
       } else {
         arma::vec xinit0 = arma::linspace( minD+1.0e-10, maxD-1.0e-10, ninit );
@@ -95,7 +111,7 @@ arma::mat arms_gibbs_xi(
 
         err = ARMS::arms (
           xinit, ninit, xl,  xr,
-          myfunc, mydata,
+          log_dens_xis, mydata,
           &convex, npoint,
           dometrop, xprev, xsamp,
           every, qcent, xcent, ncent, &neval);
@@ -132,9 +148,9 @@ arma::mat arms_gibbs_xi(
       currentPars[j] = xsamp[every - 1];
       samp(j, i + 1) = xsamp[every - 1];
 
-      free(mydata);
     }
   }
+  free(mydata);
   // remove the inital values in the first column of samp
   samp.shed_col(0);
 
