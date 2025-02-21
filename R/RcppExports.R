@@ -9,8 +9,8 @@
 #' @param convex Adjustment for convexity (non-negative value, default 1.0)
 #' @param npoint Maximum number of envelope points
 #'
-arms_gibbs <- function(n, every, ninit, minRange, maxRange, metropolis, simple, convex, npoint, currentPars, vA, vB, datX0, datProportion, datEvent, weibullS) {
-    .Call('_GPTCM_arms_gibbs', PACKAGE = 'GPTCM', n, every, ninit, minRange, maxRange, metropolis, simple, convex, npoint, currentPars, vA, vB, datX0, datProportion, datEvent, weibullS)
+arms_gibbs_xi <- function(n, every, ninit, minRange, maxRange, metropolis, simple, convex, npoint, currentPars, vA, vB, datX0, datProportion, datEvent, weibullS) {
+    .Call('_GPTCM_arms_gibbs_xi', PACKAGE = 'GPTCM', n, every, ninit, minRange, maxRange, metropolis, simple, convex, npoint, currentPars, vA, vB, datX0, datProportion, datEvent, weibullS)
 }
 
 #' Rcpp wrapper for ARS algorithm
