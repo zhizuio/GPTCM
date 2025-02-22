@@ -6,7 +6,7 @@
 \usage{
 arms_gibbs_xi(
   n,
-  every,
+  nsamp,
   ninit,
   minRange,
   maxRange,
@@ -26,7 +26,7 @@ arms_gibbs_xi(
 \arguments{
 \item{n}{Number of samples to draw}
 
-\item{every}{How many samples to draw for generating each sample; only the last 'n' draws will be kept; but it seems not work for every>1, not know why}
+\item{nsamp}{How many samples to draw for generating each sample; only the last draw will be kept}
 
 \item{ninit}{Number of initials as meshgrid values for envelop search}
 

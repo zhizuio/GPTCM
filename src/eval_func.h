@@ -7,8 +7,7 @@
   #include <RcppArmadillo.h>
 
 
-  inline double upperbound1 = 70.;
-  inline double upperbound2 = 69.;
+  inline double upperbound = 700.;
 
   typedef std::vector<double> stdvec;
 

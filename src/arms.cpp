@@ -4,6 +4,7 @@
 
 /* *********************************************************************** */
 
+#include <Rmath.h>  /* for RNG interface */
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
@@ -909,9 +910,9 @@ double u_random()
 
 /* to return a standard uniform random number */
 {
-  //return (unif_rand());//((double)rand() + 0.5)/((double)RAND_MAX + 1.0);
-  srand(time(NULL)); // randomize seed from library '#include <time.h>'
-  return (double)rand() / (double)RAND_MAX; 
+  return (unif_rand());//((double)rand() + 0.5)/((double)RAND_MAX + 1.0);
+  // srand(time(NULL)); // randomize seed from library '#include <time.h>'
+  // return (double)rand() / (double)RAND_MAX; 
 }
 
 /* *********************************************************************** */

@@ -12,7 +12,7 @@
 //' Multivariate ARMS via Gibbs sampler
 //'
 //' @param n Number of samples to draw
-//' @param every How many samples to draw for generating each sample; only the last 'n' draws will be kept; but it seems not work for every>1, not know why
+//' @param nsamp How many samples to draw for generating each sample; only the last draw will be kept
 //' @param ninit Number of initials as meshgrid values for envelop search
 //' @param convex Adjustment for convexity (non-negative value, default 1.0)
 //' @param npoint Maximum number of envelope points
@@ -20,7 +20,7 @@
 // [[Rcpp::export]]
 arma::mat arms_gibbs_xi(
   int n,
-  int every, 
+  int nsamp, 
   int ninit,
   arma::vec minRange,
   arma::vec maxRange,
@@ -38,16 +38,6 @@ arma::mat arms_gibbs_xi(
   arma::ivec datEvent, 
   arma::mat weibullS) 
 {
-  /* IF every>1, all samples are the same; not know why
-  if (n > every)
-  {
-    std::printf("Arguments 'n' should not be larger than argument 'every'.\n");
-    exit (0);
-  }
-  */
-
-  //int ninit = initialPoints.n_elem; // # here 'initialPoints' can be a vector/matrix (in univariate/multivariate cases) for initializing meshgrid values
-
   // number of parameters to be updated
   int p = currentPars.n_elem; // = 1;
   int L = datProportion.n_cols;
@@ -61,6 +51,13 @@ arma::mat arms_gibbs_xi(
   double *xr; xr = &maxD;
 
   int dometrop = metropolis;
+  double xinit[ninit];
+  if (!simple)
+  {
+    arma::vec xinit0 = arma::linspace( minD+1.0e-10, maxD-1.0e-10, ninit );
+    for (unsigned int i = 0; i < ninit; ++i)
+      xinit[i] = xinit0[i];
+  }
 
   //dataS *mydata = create_mydata(currentPars, j, vA, vB, datX0, datProportion, datEvent, weibullS);
   dataS *mydata = (dataS *)malloc(sizeof (dataS));
@@ -69,8 +66,8 @@ arma::mat arms_gibbs_xi(
   mydata->p = p;
   mydata->L = L;
   mydata->N = N;
-  mydata->xl = xl;
-  mydata->xr = xr;
+  // mydata->xl = xl;
+  // mydata->xr = xr;
   mydata->vA = vA;
   mydata->vB = vB;
   mydata->datX = datX0.memptr();
@@ -92,7 +89,7 @@ arma::mat arms_gibbs_xi(
       //double initi = samp(j, i);  //samp(j, i)
       //double *xprev; xprev = &initi;
       double xprev = samp(j, i);
-      double *xsamp = (double*)malloc(every * sizeof(double));
+      double *xsamp = (double*)malloc(nsamp * sizeof(double));
       double qcent[1], xcent[1];
       int neval, ncent = 0;
 
@@ -104,17 +101,12 @@ arma::mat arms_gibbs_xi(
           log_dens_xis, mydata,
           dometrop, &xprev, xsamp);
       } else {
-        arma::vec xinit0 = arma::linspace( minD+1.0e-10, maxD-1.0e-10, ninit );
-        double xinit[ninit];
-        for (unsigned int i = 0; i < ninit; ++i)
-          xinit[i] = xinit0[i];
-
         err = ARMS::arms (
           xinit, ninit, xl,  xr,
           log_dens_xis, mydata,
           &convex, npoint,
           dometrop, &xprev, xsamp,
-          every, qcent, xcent, ncent, &neval);
+          nsamp, qcent, xcent, ncent, &neval);
           /*
           std::cout << "...debug arms(): ninit=" << ninit <<
           "; xinit[0]="  << xinit[0] << 
@@ -127,7 +119,7 @@ arma::mat arms_gibbs_xi(
           "; dometrop=" << dometrop << 
           "; xprev=" << *xprev << 
           "; xsamp=" << *xsamp << 
-          "; every=" << every << 
+          "; nsamp=" << nsamp << 
           "; qcent=" << *qcent << 
           "; xcent=" << *xcent << 
           "; ncent=" << ncent << 
@@ -138,15 +130,15 @@ arma::mat arms_gibbs_xi(
       // check ARMS validity
       if (err > 0)
        std::printf("In ARMS::arms_(): error code in ARMS = %d.\n", err);
-      if (isnan(xsamp[every-1]))
+      if (isnan(xsamp[nsamp-1]))
         std::printf("In ARMS::arms_(): NaN generated, possibly due to overflow in (log-)density (e.g. with densities involving exp(exp(...))).\n");
-      if (xsamp[n-1] < minD || xsamp[every-1] > maxD)
-        std::printf("In ARMS::arms_(): %d-th sample out of range [%f, %f] (fused domain). Got %f.\n", every, *xl, *xr, xsamp[every-1]);
+      if (xsamp[n-1] < minD || xsamp[nsamp-1] > maxD)
+        std::printf("In ARMS::arms_(): %d-th sample out of range [%f, %f] (fused domain). Got %f.\n", nsamp, *xl, *xr, xsamp[nsamp-1]);
 
-      //xprev = xsamp[every - 1];
-      //for (unsigned int i = 0; i < n; ++i) samp(j, i + 1) = xsamp[every - n + i];
-      currentPars[j] = xsamp[every - 1];
-      samp(j, i + 1) = xsamp[every - 1];
+      //xprev = xsamp[nsamp - 1];
+      //for (unsigned int i = 0; i < n; ++i) samp(j, i + 1) = xsamp[nsamp - n + i];
+      currentPars[j] = xsamp[nsamp - 1];
+      samp(j, i + 1) = xsamp[nsamp - 1];
 
       free(xsamp);
     }
@@ -165,7 +157,7 @@ arma::mat arms_gibbs_xi(
 //' Multivariate ARMS via Gibbs sampler for beta
 //'
 //' @param n Number of samples to draw
-//' @param every How many samples to draw for generating each sample; only the last 'n' draws will be kept; but it seems not work for every>1, not know why
+//' @param nsamp How many samples to draw for generating each sample; only the last draw will be kept
 //' @param ninit Number of initials as meshgrid values for envelop search
 //' @param convex Adjustment for convexity (non-negative value, default 1.0)
 //' @param npoint Maximum number of envelope points
@@ -173,7 +165,7 @@ arma::mat arms_gibbs_xi(
 // [[Rcpp::export]]
 arma::mat arms_gibbs_beta(
   int n,
-  int every, 
+  int nsamp, 
   int ninit,
   arma::vec minRange,
   arma::vec maxRange,
@@ -197,9 +189,13 @@ arma::mat arms_gibbs_beta(
   arma::mat weibullS) 
 {
   // dimensions
-  int p = currentPars.n_rows; 
-  int L = datProportion.n_cols;
-  int N = datProportion.n_rows;
+  int N = datX.n_rows;
+  int p = datX.n_cols; 
+  int L = datX.n_slices;
+
+  int dometrop = metropolis;
+
+  // objects for arms()
   double minD;
   double maxD;
   minD = minRange[0]; // [j]
@@ -207,17 +203,23 @@ arma::mat arms_gibbs_beta(
   double *xl; xl = &minD;
   double *xr; xr = &maxD;
 
-  int dometrop = metropolis;
+  double xinit[ninit];
+  if (!simple)
+  {
+    arma::vec xinit0 = arma::linspace( minD+1.0e-10, maxD-1.0e-10, ninit );
+    for (int i = 0; i < ninit; ++i)
+      xinit[i] = xinit0[i];
+  }
 
   dataS *mydata = (dataS *)malloc(sizeof (dataS));
   mydata->currentPars = currentPars.memptr();
   mydata->p = p;
   mydata->L = L;
   mydata->N = N;
-  mydata->xl = xl;
-  mydata->xr = xr;
-  mydata->vA = vA;
-  mydata->vB = vB;
+  // mydata->xl = xl;
+  // mydata->xr = xr;
+  // mydata->vA = vA;
+  // mydata->vB = vB;
   mydata->tauSq = tauSq,
   mydata->kappa = kappa,
   mydata->datTheta = datTheta.memptr();
@@ -234,12 +236,12 @@ arma::mat arms_gibbs_beta(
     {
       mydata->jj = j;
       mydata->l = l;
-      mydata->datX = (datX.slice(l)).memptr();
+      mydata->datX = datX.slice(l).memptr();
       
       //double initi = currentPars(j, l);  //samp(j, i)
       //double *xprev; xprev = &initi;
       double xprev = currentPars(j, l);
-      double *xsamp = (double*)malloc(every * sizeof(double));
+      double *xsamp = (double*)malloc(nsamp * sizeof(double));
       double qcent[1], xcent[1];
       int neval, ncent = 0;
 
@@ -251,33 +253,39 @@ arma::mat arms_gibbs_beta(
           log_dens_betas, mydata,
           dometrop, &xprev, xsamp);
       } else {
-        arma::vec xinit0 = arma::linspace( minD+1.0e-10, maxD-1.0e-10, ninit );
-        double xinit[ninit];
-        for (int i = 0; i < ninit; ++i)
-          xinit[i] = xinit0[i];
-
         err = ARMS::arms (
           xinit, ninit, xl,  xr,
           log_dens_betas, mydata,
           &convex, npoint,
           dometrop, &xprev, xsamp,
-          every, qcent, xcent, ncent, &neval);
+          nsamp, qcent, xcent, ncent, &neval);
       }
 
       // check ARMS validity
       if (err > 0)
        std::printf("In ARMS::arms_(): error code in ARMS = %d.\n", err);
-      if (isnan(xsamp[every-1]))
+      if (isnan(xsamp[nsamp-1]))
         std::printf("In ARMS::arms_(): NaN generated, possibly due to overflow in (log-)density (e.g. with densities involving exp(exp(...))).\n");
-      if (xsamp[n-1] < minD || xsamp[every-1] > maxD)
-        std::printf("In ARMS::arms_(): %d-th sample out of range [%f, %f] (fused domain). Got %f.\n", every, *xl, *xr, xsamp[every-1]);
+      if (xsamp[n-1] < minD || xsamp[nsamp-1] > maxD)
+        std::printf("In ARMS::arms_(): %d-th sample out of range [%f, %f] (fused domain). Got %f.\n", nsamp, *xl, *xr, xsamp[nsamp-1]);
 
-      currentPars(j, l) = xsamp[every - 1];
+      // std::cout << "...debug xsamp[1:nsamp]=";
+      // for( int i=0; i<nsamp; ++i) {
+      //   std::cout << ", " << xsamp[i] ;
+      // }
+      // std::cout <<  "/n";
+
+      currentPars(j, l) = xsamp[nsamp - 1];
 
       // if put 'create_mydata' out of for-loop, the following updates can for elements of pointer *mydata
-      datMu.col(l) = arma::exp( datX.slice(l) *  currentPars.col(l));
-      arma::vec lambdas = datMu.col(l) / std::tgamma(1. + 1./kappa);
-      weibullS.col(l) = arma::exp( -arma::pow(datTime / lambdas, kappa) );
+      arma::vec logMu_l = datX.slice(l) * currentPars.col(l);
+      logMu_l.elem(arma::find(logMu_l > upperbound)).fill(upperbound);
+      datMu.col(l) = arma::exp( logMu_l );
+      // arma::vec lambdas = datMu.col(l) / std::tgamma(1. + 1./kappa);
+      // weibullS.col(l) = arma::exp( -arma::pow(datTime / lambdas, kappa) );
+      arma::vec lambdas = arma::pow( datTime / (datMu.col(l) / std::tgamma(1. + 1./kappa)), kappa);
+      lambdas.elem(arma::find(lambdas > upperbound)).fill(upperbound);
+      weibullS.col(l) = arma::exp( -lambdas );
 
       mydata->currentPars = currentPars.memptr();
       mydata->datMu = datMu.memptr(); // update this due to its change with updated coefficients

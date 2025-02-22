@@ -307,8 +307,8 @@ GPTCM_cpp <- function(dat,
 
       ## update \xi's in cure fraction
         xi.mcmc.internal <- arms_gibbs_xi(
-          1, # number of samples to draw, now only 1
-          1, # number of MCMC for generating each ARMS sample, only keeping the last one
+          1, #n: number of samples to draw, now only 1
+          1, #nsamp: number of MCMC for generating each ARMS sample, only keeping the last one
           10, #  number of initials as meshgrid values for envelop search
           #seq(-1, 1, length=10), # initial values
           -10, 10, # lower and upper bounds
@@ -465,8 +465,8 @@ GPTCM_cpp <- function(dat,
       ## update \beta_jl of S_l(t) in non-cure fraction
       #browser()
       betas.mcmc.internal <- arms_gibbs_beta(
-        1, # number of samples to draw, now only 1
-        1, # number of MCMC for generating each ARMS sample, only keeping the last one
+        1, #n: number of samples to draw, now only 1
+        1, #nsamp: number of MCMC for generating each ARMS sample, only keeping the last one
         10, #  number of initials as meshgrid values for envelop search
         #seq(-1, 1, length=10), # initial values
         -10, 10, # lower and upper bounds
@@ -475,18 +475,18 @@ GPTCM_cpp <- function(dat,
         1, # adjustment for convexity
         100, # maximum number of envelope points
         betas.current,
-        hyperpar$vA, hyperpar$vB, tauSq, kappas,
+        0, 0, tauSq, kappas,
         dat$XX,
-        thetas, mu.current, 
+        thetas, mu.current,
         dat$proportion,
         dat$survObj$event, dat$survObj$time,
         weibull.S
       )
       betas.current <- betas.mcmc.internal
       for(ll in 1:L){
-        mu.current[, l] <- exp(dat$XX[, , l] %*% betas.current[, l]) # should this and following be out of this for-loop-j?
-        lambdas[, l] <- mu.current[, l] / gamma(1 + 1 / kappas)
-        weibull.S[, l] <- exp(-(dat$survObj$time / lambdas[, l])^kappas)
+        mu.current[, ll] <- exp(dat$XX[, , ll] %*% betas.current[, l]) # should this and following be out of this for-loop-j?
+        lambdas[, ll] <- mu.current[, ll] / gamma(1 + 1 / kappas)
+        weibull.S[, ll] <- exp(-(dat$survObj$time / lambdas[, ll])^kappas)
       }
       # for (l in 1:L) {
       #   for (j in 1:p) {
