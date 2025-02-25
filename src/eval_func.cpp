@@ -31,11 +31,9 @@ double log_dens_xis(
     stdvec xis0 = arma::conv_to<stdvec>::from(xis);
     xis0.erase(xis0.begin());
 
-    unsigned int jj = mydata_parm->jj;
-  
-    xis[jj] = par;
+    xis[mydata_parm->jj] = par;
     double vSq = 10.;
-    if (jj > 0) 
+    if (mydata_parm->jj > 0) 
     {
       int ans = std::count(xis0.begin(), xis0.end(), 0.);
       double vA_tmp = mydata_parm->vA + 0.5 * (double)ans;
@@ -62,7 +60,7 @@ double log_dens_xis(
     arma::vec logpost_second = arma::zeros<arma::vec>(mydata_parm->N);
     arma::mat datProportion(mydata_parm->datProportion, mydata_parm->N, mydata_parm->L, false);
     arma::mat weibullS(mydata_parm->weibullS, mydata_parm->N, mydata_parm->L, false);
-    for(unsigned int ll=0; ll<mydata_parm->L; ++ll) 
+    for(int ll=0; ll<(mydata_parm->L); ++ll) 
     {
       //logpost_second += mydata_parm->datProportion.col(ll) % mydata_parm->weibullS.col(ll);
       logpost_second += datProportion.col(ll) % weibullS.col(ll);

@@ -43,6 +43,8 @@ arma::mat arms_gibbs_xi(
   int L = datProportion.n_cols;
   int N = datProportion.n_rows;
 
+  int dometrop = metropolis;
+
   double minD;
   double maxD;
   minD = minRange[0]; // [j]
@@ -50,12 +52,11 @@ arma::mat arms_gibbs_xi(
   double *xl; xl = &minD;
   double *xr; xr = &maxD;
 
-  int dometrop = metropolis;
   double xinit[ninit];
   if (!simple)
   {
     arma::vec xinit0 = arma::linspace( minD+1.0e-10, maxD-1.0e-10, ninit );
-    for (unsigned int i = 0; i < ninit; ++i)
+    for (int i = 0; i < ninit; ++i)
       xinit[i] = xinit0[i];
   }
 
@@ -81,9 +82,10 @@ arma::mat arms_gibbs_xi(
   arma::mat samp = arma::zeros<arma::mat>(p, n + 1);
   samp.col(0) = currentPars;
 
-  for (unsigned int i = 0; i < n; ++i)
+  for (int i = 0; i < n; ++i)
   {
-    for (unsigned int j = 0; j < p; ++j)
+    // Gibbs sampling
+    for (int j = 0; j < p; ++j)
     {
       mydata->jj = j;
       //double initi = samp(j, i);  //samp(j, i)
@@ -132,13 +134,15 @@ arma::mat arms_gibbs_xi(
        std::printf("In ARMS::arms_(): error code in ARMS = %d.\n", err);
       if (isnan(xsamp[nsamp-1]))
         std::printf("In ARMS::arms_(): NaN generated, possibly due to overflow in (log-)density (e.g. with densities involving exp(exp(...))).\n");
-      if (xsamp[n-1] < minD || xsamp[nsamp-1] > maxD)
+      if (xsamp[nsamp-1] < minD || xsamp[nsamp-1] > maxD)
         std::printf("In ARMS::arms_(): %d-th sample out of range [%f, %f] (fused domain). Got %f.\n", nsamp, *xl, *xr, xsamp[nsamp-1]);
 
       //xprev = xsamp[nsamp - 1];
-      //for (unsigned int i = 0; i < n; ++i) samp(j, i + 1) = xsamp[nsamp - n + i];
+      //for (int i = 0; i < n; ++i) samp(j, i + 1) = xsamp[nsamp - n + i];
       currentPars[j] = xsamp[nsamp - 1];
       samp(j, i + 1) = xsamp[nsamp - 1];
+
+      mydata->currentPars = currentPars.memptr();
 
       free(xsamp);
     }
@@ -163,7 +167,8 @@ arma::mat arms_gibbs_xi(
 //' @param npoint Maximum number of envelope points
 //'
 // [[Rcpp::export]]
-arma::mat arms_gibbs_beta(
+arma::mat arms_gibbs_beta( 
+  /* make a subfunction arms_gibbs for only vector betas that can be used for (varying-length) variable selected vector*/
   int n,
   int nsamp, 
   int ninit,
@@ -266,7 +271,7 @@ arma::mat arms_gibbs_beta(
        std::printf("In ARMS::arms_(): error code in ARMS = %d.\n", err);
       if (isnan(xsamp[nsamp-1]))
         std::printf("In ARMS::arms_(): NaN generated, possibly due to overflow in (log-)density (e.g. with densities involving exp(exp(...))).\n");
-      if (xsamp[n-1] < minD || xsamp[nsamp-1] > maxD)
+      if (xsamp[nsamp-1] < minD || xsamp[nsamp-1] > maxD)
         std::printf("In ARMS::arms_(): %d-th sample out of range [%f, %f] (fused domain). Got %f.\n", nsamp, *xl, *xr, xsamp[nsamp-1]);
 
       // std::cout << "...debug xsamp[1:nsamp]=";

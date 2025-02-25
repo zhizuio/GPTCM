@@ -38,12 +38,12 @@ BEGIN_RCPP
 END_RCPP
 }
 // arms_gibbs_beta
-arma::mat arms_gibbs_beta(int n, int nsamp, int ninit, arma::vec minRange, arma::vec maxRange, int metropolis, bool simple, double convex, int npoint, arma::mat currentPars, double vA, double vB, double tauSq, double kappa, arma::cube datX, arma::vec datTheta, arma::mat datMu, arma::mat datProportion, arma::ivec datEvent, arma::vec datTime, arma::mat weibullS);
+arma::mat arms_gibbs_beta(/* make a subfunction arms_gibbs for only vector betas that can be used for (varying-length) variable selected vector*/   int n, int nsamp, int ninit, arma::vec minRange, arma::vec maxRange, int metropolis, bool simple, double convex, int npoint, arma::mat currentPars, double vA, double vB, double tauSq, double kappa, arma::cube datX, arma::vec datTheta, arma::mat datMu, arma::mat datProportion, arma::ivec datEvent, arma::vec datTime, arma::mat weibullS);
 RcppExport SEXP _GPTCM_arms_gibbs_beta(SEXP nSEXP, SEXP nsampSEXP, SEXP ninitSEXP, SEXP minRangeSEXP, SEXP maxRangeSEXP, SEXP metropolisSEXP, SEXP simpleSEXP, SEXP convexSEXP, SEXP npointSEXP, SEXP currentParsSEXP, SEXP vASEXP, SEXP vBSEXP, SEXP tauSqSEXP, SEXP kappaSEXP, SEXP datXSEXP, SEXP datThetaSEXP, SEXP datMuSEXP, SEXP datProportionSEXP, SEXP datEventSEXP, SEXP datTimeSEXP, SEXP weibullSSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< /* make a subfunction arms_gibbs for only vector betas that can be used for (varying-length) variable selected vector*/   int >::type n(nSEXP);
     Rcpp::traits::input_parameter< int >::type nsamp(nsampSEXP);
     Rcpp::traits::input_parameter< int >::type ninit(ninitSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type minRange(minRangeSEXP);

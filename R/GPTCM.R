@@ -319,7 +319,7 @@ GPTCM <- function(dat,
         )
       } else {
         #browser()
-        xi.mcmc.internal <- arms_gibbs(
+        xi.mcmc.internal <- arms_gibbs_xi(
           1, # number of samples to draw, now only 1
           1, # number of MCMC for generating each ARMS sample, only keeping the last one
           10, #  number of initials as meshgrid values for envelop search
@@ -336,7 +336,7 @@ GPTCM <- function(dat,
           datEvent,
           weibull.S
         )
-        # xi.mcmc.internal <- ars_gibbs(
+        # xi.mcmc.internal <- arms_gibbs_xi(
         #   4,
         #   c(0.1, 1, 2), # initializing meshgrid values for envelop search
         #   0.01, 3, ## problematic if lower bound negative, not know why?
