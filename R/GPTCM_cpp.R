@@ -356,13 +356,9 @@ GPTCM_cpp <- function(dat,
       thetas <- exp(dat$x0 %*% xi)
       
       if (!(cpp.xi && cpp.beta && cpp.zeta && cpp.phi && cpp.kappa)) {
-        globalvariable <- list(xi = xi)
-        list2env(globalvariable, .GlobalEnv)
-        
-        globalvariable <- list(vSq = vSq)
-        list2env(globalvariable, .GlobalEnv)
-        
-        globalvariable <- list(thetas = thetas)
+        globalvariable <- list(xi = xi,
+                               vSq = vSq,
+                               thetas = thetas)
         list2env(globalvariable, .GlobalEnv)
       }
 
@@ -394,9 +390,43 @@ GPTCM_cpp <- function(dat,
         }
         
         # update coefficients of the Dirichlet model
+        #browser()
         if (cpp.zeta) {
-          # TBA
-          # ...
+          zetas.mcmc.internal <- arms_gibbs_zeta(
+            1, #n: number of samples to draw, now only 1
+            1, #nsamp: number of MCMC for generating each ARMS sample, only keeping the last one
+            10, #  number of initials as meshgrid values for envelop search
+            #seq(-1, 1, length=10), # initial values
+            -10, 10, # lower and upper bounds
+            1, # 0/1 metropolis step or not
+            arms.simple[1],
+            1, # adjustment for convexity
+            100, # maximum number of envelope points
+            zetas.current,
+            w0Sq, wSq, phi, 
+            kappas,
+            TRUE,
+            dat$XX,
+            thetas, 
+            proportion,
+            dat$proportion,
+            dat$survObj$event, 
+            weibull.S,
+            lambdas
+          )
+          zetas.current <- zetas.mcmc.internal
+          alphas <- sapply(1:L, function(ll)
+          {exp(cbind(1, dat$XX[, , ll]) %*% zetas.current[, ll])}
+          )
+          alphas[alphas > 170] <- 170
+          alphas[alphas < 1e-10] <- 1e-10
+          proportion <- alphas / rowSums(alphas)
+          
+          if (!(cpp.xi && cpp.beta && cpp.zeta && cpp.phi && cpp.kappa)) {
+            globalvariable <- list(zetas.current = zetas.current,
+                                   proportion = proportion)
+            list2env(globalvariable, .GlobalEnv)
+          }
         } else { ## not use cpp 'arms_gibbs_zeta()'
           for (l in 1:ifelse(dirichlet, L, L - 1)) {
             for (j in 1:(p + 1)) {
@@ -452,6 +482,11 @@ GPTCM_cpp <- function(dat,
             globalvariable <- list(proportion = proportion)
             list2env(globalvariable, .GlobalEnv)
           }
+          if (!(cpp.xi && cpp.beta && cpp.zeta && cpp.phi && cpp.kappa)) {
+            globalvariable <- list(zetas.current = zetas.current,
+                                   proportion = proportion)
+            list2env(globalvariable, .GlobalEnv)
+          }
         }
         zetas.mcmc[1 + m, ] <- as.vector(zetas.current)
         
@@ -460,7 +495,7 @@ GPTCM_cpp <- function(dat,
                                  proportion = proportion)
           list2env(globalvariable, .GlobalEnv)
         }
-
+        
         ## update wSq, the variance of zetas
         if (w0Sampler == "IGamma") {
           w0Sq <- sampleW(1, hyperpar$w0A, hyperpar$w0B, zetas.current[1, ])
@@ -525,7 +560,7 @@ GPTCM_cpp <- function(dat,
           1, # adjustment for convexity
           100, # maximum number of envelope points
           betas.current,
-          0, 0, tauSq, kappas,
+          tauSq, kappas,
           dat$XX,
           thetas, mu.current,
           dat$proportion,
@@ -534,9 +569,18 @@ GPTCM_cpp <- function(dat,
         )
         betas.current <- betas.mcmc.internal
         for(ll in 1:L){
-          mu.current[, ll] <- exp(dat$XX[, , ll] %*% betas.current[, l]) # should this and following be out of this for-loop-j?
+          tmp <- dat$XX[, , ll] %*% betas.current[, l]
+          tmp[tmp > 700.] <- 700.
+          mu.current[, ll] <- exp(tmp) # should this and following be out of this for-loop-j?
           lambdas[, ll] <- mu.current[, ll] / gamma(1 + 1 / kappas)
           weibull.S[, ll] <- exp(-(dat$survObj$time / lambdas[, ll])^kappas)
+        }
+        
+        if (!(cpp.xi && cpp.beta && cpp.zeta && cpp.phi && cpp.kappa)) {
+          globalvariable <- list(lambdas = lambdas, 
+                                 mu.current = mu.current, 
+                                 weibull.S = weibull.S) # do we need mu&S her?
+          list2env(globalvariable, .GlobalEnv)
         }
       } else { ## not use cpp 'arms_gibbs_beta()'
         for (l in 1:L) {

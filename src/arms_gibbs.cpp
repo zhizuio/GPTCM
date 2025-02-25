@@ -9,7 +9,7 @@
 // [[Rcpp::depends(RcppArmadillo)]]
 
 
-//' Multivariate ARMS via Gibbs sampler
+//' Multivariate ARMS via Gibbs sampler for xi
 //'
 //' @param n Number of samples to draw
 //' @param nsamp How many samples to draw for generating each sample; only the last draw will be kept
@@ -168,7 +168,6 @@ arma::mat arms_gibbs_xi(
 //'
 // [[Rcpp::export]]
 arma::mat arms_gibbs_beta( 
-  /* make a subfunction arms_gibbs for only vector betas that can be used for (varying-length) variable selected vector*/
   int n,
   int nsamp, 
   int ninit,
@@ -181,8 +180,6 @@ arma::mat arms_gibbs_beta(
   int npoint,
   
   arma::mat currentPars, 
-  double vA, 
-  double vB, 
   double tauSq,
   double kappa,
   arma::cube datX, 
@@ -193,6 +190,8 @@ arma::mat arms_gibbs_beta(
   arma::vec datTime,
   arma::mat weibullS) 
 {
+  /* make a subfunction arms_gibbs for only vector betas that can be used for (varying-length) variable selected vector*/
+
   // dimensions
   int N = datX.n_rows;
   int p = datX.n_cols; 
@@ -291,6 +290,7 @@ arma::mat arms_gibbs_beta(
       arma::vec lambdas = arma::pow( datTime / (datMu.col(l) / std::tgamma(1. + 1./kappa)), kappa);
       lambdas.elem(arma::find(lambdas > upperbound)).fill(upperbound);
       weibullS.col(l) = arma::exp( -lambdas );
+      //weibullS.elem(arma::find(weibullS < lowerbound)).fill(lowerbound); // remove later on if using smaller upperbound for lambdas
 
       mydata->currentPars = currentPars.memptr();
       mydata->datMu = datMu.memptr(); // update this due to its change with updated coefficients
@@ -308,5 +308,151 @@ arma::mat arms_gibbs_beta(
     Rcpp::Named("weibullS") = weibullS
   );
   */
+  return currentPars;
+}
+
+
+
+//' Multivariate ARMS via Gibbs sampler for zeta
+//'
+//' @param n Number of samples to draw
+//' @param nsamp How many samples to draw for generating each sample; only the last draw will be kept
+//' @param ninit Number of initials as meshgrid values for envelop search
+//' @param convex Adjustment for convexity (non-negative value, default 1.0)
+//' @param npoint Maximum number of envelope points
+//' @param dirichlet Not yet implemented
+//'
+// [[Rcpp::export]]
+arma::mat arms_gibbs_zeta( 
+  int n,
+  int nsamp, 
+  int ninit,
+  arma::vec minRange,
+  arma::vec maxRange,
+
+  int metropolis, 
+  bool simple,
+  double convex,
+  int npoint,
+  
+  arma::mat currentPars, 
+  double w0Sq, 
+  double wSq, 
+  double phi,
+  double kappa,
+  bool dirichlet,
+  arma::cube datX, 
+  arma::vec datTheta,
+  arma::mat datProportion,
+  arma::mat datProportionConst,
+  arma::ivec datEvent, 
+  arma::mat weibullS, 
+  arma::mat weibullLambda) 
+{
+  /* make a subfunction arms_gibbs for only vector betas that can be used for (varying-length) variable selected vector*/
+
+  // dimensions
+  int N = datX.n_rows;
+  int p = datX.n_cols; 
+  int L = datX.n_slices;
+
+  int dometrop = metropolis;
+
+  // objects for arms()
+  double minD;
+  double maxD;
+  minD = minRange[0]; // [j]
+  maxD = maxRange[0]; // [j]
+  double *xl; xl = &minD;
+  double *xr; xr = &maxD;
+
+  double xinit[ninit];
+  if (!simple)
+  {
+    arma::vec xinit0 = arma::linspace( minD+1.0e-10, maxD-1.0e-10, ninit );
+    for (int i = 0; i < ninit; ++i)
+      xinit[i] = xinit0[i];
+  }
+
+  if (!dirichlet)
+    std::printf("Warning: In arms_gibbs_zeta(), Dirichlet modeling with logit/alr-link is not implement!\n");
+
+  dataS *mydata = (dataS *)malloc(sizeof (dataS));
+  mydata->currentPars = currentPars.memptr();
+  mydata->p = p;
+  mydata->L = L;
+  mydata->N = N;
+  mydata->w0Sq = w0Sq;
+  mydata->wSq = wSq;
+  mydata->phi = phi;
+  mydata->kappa = kappa,
+  //mydata->dirichlet = dirichlet,
+  mydata->datX = datX.memptr();
+  mydata->datTheta = datTheta.memptr();
+  //mydata->datMu = datMu.memptr();
+  mydata->datProportionConst = datProportionConst.memptr();
+  mydata->datProportion = datProportion.memptr();
+  mydata->datEvent = datEvent.memptr();
+  mydata->weibullS = weibullS.memptr();
+  mydata->weibullLambda = weibullLambda.memptr();
+  
+  for (int l = 0; l < L; ++l)
+  {
+    // Gibbs sampling
+    for (int j = 0; j < p+1; ++j)
+    {
+      mydata->jj = j;
+      mydata->l = l;
+      
+      //double initi = currentPars(j, l);  //samp(j, i)
+      //double *xprev; xprev = &initi;
+      double xprev = currentPars(j, l);
+      double *xsamp = (double*)malloc(nsamp * sizeof(double));
+      double qcent[1], xcent[1];
+      int neval, ncent = 0;
+
+      int err;
+      if (simple)
+      {
+        err = ARMS::arms_simple (
+          ninit, xl,  xr,
+          log_dens_zetas, mydata,
+          dometrop, &xprev, xsamp);
+      } else {
+        err = ARMS::arms (
+          xinit, ninit, xl,  xr,
+          log_dens_zetas, mydata,
+          &convex, npoint,
+          dometrop, &xprev, xsamp,
+          nsamp, qcent, xcent, ncent, &neval);
+      }
+
+      // check ARMS validity
+      if (err > 0)
+       std::printf("In ARMS::arms_(): error code in ARMS = %d.\n", err);
+      if (isnan(xsamp[nsamp-1]))
+        std::printf("In ARMS::arms_(): NaN generated, possibly due to overflow in (log-)density (e.g. with densities involving exp(exp(...))).\n");
+      if (xsamp[nsamp-1] < minD || xsamp[nsamp-1] > maxD)
+        std::printf("In ARMS::arms_(): %d-th sample out of range [%f, %f] (fused domain). Got %f.\n", nsamp, *xl, *xr, xsamp[nsamp-1]);
+
+      currentPars(j, l) = xsamp[nsamp - 1];
+
+      // update proportions based on currentPars 
+      arma::mat alphas = arma::zeros<arma::mat>(N, L);
+      for(int ll=0; ll<L; ++ll) 
+      {
+        alphas.col(ll) = arma::exp( currentPars(0, ll) + datX.slice(ll) * currentPars.submat(1, ll, p, ll) );
+      }
+      alphas.elem(arma::find(alphas > upperbound3)).fill(upperbound3);
+      datProportion %= arma::repmat(arma::sum(alphas, 1), 1, L);
+
+      mydata->currentPars = currentPars.memptr();
+      mydata->datProportion = datProportion.memptr(); // update this due to its change with updated coefficients
+
+      free(xsamp);
+    }
+  }
+  free(mydata);
+
   return currentPars;
 }

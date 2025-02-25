@@ -38,12 +38,12 @@ BEGIN_RCPP
 END_RCPP
 }
 // arms_gibbs_beta
-arma::mat arms_gibbs_beta(/* make a subfunction arms_gibbs for only vector betas that can be used for (varying-length) variable selected vector*/   int n, int nsamp, int ninit, arma::vec minRange, arma::vec maxRange, int metropolis, bool simple, double convex, int npoint, arma::mat currentPars, double vA, double vB, double tauSq, double kappa, arma::cube datX, arma::vec datTheta, arma::mat datMu, arma::mat datProportion, arma::ivec datEvent, arma::vec datTime, arma::mat weibullS);
-RcppExport SEXP _GPTCM_arms_gibbs_beta(SEXP nSEXP, SEXP nsampSEXP, SEXP ninitSEXP, SEXP minRangeSEXP, SEXP maxRangeSEXP, SEXP metropolisSEXP, SEXP simpleSEXP, SEXP convexSEXP, SEXP npointSEXP, SEXP currentParsSEXP, SEXP vASEXP, SEXP vBSEXP, SEXP tauSqSEXP, SEXP kappaSEXP, SEXP datXSEXP, SEXP datThetaSEXP, SEXP datMuSEXP, SEXP datProportionSEXP, SEXP datEventSEXP, SEXP datTimeSEXP, SEXP weibullSSEXP) {
+arma::mat arms_gibbs_beta(int n, int nsamp, int ninit, arma::vec minRange, arma::vec maxRange, int metropolis, bool simple, double convex, int npoint, arma::mat currentPars, double tauSq, double kappa, arma::cube datX, arma::vec datTheta, arma::mat datMu, arma::mat datProportion, arma::ivec datEvent, arma::vec datTime, arma::mat weibullS);
+RcppExport SEXP _GPTCM_arms_gibbs_beta(SEXP nSEXP, SEXP nsampSEXP, SEXP ninitSEXP, SEXP minRangeSEXP, SEXP maxRangeSEXP, SEXP metropolisSEXP, SEXP simpleSEXP, SEXP convexSEXP, SEXP npointSEXP, SEXP currentParsSEXP, SEXP tauSqSEXP, SEXP kappaSEXP, SEXP datXSEXP, SEXP datThetaSEXP, SEXP datMuSEXP, SEXP datProportionSEXP, SEXP datEventSEXP, SEXP datTimeSEXP, SEXP weibullSSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< /* make a subfunction arms_gibbs for only vector betas that can be used for (varying-length) variable selected vector*/   int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
     Rcpp::traits::input_parameter< int >::type nsamp(nsampSEXP);
     Rcpp::traits::input_parameter< int >::type ninit(ninitSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type minRange(minRangeSEXP);
@@ -53,8 +53,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type convex(convexSEXP);
     Rcpp::traits::input_parameter< int >::type npoint(npointSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type currentPars(currentParsSEXP);
-    Rcpp::traits::input_parameter< double >::type vA(vASEXP);
-    Rcpp::traits::input_parameter< double >::type vB(vBSEXP);
     Rcpp::traits::input_parameter< double >::type tauSq(tauSqSEXP);
     Rcpp::traits::input_parameter< double >::type kappa(kappaSEXP);
     Rcpp::traits::input_parameter< arma::cube >::type datX(datXSEXP);
@@ -64,7 +62,39 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::ivec >::type datEvent(datEventSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type datTime(datTimeSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type weibullS(weibullSSEXP);
-    rcpp_result_gen = Rcpp::wrap(arms_gibbs_beta(n, nsamp, ninit, minRange, maxRange, metropolis, simple, convex, npoint, currentPars, vA, vB, tauSq, kappa, datX, datTheta, datMu, datProportion, datEvent, datTime, weibullS));
+    rcpp_result_gen = Rcpp::wrap(arms_gibbs_beta(n, nsamp, ninit, minRange, maxRange, metropolis, simple, convex, npoint, currentPars, tauSq, kappa, datX, datTheta, datMu, datProportion, datEvent, datTime, weibullS));
+    return rcpp_result_gen;
+END_RCPP
+}
+// arms_gibbs_zeta
+arma::mat arms_gibbs_zeta(int n, int nsamp, int ninit, arma::vec minRange, arma::vec maxRange, int metropolis, bool simple, double convex, int npoint, arma::mat currentPars, double w0Sq, double wSq, double phi, double kappa, bool dirichlet, arma::cube datX, arma::vec datTheta, arma::mat datProportion, arma::mat datProportionConst, arma::ivec datEvent, arma::mat weibullS, arma::mat weibullLambda);
+RcppExport SEXP _GPTCM_arms_gibbs_zeta(SEXP nSEXP, SEXP nsampSEXP, SEXP ninitSEXP, SEXP minRangeSEXP, SEXP maxRangeSEXP, SEXP metropolisSEXP, SEXP simpleSEXP, SEXP convexSEXP, SEXP npointSEXP, SEXP currentParsSEXP, SEXP w0SqSEXP, SEXP wSqSEXP, SEXP phiSEXP, SEXP kappaSEXP, SEXP dirichletSEXP, SEXP datXSEXP, SEXP datThetaSEXP, SEXP datProportionSEXP, SEXP datProportionConstSEXP, SEXP datEventSEXP, SEXP weibullSSEXP, SEXP weibullLambdaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< int >::type nsamp(nsampSEXP);
+    Rcpp::traits::input_parameter< int >::type ninit(ninitSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type minRange(minRangeSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type maxRange(maxRangeSEXP);
+    Rcpp::traits::input_parameter< int >::type metropolis(metropolisSEXP);
+    Rcpp::traits::input_parameter< bool >::type simple(simpleSEXP);
+    Rcpp::traits::input_parameter< double >::type convex(convexSEXP);
+    Rcpp::traits::input_parameter< int >::type npoint(npointSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type currentPars(currentParsSEXP);
+    Rcpp::traits::input_parameter< double >::type w0Sq(w0SqSEXP);
+    Rcpp::traits::input_parameter< double >::type wSq(wSqSEXP);
+    Rcpp::traits::input_parameter< double >::type phi(phiSEXP);
+    Rcpp::traits::input_parameter< double >::type kappa(kappaSEXP);
+    Rcpp::traits::input_parameter< bool >::type dirichlet(dirichletSEXP);
+    Rcpp::traits::input_parameter< arma::cube >::type datX(datXSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type datTheta(datThetaSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type datProportion(datProportionSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type datProportionConst(datProportionConstSEXP);
+    Rcpp::traits::input_parameter< arma::ivec >::type datEvent(datEventSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type weibullS(weibullSSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type weibullLambda(weibullLambdaSEXP);
+    rcpp_result_gen = Rcpp::wrap(arms_gibbs_zeta(n, nsamp, ninit, minRange, maxRange, metropolis, simple, convex, npoint, currentPars, w0Sq, wSq, phi, kappa, dirichlet, datX, datTheta, datProportion, datProportionConst, datEvent, weibullS, weibullLambda));
     return rcpp_result_gen;
 END_RCPP
 }

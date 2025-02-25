@@ -8,6 +8,8 @@
 
 
   inline double upperbound = 700.;
+  inline double upperbound3 = 170.;
+  inline double lowerbound = 1.0e-10;
 
   typedef std::vector<double> stdvec;
 
@@ -16,26 +18,34 @@
   {
     // members
     double *currentPars;
-    unsigned int jj;
-
+    
+    int jj;
     int l;
     int p;
     int L;
     int N;
+
+    double vA;
+    double vB;
     double tauSq;
-    double kappa;
-    double *datTheta; 
-    double *datMu; 
-    double *datTime; 
+    double w0Sq;
+    double wSq;
+    double phi;
+    bool dirichlet;
 
     double *xl;
     double *xr;
-    double vA;
-    double vB;
+
+    double kappa;
+    double *datTheta; 
+    double *datMu; 
     double *datX;
     double *datProportion;
+    double *datProportionConst;
     int *datEvent;
+    double *datTime;
     double *weibullS;
+    double *weibullLambda;
   }dataS;
 
 
@@ -57,6 +67,16 @@
     void *abc_data
   );
   
+  double log_dens_phi
+  (
+    double par, 
+    void *abc_data
+  );
 
+  double log_dens_kappa
+  (
+    double par, 
+    void *abc_data
+  );
 
 #endif

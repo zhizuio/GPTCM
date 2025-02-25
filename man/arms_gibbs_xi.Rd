@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{arms_gibbs_xi}
 \alias{arms_gibbs_xi}
-\title{Multivariate ARMS via Gibbs sampler}
+\title{Multivariate ARMS via Gibbs sampler for xi}
 \usage{
 arms_gibbs_xi(
   n,
@@ -35,5 +35,5 @@ arms_gibbs_xi(
 \item{npoint}{Maximum number of envelope points}
 }
 \description{
-Multivariate ARMS via Gibbs sampler
+Multivariate ARMS via Gibbs sampler for xi
 }

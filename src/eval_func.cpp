@@ -137,3 +137,94 @@ double log_dens_betas(
   
   return h;
 }
+
+
+// log-density for coefficient zetas
+double log_dens_zetas(
+  double par, 
+  void *abc_data) 
+{
+  double h = 0.0; 
+
+  dataS *mydata_parm = (dataS *)calloc(sizeof(dataS), sizeof(dataS));
+  *mydata_parm = *(dataS *)abc_data;
+
+  arma::mat pars(mydata_parm->currentPars, mydata_parm->p + 1, mydata_parm->L, true);
+  pars(mydata_parm->jj, mydata_parm->l) = par;
+
+  // update proportions based on proposal
+  arma::mat datProportionTmp(mydata_parm->datProportion, mydata_parm->N, mydata_parm->L, true);
+  arma::cube datX(mydata_parm->datX, mydata_parm->N, mydata_parm->p, mydata_parm->L, false);
+  arma::mat alphas = arma::zeros<arma::mat>(mydata_parm->N, mydata_parm->L);
+
+  for(int ll=0; ll<(mydata_parm->L); ++ll) 
+  {
+    alphas.col(ll) = arma::exp( pars(0, ll) + datX.slice(ll) * pars.submat(1, ll, mydata_parm->p, ll) );
+  }
+  alphas.elem(arma::find(alphas > upperbound3)).fill(upperbound3);
+  alphas.elem(arma::find(alphas < lowerbound)).fill(lowerbound);
+  arma::vec alphas_Rowsum = arma::sum(alphas, 1);
+// /*
+  // compute log prior
+  double w = mydata_parm->wSq;
+  if(mydata_parm->jj == 0) 
+  {
+    w = mydata_parm->w0Sq;
+  } 
+  double logprior = - par * par / w / 2.;
+
+  // non-cured density related censored part
+  arma::vec logpost_first = arma::zeros<arma::vec>(mydata_parm->N);
+  arma::vec logpost_second = arma::zeros<arma::vec>(mydata_parm->N);
+  arma::mat weibullS(mydata_parm->weibullS, mydata_parm->N, mydata_parm->L, false);
+  arma::mat weibull_lambdas(mydata_parm->weibullLambda, mydata_parm->N, mydata_parm->L, false);
+  //arma::mat weibull_lambdas = arma::mat(mydata_parm->datMu, mydata_parm->N, mydata_parm->L, false) / std::tgamma(1. + 1./mydata_parm->kappa);
+  //weibullS.elem(arma::find(weibullS < lowerbound)).fill(lowerbound);
+  for(int ll=0; ll<(mydata_parm->L); ++ll) 
+  {
+    arma::vec tmp = datProportionTmp.col(ll) / alphas_Rowsum %  weibullS.col(ll);
+    logpost_first += arma::pow(weibull_lambdas.col(ll), - mydata_parm->kappa) % tmp;
+    logpost_second += tmp;
+  }
+
+  double logpost_first_sum = 0.;
+  logpost_first_sum = arma::accu( arma::log( logpost_first.elem(arma::find(
+    arma::ivec(mydata_parm->datEvent, mydata_parm->N, false)
+  )) ) );
+
+  double logpost_second_sum = 0.;
+  logpost_second_sum = arma::accu(arma::vec(mydata_parm->datTheta, mydata_parm->N, false) % logpost_second);
+
+  // Dirichlet density
+  arma::mat datProportionConst_tmp(mydata_parm->datProportionConst, mydata_parm->N, mydata_parm->L, false);
+  /*
+  arma::vec log_dirichlet = arma::zeros<arma::vec>(mydata_parm->N);
+  for(int i=0; i<(mydata_parm->N); ++i)
+  {
+    double rowSum_lgamma_alphas = 0;
+    for(int ll=0; ll<(mydata_parm->L); ++l)
+    {
+      rowSum_lgamma_alphas += std::lgamma(alphas(i,ll));
+    }
+    log_dirichlet[i] = std::lgamma(alphas_Rowsum[i]) - rowSum_lgamma_alphas + 
+      arma::accu((alphas.row(i)-1.0) % arma::log(datProportionConst_tmp.row(i)));
+  }
+  double log_dirichlet_sum = arma::accu(log_dirichlet) 
+  */
+  double log_dirichlet_sum = 0.;
+  log_dirichlet_sum = arma::accu(
+    arma::lgamma(alphas_Rowsum) - arma::sum(arma::lgamma(alphas), 1) + 
+      arma::sum( (alphas - 1.0) % arma::log(datProportionConst_tmp), 1 )
+  );
+
+  h = logprior + logpost_first_sum + logpost_second_sum + log_dirichlet_sum;
+/*
+  std::cout << "...debug log_dens_zetas: h=" << h << 
+  "; logprior=" << logprior <<
+  "; logpost_first_sum=" << logpost_first_sum <<
+  "; logpost_second_sum=" << logpost_second_sum <<
+  "; log_dirichlet_sum=" << log_dirichlet_sum <<
+  "\n";
+*/
+  return h;
+}
