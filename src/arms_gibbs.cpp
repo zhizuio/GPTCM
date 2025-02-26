@@ -49,8 +49,8 @@ arma::mat arms_gibbs_xi(
   double maxD;
   minD = minRange[0]; // [j]
   maxD = maxRange[0]; // [j]
-  double *xl; xl = &minD;
-  double *xr; xr = &maxD;
+  //double *xl; xl = &minD;
+  //double *xr; xr = &maxD;
 
   double xinit[ninit];
   if (!simple)
@@ -97,12 +97,12 @@ arma::mat arms_gibbs_xi(
       if (simple)
       {
         err = ARMS::arms_simple (
-          ninit, xl,  xr,
+          ninit, &minD, &maxD,
           log_dens_xis, mydata,
           dometrop, &xprev, xsamp);
       } else {
         err = ARMS::arms (
-          xinit, ninit, xl,  xr,
+          xinit, ninit, &minD, &maxD,
           log_dens_xis, mydata,
           &convex, npoint,
           dometrop, &xprev, xsamp,
@@ -133,7 +133,7 @@ arma::mat arms_gibbs_xi(
       if (isnan(xsamp[nsamp-1]))
         std::printf("In ARMS::arms_(): NaN generated, possibly due to overflow in (log-)density (e.g. with densities involving exp(exp(...))).\n");
       if (xsamp[nsamp-1] < minD || xsamp[nsamp-1] > maxD)
-        std::printf("In ARMS::arms_(): %d-th sample out of range [%f, %f] (fused domain). Got %f.\n", nsamp, *xl, *xr, xsamp[nsamp-1]);
+        std::printf("In ARMS::arms_(): %d-th sample out of range [%f, %f] (fused domain). Got %f.\n", nsamp, minD, maxD, xsamp[nsamp-1]);
 
       //xprev = xsamp[nsamp - 1];
       //for (int i = 0; i < n; ++i) samp(j, i + 1) = xsamp[nsamp - n + i];
@@ -202,8 +202,8 @@ arma::mat arms_gibbs_beta(
   double maxD;
   minD = minRange[0]; // [j]
   maxD = maxRange[0]; // [j]
-  double *xl; xl = &minD;
-  double *xr; xr = &maxD;
+  //double *xl; xl = &minD;
+  //double *xr; xr = &maxD;
 
   double xinit[ninit];
   if (!simple)
@@ -251,12 +251,12 @@ arma::mat arms_gibbs_beta(
       if (simple)
       {
         err = ARMS::arms_simple (
-          ninit, xl,  xr,
+          ninit, &minD, &maxD,
           log_dens_betas, mydata,
           dometrop, &xprev, xsamp);
       } else {
         err = ARMS::arms (
-          xinit, ninit, xl,  xr,
+          xinit, ninit, &minD, &maxD,
           log_dens_betas, mydata,
           &convex, npoint,
           dometrop, &xprev, xsamp,
@@ -269,7 +269,7 @@ arma::mat arms_gibbs_beta(
       if (isnan(xsamp[nsamp-1]))
         std::printf("In ARMS::arms_(): NaN generated, possibly due to overflow in (log-)density (e.g. with densities involving exp(exp(...))).\n");
       if (xsamp[nsamp-1] < minD || xsamp[nsamp-1] > maxD)
-        std::printf("In ARMS::arms_(): %d-th sample out of range [%f, %f] (fused domain). Got %f.\n", nsamp, *xl, *xr, xsamp[nsamp-1]);
+        std::printf("In ARMS::arms_(): %d-th sample out of range [%f, %f] (fused domain). Got %f.\n", nsamp, minD, maxD, xsamp[nsamp-1]);
 
       // std::cout << "...debug xsamp[1:nsamp]=";
       // for( int i=0; i<nsamp; ++i) {
@@ -361,8 +361,8 @@ arma::mat arms_gibbs_zeta(
   double maxD;
   minD = minRange[0]; // [j]
   maxD = maxRange[0]; // [j]
-  double *xl; xl = &minD;
-  double *xr; xr = &maxD;
+  //double *xl; xl = &minD;
+  //double *xr; xr = &maxD;
 
   double xinit[ninit];
   if (!simple)
@@ -413,12 +413,12 @@ arma::mat arms_gibbs_zeta(
       if (simple)
       {
         err = ARMS::arms_simple (
-          ninit, xl,  xr,
+          ninit, &minD, &maxD,
           log_dens_zetas, mydata,
           dometrop, &xprev, xsamp);
       } else {
         err = ARMS::arms (
-          xinit, ninit, xl,  xr,
+          xinit, ninit, &minD, &maxD,
           log_dens_zetas, mydata,
           &convex, npoint,
           dometrop, &xprev, xsamp,
@@ -431,7 +431,7 @@ arma::mat arms_gibbs_zeta(
       if (isnan(xsamp[nsamp-1]))
         std::printf("In ARMS::arms_(): NaN generated, possibly due to overflow in (log-)density (e.g. with densities involving exp(exp(...))).\n");
       if (xsamp[nsamp-1] < minD || xsamp[nsamp-1] > maxD)
-        std::printf("In ARMS::arms_(): %d-th sample out of range [%f, %f] (fused domain). Got %f.\n", nsamp, *xl, *xr, xsamp[nsamp-1]);
+        std::printf("In ARMS::arms_(): %d-th sample out of range [%f, %f] (fused domain). Got %f.\n", nsamp, minD, maxD, xsamp[nsamp-1]);
 
       currentPars(j, l) = xsamp[nsamp - 1];
 
@@ -490,8 +490,8 @@ arma::vec arms_phi(
   // objects for arms()
   double minD = minRange;
   double maxD = maxRange;
-  double *xl; xl = &minD;
-  double *xr; xr = &maxD;
+  //double *xl; xl = &minD;
+  //double *xr; xr = &maxD;
 
   double xinit[ninit];
   if (!simple)
@@ -520,12 +520,12 @@ arma::vec arms_phi(
   if (simple)
   {
     err = ARMS::arms_simple (
-      ninit, xl,  xr,
+      ninit, &minD, &maxD,
       log_dens_phi, mydata,
       dometrop, &xprev, xsamp);
   } else {
     err = ARMS::arms (
-      xinit, ninit, xl,  xr,
+      xinit, ninit, &minD, &maxD,
       log_dens_phi, mydata,
       &convex, npoint,
       dometrop, &xprev, xsamp,
@@ -538,7 +538,7 @@ arma::vec arms_phi(
   if (isnan(xsamp[nsamp-1]))
     std::printf("In ARMS::arms_(): NaN generated, possibly due to overflow in (log-)density (e.g. with densities involving exp(exp(...))).\n");
   if (xsamp[nsamp-1] < minD || xsamp[nsamp-1] > maxD)
-    std::printf("In ARMS::arms_(): %d-th sample out of range [%f, %f] (fused domain). Got %f.\n", nsamp, *xl, *xr, xsamp[nsamp-1]);
+    std::printf("In ARMS::arms_(): %d-th sample out of range [%f, %f] (fused domain). Got %f.\n", nsamp, minD, maxD, xsamp[nsamp-1]);
 
   currentPars = xsamp[nsamp - 1];
   for (int i = 0; i < n; ++i) 
@@ -595,8 +595,8 @@ arma::vec arms_kappa(
   // objects for arms()
   double minD = minRange;
   double maxD = maxRange;
-  double *xl; xl = &minD;
-  double *xr; xr = &maxD;
+  //double *xl; xl = &minD;
+  //double *xr; xr = &maxD;
 
   double xinit[ninit];
   if (!simple)
@@ -635,12 +635,12 @@ arma::vec arms_kappa(
   if (simple)
   {
     err = ARMS::arms_simple (
-      ninit, xl,  xr,
+      ninit, &minD, &maxD,
       log_dens_kappa, mydata,
       dometrop, &xprev, xsamp);
   } else {
     err = ARMS::arms (
-      xinit, ninit, xl,  xr,
+      xinit, ninit, &minD, &maxD,
       log_dens_kappa, mydata,
       &convex, npoint,
       dometrop, &xprev, xsamp,
@@ -653,7 +653,7 @@ arma::vec arms_kappa(
   if (isnan(xsamp[nsamp-1]))
     std::printf("In ARMS::arms_(): NaN generated, possibly due to overflow in (log-)density (e.g. with densities involving exp(exp(...))).\n");
   if (xsamp[nsamp-1] < minD || xsamp[nsamp-1] > maxD)
-    std::printf("In ARMS::arms_(): %d-th sample out of range [%f, %f] (fused domain). Got %f.\n", nsamp, *xl, *xr, xsamp[nsamp-1]);
+    std::printf("In ARMS::arms_(): %d-th sample out of range [%f, %f] (fused domain). Got %f.\n", nsamp, minD, maxD, xsamp[nsamp-1]);
 
   currentPars = xsamp[nsamp - 1];
   for (int i = 0; i < n; ++i) 
