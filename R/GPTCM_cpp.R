@@ -527,7 +527,7 @@ GPTCM_cpp <- function(dat,
       }
       
       ## update kappa in noncure fraction
-      browser()
+      #browser()
       if (cpp.kappa) {
         kappas.mcmc.internal <- arms_kappa(
           1, #n: number of samples to draw, now only 1
