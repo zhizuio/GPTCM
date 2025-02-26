@@ -72,6 +72,8 @@ double log_dens_xis(
   //} else {
   //  h = -1.0e100;
   //}
+
+  std::cout << "...debug log_dens_xis h=" << h << "\n";
   
   return h;
 }
@@ -134,6 +136,8 @@ double log_dens_betas(
     datProportion.col(mydata_parm->l) % weibullS_tmp.col(mydata_parm->l));
 
   h = logpost_first_sum + logpost_second_sum + logprior;
+
+  std::cout << "...debug log_dens_betas h=" << h << "\n";
   
   return h;
 }
@@ -218,14 +222,14 @@ double log_dens_zetas(
   );
 
   h = logprior + logpost_first_sum + logpost_second_sum + log_dirichlet_sum;
-/*
+
   std::cout << "...debug log_dens_zetas: h=" << h << 
   "; logprior=" << logprior <<
   "; logpost_first_sum=" << logpost_first_sum <<
   "; logpost_second_sum=" << logpost_second_sum <<
   "; log_dirichlet_sum=" << log_dirichlet_sum <<
   "\n";
-*/
+
   return h;
 }
 
@@ -268,6 +272,8 @@ double log_dens_phi(
 
   h = logprior + arma::accu(normalizingConst + geometricTerm);
 
+  std::cout << "...debug log_dens_phi h=" << h << "\n";
+
   return h;
 }
 
@@ -307,10 +313,6 @@ double log_dens_kappa(
     lambdas_tmp.elem(arma::find(lambdas_tmp > upperbound)).fill(upperbound);
     arma::vec weibullS_tmp = arma::exp(- lambdas_tmp);
 
-    std::cout << "...debug ll=" << ll << 
-    "; min(datProportion.col(ll))" << arma::min(datProportion.col(ll)) <<  
-    "; min(weibull_lambdas_tmp)" << arma::min(weibull_lambdas_tmp) <<  
-    "; min(weibullS_tmp)" << arma::min(weibullS_tmp) <<  "\n";
     logpost_first += datProportion.col(ll) % arma::pow(weibull_lambdas_tmp, par) % weibullS_tmp;
     logpost_second += datProportion.col(ll) % weibullS_tmp;
   }
@@ -324,10 +326,6 @@ double log_dens_kappa(
 
   h = logprior + logpost_first_sum + logpost_second_sum;
 
-  std::cout << "...debug par=" << par << 
-  "; h=" << h << 
-  "; logpost_first_sum=" << logpost_first_sum << 
-  "; logpost_second_sum=" << logpost_second_sum << 
-  "\n";
+  std::cout << "...debug log_dens_kappa h=" << h << "\n";
   return h;
 }
