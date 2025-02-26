@@ -341,12 +341,12 @@ arma::mat arms_gibbs_zeta(
   bool dirichlet,
   arma::cube datX, 
   arma::vec datTheta,
-  arma::mat datProportion,
   arma::mat datProportionConst,
   arma::ivec datEvent, 
   arma::mat weibullS, 
   arma::mat weibullLambda) 
 {
+  // arma::mat datProportion, // remove this argument
   /* make a subfunction arms_gibbs for only vector betas that can be used for (varying-length) variable selected vector*/
 
   // dimensions
@@ -389,7 +389,7 @@ arma::mat arms_gibbs_zeta(
   mydata->datTheta = datTheta.memptr();
   //mydata->datMu = datMu.memptr();
   mydata->datProportionConst = datProportionConst.memptr();
-  mydata->datProportion = datProportion.memptr();
+  //mydata->datProportion = datProportion.memptr();
   mydata->datEvent = datEvent.memptr();
   mydata->weibullS = weibullS.memptr();
   mydata->weibullLambda = weibullLambda.memptr();
@@ -436,16 +436,18 @@ arma::mat arms_gibbs_zeta(
       currentPars(j, l) = xsamp[nsamp - 1];
 
       // update proportions based on currentPars 
+      /*
       arma::mat alphas = arma::zeros<arma::mat>(N, L);
       for(int ll=0; ll<L; ++ll) 
       {
         alphas.col(ll) = arma::exp( currentPars(0, ll) + datX.slice(ll) * currentPars.submat(1, ll, p, ll) );
       }
       alphas.elem(arma::find(alphas > upperbound3)).fill(upperbound3);
-      datProportion %= arma::repmat(arma::sum(alphas, 1), 1, L);
+      datProportion = alphas / arma::repmat(arma::sum(alphas, 1), 1, L);
+      */
 
       mydata->currentPars = currentPars.memptr();
-      mydata->datProportion = datProportion.memptr(); // update this due to its change with updated coefficients
+      //mydata->datProportion = datProportion.memptr(); 
 
       free(xsamp);
     }

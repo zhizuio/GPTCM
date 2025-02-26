@@ -73,7 +73,7 @@ double log_dens_xis(
   //  h = -1.0e100;
   //}
 
-  std::cout << "...debug log_dens_xis h=" << h << "\n";
+  // std::cout << "...debug log_dens_xis h=" << h << "\n";
   
   return h;
 }
@@ -137,7 +137,7 @@ double log_dens_betas(
 
   h = logpost_first_sum + logpost_second_sum + logprior;
 
-  std::cout << "...debug log_dens_betas h=" << h << "\n";
+  // std::cout << "...debug log_dens_betas h=" << h << "\n";
   
   return h;
 }
@@ -157,7 +157,7 @@ double log_dens_zetas(
   pars(mydata_parm->jj, mydata_parm->l) = par;
 
   // update proportions based on proposal
-  arma::mat datProportionTmp(mydata_parm->datProportion, mydata_parm->N, mydata_parm->L, true);
+  //arma::mat datProportionTmp(mydata_parm->datProportion, mydata_parm->N, mydata_parm->L, true);
   arma::cube datX(mydata_parm->datX, mydata_parm->N, mydata_parm->p, mydata_parm->L, false);
   arma::mat alphas = arma::zeros<arma::mat>(mydata_parm->N, mydata_parm->L);
 
@@ -186,7 +186,8 @@ double log_dens_zetas(
   //weibullS.elem(arma::find(weibullS < lowerbound)).fill(lowerbound);
   for(int ll=0; ll<(mydata_parm->L); ++ll) 
   {
-    arma::vec tmp = datProportionTmp.col(ll) / alphas_Rowsum %  weibullS.col(ll);
+    //arma::vec tmp = datProportionTmp.col(ll) / alphas_Rowsum %  weibullS.col(ll);
+    arma::vec tmp = alphas.col(ll) / alphas_Rowsum %  weibullS.col(ll);
     logpost_first += arma::pow(weibull_lambdas.col(ll), - mydata_parm->kappa) % tmp;
     logpost_second += tmp;
   }
@@ -222,14 +223,14 @@ double log_dens_zetas(
   );
 
   h = logprior + logpost_first_sum + logpost_second_sum + log_dirichlet_sum;
-
+/*
   std::cout << "...debug log_dens_zetas: h=" << h << 
   "; logprior=" << logprior <<
   "; logpost_first_sum=" << logpost_first_sum <<
   "; logpost_second_sum=" << logpost_second_sum <<
   "; log_dirichlet_sum=" << log_dirichlet_sum <<
   "\n";
-
+*/
   return h;
 }
 
@@ -272,7 +273,7 @@ double log_dens_phi(
 
   h = logprior + arma::accu(normalizingConst + geometricTerm);
 
-  std::cout << "...debug log_dens_phi h=" << h << "\n";
+  // std::cout << "...debug log_dens_phi h=" << h << "\n";
 
   return h;
 }
@@ -326,6 +327,6 @@ double log_dens_kappa(
 
   h = logprior + logpost_first_sum + logpost_second_sum;
 
-  std::cout << "...debug log_dens_kappa h=" << h << "\n";
+  // std::cout << "...debug log_dens_kappa h=" << h << "\n";
   return h;
 }

@@ -22,7 +22,6 @@ arms_gibbs_zeta(
   dirichlet,
   datX,
   datTheta,
-  datProportion,
   datProportionConst,
   datEvent,
   weibullS,

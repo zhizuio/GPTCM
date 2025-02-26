@@ -34,8 +34,8 @@ arms_gibbs_beta <- function(n, nsamp, ninit, minRange, maxRange, metropolis, sim
 #' @param npoint Maximum number of envelope points
 #' @param dirichlet Not yet implemented
 #'
-arms_gibbs_zeta <- function(n, nsamp, ninit, minRange, maxRange, metropolis, simple, convex, npoint, currentPars, w0Sq, wSq, phi, kappa, dirichlet, datX, datTheta, datProportion, datProportionConst, datEvent, weibullS, weibullLambda) {
-    .Call('_GPTCM_arms_gibbs_zeta', PACKAGE = 'GPTCM', n, nsamp, ninit, minRange, maxRange, metropolis, simple, convex, npoint, currentPars, w0Sq, wSq, phi, kappa, dirichlet, datX, datTheta, datProportion, datProportionConst, datEvent, weibullS, weibullLambda)
+arms_gibbs_zeta <- function(n, nsamp, ninit, minRange, maxRange, metropolis, simple, convex, npoint, currentPars, w0Sq, wSq, phi, kappa, dirichlet, datX, datTheta, datProportionConst, datEvent, weibullS, weibullLambda) {
+    .Call('_GPTCM_arms_gibbs_zeta', PACKAGE = 'GPTCM', n, nsamp, ninit, minRange, maxRange, metropolis, simple, convex, npoint, currentPars, w0Sq, wSq, phi, kappa, dirichlet, datX, datTheta, datProportionConst, datEvent, weibullS, weibullLambda)
 }
 
 #' Univariate ARMS for phi
