@@ -98,6 +98,57 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// arms_phi
+arma::vec arms_phi(int n, int nsamp, int ninit, double minRange, double maxRange, int metropolis, bool simple, double convex, int npoint, double currentPars, double Delta, arma::mat datProportion, arma::mat datProportionConst);
+RcppExport SEXP _GPTCM_arms_phi(SEXP nSEXP, SEXP nsampSEXP, SEXP ninitSEXP, SEXP minRangeSEXP, SEXP maxRangeSEXP, SEXP metropolisSEXP, SEXP simpleSEXP, SEXP convexSEXP, SEXP npointSEXP, SEXP currentParsSEXP, SEXP DeltaSEXP, SEXP datProportionSEXP, SEXP datProportionConstSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< int >::type nsamp(nsampSEXP);
+    Rcpp::traits::input_parameter< int >::type ninit(ninitSEXP);
+    Rcpp::traits::input_parameter< double >::type minRange(minRangeSEXP);
+    Rcpp::traits::input_parameter< double >::type maxRange(maxRangeSEXP);
+    Rcpp::traits::input_parameter< int >::type metropolis(metropolisSEXP);
+    Rcpp::traits::input_parameter< bool >::type simple(simpleSEXP);
+    Rcpp::traits::input_parameter< double >::type convex(convexSEXP);
+    Rcpp::traits::input_parameter< int >::type npoint(npointSEXP);
+    Rcpp::traits::input_parameter< double >::type currentPars(currentParsSEXP);
+    Rcpp::traits::input_parameter< double >::type Delta(DeltaSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type datProportion(datProportionSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type datProportionConst(datProportionConstSEXP);
+    rcpp_result_gen = Rcpp::wrap(arms_phi(n, nsamp, ninit, minRange, maxRange, metropolis, simple, convex, npoint, currentPars, Delta, datProportion, datProportionConst));
+    return rcpp_result_gen;
+END_RCPP
+}
+// arms_kappa
+arma::vec arms_kappa(int n, int nsamp, int ninit, double minRange, double maxRange, int metropolis, bool simple, double convex, int npoint, double currentPars, double kappaA, double kappaB, bool invGamma, arma::vec datTheta, arma::mat datMu, arma::mat datProportion, arma::ivec datEvent, arma::vec datTime);
+RcppExport SEXP _GPTCM_arms_kappa(SEXP nSEXP, SEXP nsampSEXP, SEXP ninitSEXP, SEXP minRangeSEXP, SEXP maxRangeSEXP, SEXP metropolisSEXP, SEXP simpleSEXP, SEXP convexSEXP, SEXP npointSEXP, SEXP currentParsSEXP, SEXP kappaASEXP, SEXP kappaBSEXP, SEXP invGammaSEXP, SEXP datThetaSEXP, SEXP datMuSEXP, SEXP datProportionSEXP, SEXP datEventSEXP, SEXP datTimeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< int >::type nsamp(nsampSEXP);
+    Rcpp::traits::input_parameter< int >::type ninit(ninitSEXP);
+    Rcpp::traits::input_parameter< double >::type minRange(minRangeSEXP);
+    Rcpp::traits::input_parameter< double >::type maxRange(maxRangeSEXP);
+    Rcpp::traits::input_parameter< int >::type metropolis(metropolisSEXP);
+    Rcpp::traits::input_parameter< bool >::type simple(simpleSEXP);
+    Rcpp::traits::input_parameter< double >::type convex(convexSEXP);
+    Rcpp::traits::input_parameter< int >::type npoint(npointSEXP);
+    Rcpp::traits::input_parameter< double >::type currentPars(currentParsSEXP);
+    Rcpp::traits::input_parameter< double >::type kappaA(kappaASEXP);
+    Rcpp::traits::input_parameter< double >::type kappaB(kappaBSEXP);
+    Rcpp::traits::input_parameter< bool >::type invGamma(invGammaSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type datTheta(datThetaSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type datMu(datMuSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type datProportion(datProportionSEXP);
+    Rcpp::traits::input_parameter< arma::ivec >::type datEvent(datEventSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type datTime(datTimeSEXP);
+    rcpp_result_gen = Rcpp::wrap(arms_kappa(n, nsamp, ninit, minRange, maxRange, metropolis, simple, convex, npoint, currentPars, kappaA, kappaB, invGamma, datTheta, datMu, datProportion, datEvent, datTime));
+    return rcpp_result_gen;
+END_RCPP
+}
 // ars
 arma::vec ars(int n, arma::vec initialPoints, double minRange, double maxRange, unsigned int jj, arma::vec& xis, double vA, double vB, const arma::mat datX0, const arma::mat datProportion, const arma::uvec datEvent, arma::mat& weibullS);
 RcppExport SEXP _GPTCM_ars(SEXP nSEXP, SEXP initialPointsSEXP, SEXP minRangeSEXP, SEXP maxRangeSEXP, SEXP jjSEXP, SEXP xisSEXP, SEXP vASEXP, SEXP vBSEXP, SEXP datX0SEXP, SEXP datProportionSEXP, SEXP datEventSEXP, SEXP weibullSSEXP) {

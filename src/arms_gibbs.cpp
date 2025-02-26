@@ -75,10 +75,8 @@ arma::mat arms_gibbs_xi(
   mydata->datProportion = datProportion.memptr();
   mydata->datEvent = datEvent.memptr();
   mydata->weibullS = weibullS.memptr();
-  
-  // convert arma::mat to C double pointer or array
-  // TBA...
 
+  // define how many ARMS samples to draw for currentPars
   arma::mat samp = arma::zeros<arma::mat>(p, n + 1);
   samp.col(0) = currentPars;
 
@@ -455,4 +453,215 @@ arma::mat arms_gibbs_zeta(
   free(mydata);
 
   return currentPars;
+}
+
+
+//' Univariate ARMS for phi
+//'
+//' @param n Number of samples to draw
+//' @param nsamp How many samples to draw for generating each sample; only the last draw will be kept
+//' @param ninit Number of initials as meshgrid values for envelop search
+//' @param convex Adjustment for convexity (non-negative value, default 1.0)
+//' @param npoint Maximum number of envelope points
+//' @param dirichlet Not yet implemented
+//'
+// [[Rcpp::export]]
+arma::vec arms_phi( 
+  int n,
+  int nsamp, 
+  int ninit,
+  double minRange,
+  double maxRange,
+
+  int metropolis, 
+  bool simple,
+  double convex,
+  int npoint,
+  
+  double currentPars, 
+  double Delta,
+  arma::mat datProportion,
+  arma::mat datProportionConst) 
+{
+  int dometrop = metropolis;
+
+  // objects for arms()
+  double minD = minRange;
+  double maxD = maxRange;
+  double *xl; xl = &minD;
+  double *xr; xr = &maxD;
+
+  double xinit[ninit];
+  if (!simple)
+  {
+    arma::vec xinit0 = arma::linspace( minD+1.0e-10, maxD-1.0e-10, ninit );
+    for (int i = 0; i < ninit; ++i)
+      xinit[i] = xinit0[i];
+  }
+
+  dataS *mydata = (dataS *)malloc(sizeof (dataS));
+  //mydata->currentPars = &currentPars;
+  mydata->Delta = Delta;
+  mydata->datProportionConst = datProportionConst.memptr();
+  mydata->datProportion = datProportion.memptr();
+  
+  // define how many ARMS samples to draw for currentPars; first one as intial value
+  std::vector<double> samp(n + 1);
+  samp[0] = currentPars;
+
+  double xprev = currentPars;
+  double *xsamp = (double*)malloc(nsamp * sizeof(double));
+  double qcent[1], xcent[1];
+  int neval, ncent = 0;
+
+  int err;
+  if (simple)
+  {
+    err = ARMS::arms_simple (
+      ninit, xl,  xr,
+      log_dens_phi, mydata,
+      dometrop, &xprev, xsamp);
+  } else {
+    err = ARMS::arms (
+      xinit, ninit, xl,  xr,
+      log_dens_phi, mydata,
+      &convex, npoint,
+      dometrop, &xprev, xsamp,
+      nsamp, qcent, xcent, ncent, &neval);
+  }
+
+  // check ARMS validity
+  if (err > 0)
+   std::printf("In ARMS::arms_(): error code in ARMS = %d.\n", err);
+  if (isnan(xsamp[nsamp-1]))
+    std::printf("In ARMS::arms_(): NaN generated, possibly due to overflow in (log-)density (e.g. with densities involving exp(exp(...))).\n");
+  if (xsamp[nsamp-1] < minD || xsamp[nsamp-1] > maxD)
+    std::printf("In ARMS::arms_(): %d-th sample out of range [%f, %f] (fused domain). Got %f.\n", nsamp, *xl, *xr, xsamp[nsamp-1]);
+
+  currentPars = xsamp[nsamp - 1];
+  for (int i = 0; i < n; ++i) 
+    samp[i + 1] = xsamp[nsamp - n + i];
+
+  // remove the initial value
+  samp.erase(samp.begin());
+
+  free(xsamp);  
+  free(mydata);
+
+  return samp;
+}
+
+
+//' Univariate ARMS for kappa
+//'
+//' @param n Number of samples to draw
+//' @param nsamp How many samples to draw for generating each sample; only the last draw will be kept
+//' @param ninit Number of initials as meshgrid values for envelop search
+//' @param convex Adjustment for convexity (non-negative value, default 1.0)
+//' @param npoint Maximum number of envelope points
+//' @param dirichlet Not yet implemented
+//'
+// [[Rcpp::export]]
+arma::vec arms_kappa( 
+  int n,
+  int nsamp, 
+  int ninit,
+  double minRange,
+  double maxRange,
+
+  int metropolis, 
+  bool simple,
+  double convex,
+  int npoint,
+  
+  double currentPars, 
+  double kappaA,
+  double kappaB,
+  bool invGamma,
+  arma::vec datTheta,
+  arma::mat datMu,
+  arma::mat datProportion, 
+  arma::ivec datEvent, 
+  arma::vec datTime) 
+{
+  // dimensions
+  int N = datProportion.n_rows;
+  int L = datProportion.n_cols;
+
+  int dometrop = metropolis;
+
+  // objects for arms()
+  double minD = minRange;
+  double maxD = maxRange;
+  double *xl; xl = &minD;
+  double *xr; xr = &maxD;
+
+  double xinit[ninit];
+  if (!simple)
+  {
+    arma::vec xinit0 = arma::linspace( minD+1.0e-10, maxD-1.0e-10, ninit );
+    for (int i = 0; i < ninit; ++i)
+      xinit[i] = xinit0[i];
+  }
+
+  dataS *mydata = (dataS *)malloc(sizeof (dataS));
+  //mydata->currentPars = &currentPars;
+  //mydata->p = p;
+  mydata->L = L;
+  mydata->N = N;
+  // mydata->xl = xl;
+  // mydata->xr = xr;
+  mydata->kappaA = kappaA;
+  mydata->kappaB = kappaB;
+  mydata->invGamma = invGamma;
+  mydata->datTheta = datTheta.memptr();
+  mydata->datMu = datMu.memptr();
+  mydata->datProportion = datProportion.memptr();
+  mydata->datEvent = datEvent.memptr();
+  mydata->datTime = datTime.memptr();
+  
+  // define how many ARMS samples to draw for currentPars; first one as intial value
+  std::vector<double> samp(n + 1);
+  samp[0] = currentPars;
+
+  double xprev = currentPars;
+  double *xsamp = (double*)malloc(nsamp * sizeof(double));
+  double qcent[1], xcent[1];
+  int neval, ncent = 0;
+
+  int err;
+  if (simple)
+  {
+    err = ARMS::arms_simple (
+      ninit, xl,  xr,
+      log_dens_kappa, mydata,
+      dometrop, &xprev, xsamp);
+  } else {
+    err = ARMS::arms (
+      xinit, ninit, xl,  xr,
+      log_dens_kappa, mydata,
+      &convex, npoint,
+      dometrop, &xprev, xsamp,
+      nsamp, qcent, xcent, ncent, &neval);
+  }
+
+  // check ARMS validity
+  if (err > 0)
+   std::printf("In ARMS::arms_(): error code in ARMS = %d.\n", err);
+  if (isnan(xsamp[nsamp-1]))
+    std::printf("In ARMS::arms_(): NaN generated, possibly due to overflow in (log-)density (e.g. with densities involving exp(exp(...))).\n");
+  if (xsamp[nsamp-1] < minD || xsamp[nsamp-1] > maxD)
+    std::printf("In ARMS::arms_(): %d-th sample out of range [%f, %f] (fused domain). Got %f.\n", nsamp, *xl, *xr, xsamp[nsamp-1]);
+
+  currentPars = xsamp[nsamp - 1];
+  for (int i = 0; i < n; ++i) 
+    samp[i + 1] = xsamp[nsamp - n + i];
+
+  // remove the initial value
+  samp.erase(samp.begin());
+
+  free(xsamp);  
+  free(mydata);
+
+  return samp;
 }

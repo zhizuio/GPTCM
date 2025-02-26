@@ -109,6 +109,8 @@ GPTCM_cpp <- function(dat,
     # hyperparameters for variable selection's probabilities' Beta priors
     hyperpar$a_pi <- 0.5
     hyperpar$b_pi <- 0.5
+    
+    hyperpar$Delta <- 20
   #}
   
   # transform proportions data if including values very close to 0 or 1
@@ -366,10 +368,25 @@ GPTCM_cpp <- function(dat,
       if (proportion.model) {
         
         ## update phi if using Dirichlet (alternative parametrization) measurement error model
+        #browser()
         if (!dirichlet) {
           if (cpp.phi) {
-            # TBA
-            # ...
+            phi.mcmc.internal <- arms_phi(
+              1, #n: number of samples to draw, now only 1
+              1, #nsamp: number of MCMC for generating each ARMS sample, only keeping the last one
+              10, #  number of initials as meshgrid values for envelop search
+              #seq(-1, 1, length=10), # initial values
+              0.01, 500, # lower and upper bounds
+              1, # 0/1 metropolis step or not
+              arms.simple[1],
+              1, # adjustment for convexity
+              100, # maximum number of envelope points
+              phi,
+              hyperpar$Delta,
+              proportion,
+              dat$proportion
+            )
+            phi <- as.double(phi.mcmc.internal)
           } else { ## not use cpp 'arms_gibbs_phi()'
             phi.mcmc.internal <- arms(
               y.start = phi,
@@ -382,8 +399,8 @@ GPTCM_cpp <- function(dat,
           # phi <- mean(phi.mcmc.internal)#[-c(1:(length(phi.mcmc.internal)/2))])#median
           phi <- median(phi.mcmc.internal[-c(1:(length(phi.mcmc.internal) / 2))]) # median
           phi <- median(c(phi, 0.1, 200 - 0.1))
-          phi.mcmc[1 + m] <- phi
         }
+        phi.mcmc[1 + m] <- phi
         if (!(cpp.xi && cpp.beta && cpp.zeta && cpp.phi && cpp.kappa)) {
           globalvariable <- list(phi = phi)
           list2env(globalvariable, .GlobalEnv)
@@ -510,9 +527,29 @@ GPTCM_cpp <- function(dat,
       }
       
       ## update kappa in noncure fraction
+      browser()
       if (cpp.kappa) {
-        # TBA
-        # ...
+        kappas.mcmc.internal <- arms_kappa(
+          1, #n: number of samples to draw, now only 1
+          1, #nsamp: number of MCMC for generating each ARMS sample, only keeping the last one
+          10, #  number of initials as meshgrid values for envelop search
+          #seq(-1, 1, length=10), # initial values
+          0.1, 10, # lower and upper bounds
+          1, # 0/1 metropolis step or not
+          arms.simple[1],
+          1, # adjustment for convexity
+          100, # maximum number of envelope points
+          kappas,
+          hyperpar$kappaA, 
+          hyperpar$kappaB, 
+          TRUE, #(kappaPrior=="IGamma"), # use inverse gamma prior or gamma prior
+          thetas, 
+          mu.current,
+          proportion,
+          dat$survObj$event,
+          dat$survObj$time
+        )
+        kappas <- as.double(kappas.mcmc.internal)
       } else { ## not use cpp 'arms_gibbs_kappa()'
         kappas.mcmc.internal <- arms(
           y.start = kappas,
@@ -520,6 +557,8 @@ GPTCM_cpp <- function(dat,
           indFunc = convex_support_kappas,
           n.sample = 20
         )
+        kappas <- median(kappas.mcmc.internal[-c(1:(length(kappas.mcmc.internal) / 2))])
+        kappas <- median(c(kappas, 0.1 + 0.1, 10 - 0.1))
       }
       #if (kappaSampler == "arms") {
       # } else {
@@ -530,8 +569,6 @@ GPTCM_cpp <- function(dat,
       # }
       ## n.sample = 20 will result in less variation
       # kappas <- mean(kappas.mcmc.internal)#[-c(1:(length(kappas.mcmc.internal)/2))])#median
-      kappas <- median(kappas.mcmc.internal[-c(1:(length(kappas.mcmc.internal) / 2))])
-      kappas <- median(c(kappas, 0.1 + 0.1, 10 - 0.1))
       kappas.mcmc[1 + m] <- kappas
       # lambdas <- mu.current / gamma(1 + 1 / kappas)
       if (!(cpp.xi && cpp.beta && cpp.zeta && cpp.phi && cpp.kappa)) {
@@ -548,7 +585,7 @@ GPTCM_cpp <- function(dat,
 
       ## update \beta_jl of S_l(t) in non-cure fraction
       #browser()
-      if (cpp.kappa) {
+      if (cpp.beta) {
         betas.mcmc.internal <- arms_gibbs_beta(
           1, #n: number of samples to draw, now only 1
           1, #nsamp: number of MCMC for generating each ARMS sample, only keeping the last one

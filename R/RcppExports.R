@@ -38,6 +38,32 @@ arms_gibbs_zeta <- function(n, nsamp, ninit, minRange, maxRange, metropolis, sim
     .Call('_GPTCM_arms_gibbs_zeta', PACKAGE = 'GPTCM', n, nsamp, ninit, minRange, maxRange, metropolis, simple, convex, npoint, currentPars, w0Sq, wSq, phi, kappa, dirichlet, datX, datTheta, datProportion, datProportionConst, datEvent, weibullS, weibullLambda)
 }
 
+#' Univariate ARMS for phi
+#'
+#' @param n Number of samples to draw
+#' @param nsamp How many samples to draw for generating each sample; only the last draw will be kept
+#' @param ninit Number of initials as meshgrid values for envelop search
+#' @param convex Adjustment for convexity (non-negative value, default 1.0)
+#' @param npoint Maximum number of envelope points
+#' @param dirichlet Not yet implemented
+#'
+arms_phi <- function(n, nsamp, ninit, minRange, maxRange, metropolis, simple, convex, npoint, currentPars, Delta, datProportion, datProportionConst) {
+    .Call('_GPTCM_arms_phi', PACKAGE = 'GPTCM', n, nsamp, ninit, minRange, maxRange, metropolis, simple, convex, npoint, currentPars, Delta, datProportion, datProportionConst)
+}
+
+#' Univariate ARMS for kappa
+#'
+#' @param n Number of samples to draw
+#' @param nsamp How many samples to draw for generating each sample; only the last draw will be kept
+#' @param ninit Number of initials as meshgrid values for envelop search
+#' @param convex Adjustment for convexity (non-negative value, default 1.0)
+#' @param npoint Maximum number of envelope points
+#' @param dirichlet Not yet implemented
+#'
+arms_kappa <- function(n, nsamp, ninit, minRange, maxRange, metropolis, simple, convex, npoint, currentPars, kappaA, kappaB, invGamma, datTheta, datMu, datProportion, datEvent, datTime) {
+    .Call('_GPTCM_arms_kappa', PACKAGE = 'GPTCM', n, nsamp, ninit, minRange, maxRange, metropolis, simple, convex, npoint, currentPars, kappaA, kappaB, invGamma, datTheta, datMu, datProportion, datEvent, datTime)
+}
+
 #' Rcpp wrapper for ARS algorithm
 #'
 #' @param n number of variates to draw

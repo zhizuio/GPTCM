@@ -68,7 +68,7 @@ plotCoeff <- function(dat, datMCMC,
     dirichlet <- datMCMC$input$dirichlet
     
     if(is.null(label.y)){
-      label.y <- c(paste0("x", 1:p), "intecept")
+      label.y <- c("intecept", paste0("x", 1:p))
     }
     
     # pdf(paste0("gptcm_zetaHat_Sigma",Sigma,"_M",M,".pdf"), height = 5, width = 7)

@@ -11,6 +11,8 @@
 extern SEXP _GPTCM_arms_gibbs_beta(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _GPTCM_arms_gibbs_xi(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _GPTCM_arms_gibbs_zeta(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP _GPTCM_arms_kappa(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP _GPTCM_arms_phi(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _GPTCM_ars(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _GPTCM_ars_debug(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _GPTCM_ars_gibbs(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -20,6 +22,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_GPTCM_arms_gibbs_beta", (DL_FUNC) &_GPTCM_arms_gibbs_beta, 19},
     {"_GPTCM_arms_gibbs_xi",   (DL_FUNC) &_GPTCM_arms_gibbs_xi,   16},
     {"_GPTCM_arms_gibbs_zeta", (DL_FUNC) &_GPTCM_arms_gibbs_zeta, 22},
+    {"_GPTCM_arms_kappa",      (DL_FUNC) &_GPTCM_arms_kappa,      18},
+    {"_GPTCM_arms_phi",        (DL_FUNC) &_GPTCM_arms_phi,        13},
     {"_GPTCM_ars",             (DL_FUNC) &_GPTCM_ars,             12},
     {"_GPTCM_ars_debug",       (DL_FUNC) &_GPTCM_ars_debug,       13},
     {"_GPTCM_ars_gibbs",       (DL_FUNC) &_GPTCM_ars_gibbs,       11},

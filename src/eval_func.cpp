@@ -14,7 +14,7 @@ double log_dens_xis(
   // If myfunc() has to be defined in C code, all vec/mat elements in 'struct common_data{}' and 'void create_mydata()' 
   //   need to be defined as 'double *', since array in C will copy big data and occupy too much memory
 
-  double h = 0.0; 
+  double h = 0.; 
 
   // dataS * mydata_parm = *(dataS *)mydata; // error: cannot initialize a variable of type 'dataS *' with an rvalue of type 'void *'
   // *mydata_parm = &abc_data; // error: no viable overloaded '='
@@ -82,7 +82,7 @@ double log_dens_betas(
   double par, 
   void *abc_data) 
 {
-  double h = 0.0; 
+  double h = 0.; 
 
   // Allocation of a zero-initialized memory block of (num*size) bytes
   // 'calloc' returns a void* (generic pointer) on success of memory allocation; type-cast it due to illegal in C++ but illegal in C
@@ -144,7 +144,7 @@ double log_dens_zetas(
   double par, 
   void *abc_data) 
 {
-  double h = 0.0; 
+  double h = 0.; 
 
   dataS *mydata_parm = (dataS *)calloc(sizeof(dataS), sizeof(dataS));
   *mydata_parm = *(dataS *)abc_data;
@@ -226,5 +226,108 @@ double log_dens_zetas(
   "; log_dirichlet_sum=" << log_dirichlet_sum <<
   "\n";
 */
+  return h;
+}
+
+// density of truncated normal distribution
+double pdfTruncNorm(double x, double m, double sd, double lower, double upper) 
+{
+  // find quantiles that correspond the the given low and high levels
+  double xi = (x - m) / sd;
+  double alpha = (lower - m) / sd;
+  double beta = (upper - m) / sd;
+  double Z = R::qnorm( beta, m, sd, true, false ) - R::qnorm( alpha, m, sd, true, false );
+
+  double ret = 1./std::sqrt(2.0*M_PI) * std::exp(-0.5*xi*xi) / sd / Z;
+
+  return ret;
+}
+
+// log-density for Dirichlet dispersion phi if the alternative parametrization is used
+double log_dens_phi(
+  double par, 
+  void *abc_data) 
+{
+  double h = 0.; 
+
+  dataS *mydata_parm = (dataS *)calloc(sizeof(dataS), sizeof(dataS));
+  *mydata_parm = *(dataS *)abc_data;
+
+  arma::mat concentrations = par * 
+    arma::mat(mydata_parm->datProportion, mydata_parm->N, mydata_parm->L, false);
+  
+  arma::vec normalizingConst = arma::log(arma::tgamma(arma::sum(concentrations, 1))) - 
+    arma::sum(arma::log(arma::tgamma(concentrations)), 1);
+
+  arma::vec geometricTerm = arma::sum((concentrations - 1.) % 
+    arma::log(arma::mat(mydata_parm->datProportionConst, mydata_parm->N, mydata_parm->L, false)), 
+    1);
+
+  double sd = std::sqrt(mydata_parm->Delta / 3.);
+  double logprior = std::log(pdfTruncNorm(par, 0., sd, 0., 1.0e+6));
+
+  h = logprior + arma::accu(normalizingConst + geometricTerm);
+
+  return h;
+}
+
+
+// log-density for kappa
+double log_dens_kappa(
+  double par, 
+  void *abc_data) 
+{
+  double h = 0.; 
+
+  dataS *mydata_parm = (dataS *)calloc(sizeof(dataS), sizeof(dataS));
+  *mydata_parm = *(dataS *)abc_data;
+
+  double logprior = 0.;
+  double logpost_first_sum = 0.;
+  double logpost_second_sum = 0.;
+  
+  if (mydata_parm->invGamma) 
+  {
+    logprior = - R::dgamma(par, mydata_parm->kappaA, 1.0/mydata_parm->kappaA, true); // equivalent to log(1/dgamma(par, a, b))
+  } else {
+    logprior = R::dgamma(par, mydata_parm->kappaA, 1.0/mydata_parm->kappaA, true);
+  }
+
+  arma::vec logpost_first = arma::zeros<arma::vec>(mydata_parm->N);
+  arma::vec logpost_second = arma::zeros<arma::vec>(mydata_parm->N);
+  arma::mat datMu(mydata_parm->datMu, mydata_parm->N, mydata_parm->L, false);
+  arma::mat datProportion(mydata_parm->datProportion, mydata_parm->N, mydata_parm->L, false);
+  arma::vec datTime(mydata_parm->datTime, mydata_parm->N, false);
+  for(int ll=0; ll<(mydata_parm->L); ++ll) 
+  {
+    arma::vec weibull_lambdas_tmp = datMu.col(ll) / std::tgamma(1.0+1.0/par);
+    // weibull_lambdas_tmp.elem(arma::find(weibull_lambdas_tmp < lowerbound)).fill(lowerbound);
+    // arma::vec weibullS_tmp = arma::exp(- arma::pow(datTime/weibull_lambdas_tmp, par));
+    arma::vec lambdas_tmp = arma::pow( datTime/weibull_lambdas_tmp, par);
+    lambdas_tmp.elem(arma::find(lambdas_tmp > upperbound)).fill(upperbound);
+    arma::vec weibullS_tmp = arma::exp(- lambdas_tmp);
+
+    std::cout << "...debug ll=" << ll << 
+    "; min(datProportion.col(ll))" << arma::min(datProportion.col(ll)) <<  
+    "; min(weibull_lambdas_tmp)" << arma::min(weibull_lambdas_tmp) <<  
+    "; min(weibullS_tmp)" << arma::min(weibullS_tmp) <<  "\n";
+    logpost_first += datProportion.col(ll) % arma::pow(weibull_lambdas_tmp, par) % weibullS_tmp;
+    logpost_second += datProportion.col(ll) % weibullS_tmp;
+  }
+
+  logpost_first %= arma::pow(datTime, par - 1.0) * par;
+  logpost_first_sum = arma::accu( arma::log( logpost_first.elem(arma::find(
+    arma::ivec(mydata_parm->datEvent, mydata_parm->N, false)
+  )) ) );
+
+  logpost_second_sum = arma::accu(arma::vec(mydata_parm->datTheta, mydata_parm->N, false) % logpost_second);
+
+  h = logprior + logpost_first_sum + logpost_second_sum;
+
+  std::cout << "...debug par=" << par << 
+  "; h=" << h << 
+  "; logpost_first_sum=" << logpost_first_sum << 
+  "; logpost_second_sum=" << logpost_second_sum << 
+  "\n";
   return h;
 }

@@ -31,12 +31,16 @@
     double w0Sq;
     double wSq;
     double phi;
+    double Delta;
     bool dirichlet;
 
     double *xl;
     double *xr;
 
     double kappa;
+    double kappaA;
+    double kappaB;
+    bool invGamma;
     double *datTheta; 
     double *datMu; 
     double *datX;
@@ -77,6 +81,15 @@
   (
     double par, 
     void *abc_data
+  );
+
+  double pdfTruncNorm
+  (
+    double x,
+    double m, 
+    double sd, 
+    double lower, 
+    double upper
   );
 
 #endif
