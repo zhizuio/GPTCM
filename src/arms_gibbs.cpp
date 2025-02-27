@@ -336,7 +336,6 @@ arma::mat arms_gibbs_zeta(
   arma::mat currentPars, 
   double w0Sq, 
   double wSq, 
-  double phi,
   double kappa,
   bool dirichlet,
   arma::cube datX, 
@@ -347,6 +346,7 @@ arma::mat arms_gibbs_zeta(
   arma::mat weibullLambda) 
 {
   // arma::mat datProportion, // remove this argument
+  // double phi,
   /* make a subfunction arms_gibbs for only vector betas that can be used for (varying-length) variable selected vector*/
 
   // dimensions
@@ -382,7 +382,7 @@ arma::mat arms_gibbs_zeta(
   mydata->N = N;
   mydata->w0Sq = w0Sq;
   mydata->wSq = wSq;
-  mydata->phi = phi;
+  //mydata->phi = phi;
   mydata->kappa = kappa,
   //mydata->dirichlet = dirichlet,
   mydata->datX = datX.memptr();

@@ -17,7 +17,6 @@ arms_gibbs_zeta(
   currentPars,
   w0Sq,
   wSq,
-  phi,
   kappa,
   dirichlet,
   datX,

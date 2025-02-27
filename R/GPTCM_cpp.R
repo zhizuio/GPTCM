@@ -316,7 +316,11 @@ GPTCM_cpp <- function(dat,
       }
 
       # new.env()
-
+      
+      ## update \xi's variance
+      vSq[-1] <- sampleV(2, hyperpar$vA, hyperpar$vB, xi)
+      vSq.mcmc[1 + m, ] <- vSq[-1]
+      
       ## update \xi's in cure fraction
       if (cpp.xi) {
         xi.mcmc.internal <- arms_gibbs_xi(
@@ -351,9 +355,6 @@ GPTCM_cpp <- function(dat,
       })
       # xi <- xi.mcmc.internal
       xi.mcmc[1 + m, ] <- xi
-
-      vSq[-1] <- sampleV(2, hyperpar$vA, hyperpar$vB, xi)
-      vSq.mcmc[1 + m, ] <- vSq[-1]
 
       thetas <- exp(dat$x0 %*% xi)
       
@@ -420,7 +421,7 @@ GPTCM_cpp <- function(dat,
             1, # adjustment for convexity
             100, # maximum number of envelope points
             zetas.current,
-            w0Sq, wSq, phi, 
+            w0Sq, wSq, 
             kappas,
             TRUE,
             dat$XX,
@@ -575,6 +576,13 @@ GPTCM_cpp <- function(dat,
         globalvariable <- list(kappas = kappas) # , lambdas = lambdas)
         list2env(globalvariable, .GlobalEnv)
       }
+      for(ll in 1:L){
+        tmp <- dat$XX[, , ll] %*% betas.current[, l]
+        tmp[tmp > 700.] <- 700.
+        mu.current[, ll] <- exp(tmp) # should this and following be out of this for-loop-j?
+        lambdas[, ll] <- mu.current[, ll] / gamma(1 + 1 / kappas)
+        weibull.S[, ll] <- exp(-(dat$survObj$time / lambdas[, ll])^kappas)
+      }
       
       ## update Gammas with Rcpp function
       # outCpp <- sampleGamma(gammas.current, FALSE, hyperpar$a_pi, hyperpar$b_pi)
@@ -582,7 +590,13 @@ GPTCM_cpp <- function(dat,
       # browser()
       # 
       # gammas.mcmc[1 + m, ] <- as.vector(gammas.current)
-
+      
+      ## update \beta's variance tauSq
+      # tauSq <- sampleTau(3, hyperpar$tauA, hyperpar$tauB, betas.current)
+      # tauSq.mcmc[1+m, ] <- tauSq
+      tauSq <- sampleTau(1, hyperpar$tauA, hyperpar$tauB, betas.current)
+      tauSq.mcmc[1 + m] <- tauSq
+      
       ## update \beta_jl of S_l(t) in non-cure fraction
       #browser()
       if (cpp.beta) {
@@ -600,7 +614,7 @@ GPTCM_cpp <- function(dat,
           tauSq, kappas,
           dat$XX,
           thetas, mu.current,
-          dat$proportion,
+          proportion, #dat$proportion,
           dat$survObj$event, dat$survObj$time,
           weibull.S
         )
@@ -679,12 +693,6 @@ GPTCM_cpp <- function(dat,
                                weibull.S = weibull.S) # do we need mu&S her?
         list2env(globalvariable, .GlobalEnv)
       }
-
-      ## update tauSq, the variance of betas
-      # tauSq <- sampleTau(3, hyperpar$tauA, hyperpar$tauB, betas.current)
-      # tauSq.mcmc[1+m, ] <- tauSq
-      tauSq <- sampleTau(1, hyperpar$tauA, hyperpar$tauB, betas.current)
-      tauSq.mcmc[1 + m] <- tauSq
       
       if (!(cpp.xi && cpp.beta && cpp.zeta && cpp.phi && cpp.kappa)) {
         globalvariable <- list(tauSq = tauSq)

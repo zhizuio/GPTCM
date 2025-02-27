@@ -34,9 +34,6 @@
     double Delta;
     bool dirichlet;
 
-    double *xl;
-    double *xr;
-
     double kappa;
     double kappaA;
     double kappaB;
