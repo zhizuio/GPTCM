@@ -124,11 +124,11 @@ double log_dens_betas(
   arma::mat datProportion(mydata_parm->datProportion, mydata_parm->N, mydata_parm->L, false);
   for(int ll=0; ll<(mydata_parm->L); ++ll) 
   {
-    // logpost_first += datProportion.col(ll) % 
-    //   arma::pow(weibull_lambdas.col(ll), - mydata_parm->kappa) % weibullS_tmp.col(ll);
+    logpost_first += datProportion.col(ll) % 
+      arma::pow(weibull_lambdas.col(ll), - mydata_parm->kappa) % weibullS_tmp.col(ll);
     
-    logpost_first += datProportion.col(ll) % (mydata_parm->kappa / weibull_lambdas.col(ll)) %
-      arma::pow(datTime/weibull_lambdas.col(ll), mydata_parm->kappa - 1.0) % weibullS_tmp.col(ll);
+    // logpost_first += datProportion.col(ll) % (mydata_parm->kappa / weibull_lambdas.col(ll)) %
+    //   arma::pow(datTime/weibull_lambdas.col(ll), mydata_parm->kappa - 1.0) % weibullS_tmp.col(ll);
   }
 
   //double logpost_first_sum = arma::accu( arma::log( logpost_first.elem(arma::find(mydata_parm->datEvent)) ) );
@@ -147,6 +147,15 @@ double log_dens_betas(
 
   // std::cout << "...debug log_dens_betas h=" << h << "\n";
   
+  // std::cout << "...h=" << h << 
+  // "; l=" << mydata_parm->l << 
+  // "; logpost_first_sum=" << logpost_first_sum <<
+  // "; max(mu_tmp)=" << arma::max(mu_tmp.col(mydata_parm->l)) <<
+  // "; max(weibull_lambdas)=" << arma::max(weibull_lambdas.col(mydata_parm->l)) <<
+  // "; logpost_second_sum=" << logpost_second_sum <<
+  // "; logprior=" << logprior <<
+  // "\n";
+
   return h;
 }
 

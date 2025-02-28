@@ -620,7 +620,7 @@ GPTCM_cpp <- function(dat,
         )
         betas.current <- betas.mcmc.internal
         for(ll in 1:L){
-          tmp <- dat$XX[, , ll] %*% betas.current[, l]
+          tmp <- dat$XX[, , ll] %*% betas.current[, ll]
           tmp[tmp > 700.] <- 700.
           mu.current[, ll] <- exp(tmp) # should this and following be out of this for-loop-j?
           lambdas[, ll] <- mu.current[, ll] / gamma(1 + 1 / kappas)
