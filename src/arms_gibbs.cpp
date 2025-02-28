@@ -140,7 +140,7 @@ arma::mat arms_gibbs_xi(
       currentPars[j] = xsamp[nsamp - 1];
       samp(j, i + 1) = xsamp[nsamp - 1];
 
-      mydata->currentPars = currentPars.memptr();
+      //mydata->currentPars = currentPars.memptr(); // notnded, since 'currentPars[j] = xsamp[nsamp - 1]' above changed the memory 
 
       free(xsamp);
     }
@@ -290,9 +290,9 @@ arma::mat arms_gibbs_beta(
       weibullS.col(l) = arma::exp( -lambdas );
       //weibullS.elem(arma::find(weibullS < lowerbound)).fill(lowerbound); // remove later on if using smaller upperbound for lambdas
 
-      mydata->currentPars = currentPars.memptr();
-      mydata->datMu = datMu.memptr(); // update this due to its change with updated coefficients
-      mydata->weibullS = weibullS.memptr(); // update this due to its change with updated coefficients
+      // mydata->currentPars = currentPars.memptr();
+      // mydata->datMu = datMu.memptr(); // update this due to its change with updated coefficients
+      // mydata->weibullS = weibullS.memptr(); // update this due to its change with updated coefficients
 
       free(xsamp);
     }
@@ -433,7 +433,7 @@ arma::mat arms_gibbs_zeta(
       if (xsamp[nsamp-1] < minD || xsamp[nsamp-1] > maxD)
         std::printf("In ARMS::arms_(): %d-th sample out of range [%f, %f] (fused domain). Got %f.\n", nsamp, minD, maxD, xsamp[nsamp-1]);
 
-      currentPars(j, l) = xsamp[nsamp - 1];
+      // currentPars(j, l) = xsamp[nsamp - 1];
 
       // update proportions based on currentPars 
       /*
@@ -446,8 +446,8 @@ arma::mat arms_gibbs_zeta(
       datProportion = alphas / arma::repmat(arma::sum(alphas, 1), 1, L);
       */
 
-      mydata->currentPars = currentPars.memptr();
-      //mydata->datProportion = datProportion.memptr(); 
+      // mydata->currentPars = currentPars.memptr();
+      // mydata->datProportion = datProportion.memptr(); 
 
       free(xsamp);
     }
@@ -540,7 +540,7 @@ arma::vec arms_phi(
   if (xsamp[nsamp-1] < minD || xsamp[nsamp-1] > maxD)
     std::printf("In ARMS::arms_(): %d-th sample out of range [%f, %f] (fused domain). Got %f.\n", nsamp, minD, maxD, xsamp[nsamp-1]);
 
-  currentPars = xsamp[nsamp - 1];
+  //currentPars = xsamp[nsamp - 1];
   for (int i = 0; i < n; ++i) 
     samp[i + 1] = xsamp[nsamp - n + i];
 
@@ -655,7 +655,7 @@ arma::vec arms_kappa(
   if (xsamp[nsamp-1] < minD || xsamp[nsamp-1] > maxD)
     std::printf("In ARMS::arms_(): %d-th sample out of range [%f, %f] (fused domain). Got %f.\n", nsamp, minD, maxD, xsamp[nsamp-1]);
 
-  currentPars = xsamp[nsamp - 1];
+  //currentPars = xsamp[nsamp - 1];
   for (int i = 0; i < n; ++i) 
     samp[i + 1] = xsamp[nsamp - n + i];
 

@@ -2,10 +2,11 @@
 % Please edit documentation in R/GPTCM.R
 \name{GPTCM}
 \alias{GPTCM}
+\alias{GPTCM_cpp}
 \alias{GPTCM-package}
-\title{Fit Bayesian GPTCM Model}
+\title{Fit Bayesian GPTCM Model with C/C++}
 \usage{
-GPTCM(
+GPTCM_cpp(
   dat,
   proportion.model = TRUE,
   dirichlet = TRUE,
@@ -19,8 +20,7 @@ GPTCM(
   nIter = 500,
   burnin = 200,
   thin = 1,
-  tick = 100,
-  cpp = FALSE
+  tick = 100
 )
 }
 \arguments{
@@ -63,7 +63,15 @@ step" (default) is used}
 
 \item{tick}{TBA}
 
-\item{cpp}{logical, whether to use C++ code for faster computation}
+\item{cpp.xi}{logical, whether to use C++ code for faster computation}
+
+\item{cpp.beta}{TBA}
+
+\item{cpp.zeta}{TBA}
+
+\item{cpp.phi}{TBA}
+
+\item{cpp.kappa}{TBA}
 }
 \value{
 An object of ...

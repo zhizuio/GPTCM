@@ -18,12 +18,7 @@ GPTCM_cpp(
   nIter = 500,
   burnin = 200,
   thin = 1,
-  tick = 100,
-  cpp.xi = FALSE,
-  cpp.beta = FALSE,
-  cpp.zeta = FALSE,
-  cpp.phi = FALSE,
-  cpp.kappa = FALSE
+  tick = 100
 )
 }
 \arguments{
@@ -65,16 +60,6 @@ step" (default) is used}
 \item{thin}{TBA}
 
 \item{tick}{TBA}
-
-\item{cpp.xi}{logical, whether to use C++ code for faster computation}
-
-\item{cpp.beta}{TBA}
-
-\item{cpp.zeta}{TBA}
-
-\item{cpp.phi}{TBA}
-
-\item{cpp.kappa}{TBA}
 }
 \value{
 An object of ...
