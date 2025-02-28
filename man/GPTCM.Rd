@@ -2,11 +2,10 @@
 % Please edit documentation in R/GPTCM.R
 \name{GPTCM}
 \alias{GPTCM}
-\alias{GPTCM_cpp}
 \alias{GPTCM-package}
 \title{Fit Bayesian GPTCM Model with C/C++}
 \usage{
-GPTCM_cpp(
+GPTCM(
   dat,
   proportion.model = TRUE,
   dirichlet = TRUE,
