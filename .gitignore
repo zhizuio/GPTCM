@@ -12,9 +12,9 @@ test_GrowthHouse.R
 anRpackage*
 results*
 
-GPTCM/src/*.o
-GPTCM/src/*.so
-GPTCM/src/*.dll
+*.o
+*.so
+*.dll
 GPTCM/src/symbols.rds
 GPTCM/src/Makevars
 GPTCM/GPTCM.Rcheck/*

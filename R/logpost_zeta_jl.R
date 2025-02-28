@@ -104,6 +104,6 @@ logpost_zeta_jl <- function(x) {
     #sum(normalizingConst + geometricTerm) + 
     log.dirichlet + logprior
   
-  if(is.na(logpost))browser()
+  if(is.na(logpost)) browser()#logpost <- -1e-100#
   return(logpost)
 }

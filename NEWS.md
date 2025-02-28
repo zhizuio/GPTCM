@@ -1,6 +1,10 @@
+# GPTCM 0.0.8
+
+* Test C/C++ (derivative-free) ARMS from CRAN pkg 'genscore' that is close to Gilks' original C code
+
 # GPTCM 0.0.7
 
-* Add Bayesian variable selection (BVS), continued...
+* Add C++ ARS (not derivative-free) adapted from GitHub 'kuperov/adsample' for generating $\xi$, but it is strange that it fails when the lower bound is negative. 
 
 # GPTCM 0.0.6
 

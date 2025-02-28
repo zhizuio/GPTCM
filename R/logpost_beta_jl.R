@@ -52,6 +52,6 @@ logpost_beta_jl <- function(x) {
     proportion[, l] * weibull.S.tmp[, l])
 
   logpost <- logpost.first + logpost.second + logprior
-
+  #browser()
   return(logpost)
 }
