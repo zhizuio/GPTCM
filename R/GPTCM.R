@@ -52,7 +52,7 @@
 #' x <- 1
 #'
 #' @export
-GPTCM_cpp <- function(dat, 
+GPTCM <- function(dat, 
                       proportion.model = TRUE,
                       dirichlet = TRUE,
                       method = "Bayes",
