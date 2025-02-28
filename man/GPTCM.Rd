@@ -19,7 +19,12 @@ GPTCM(
   nIter = 500,
   burnin = 200,
   thin = 1,
-  tick = 100
+  tick = 100,
+  cpp.xi = FALSE,
+  cpp.beta = FALSE,
+  cpp.zeta = FALSE,
+  cpp.phi = FALSE,
+  cpp.kappa = FALSE
 )
 }
 \arguments{
