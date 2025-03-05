@@ -2,10 +2,6 @@
 
 #include "eval_func.h"
 
-#include <RcppArmadillo.h>
-// [[Rcpp::depends(RcppArmadillo)]]
-
-
 // log-density for coefficient xis
 double log_dens_xis(
   double par, 
@@ -29,18 +25,21 @@ double log_dens_xis(
     arma::vec xis(mydata_parm->currentPars, mydata_parm->p, false);
     // arma::vec xis_original(mydata_parm->currentPars, mydata_parm->p, false);
     // arma::vec xis = xis_original;
-    //stdvec xis0 = arma::conv_to<stdvec>::from(mydata_parm->currentPars);
-    stdvec xis0 = arma::conv_to<stdvec>::from(xis);
-    xis0.erase(xis0.begin());
 
     xis[mydata_parm->jj] = par;
     double vSq = 10.;
     if (mydata_parm->jj > 0) 
     {
-      int ans = std::count(xis0.begin(), xis0.end(), 0.);
-      double vA_tmp = mydata_parm->vA + 0.5 * (double)ans;
-      double vB_tmp = mydata_parm->vB + 0.5 * 
-        std::inner_product( xis0.begin(), xis0.end(), xis0.begin(), 0. );
+      // stdvec xis0 = arma::conv_to<stdvec>::from(mydata_parm->currentPars);
+      // stdvec xis0 = arma::conv_to<stdvec>::from(xis);
+      // xis0.erase(xis0.begin());
+      // int ans = std::count(xis0.begin(), xis0.end(), 0.);
+      // double vA_tmp = mydata_parm->vA + 0.5 * (double)ans;
+      arma::vec xis0 = xis;
+      xis0.shed_row(0);
+      double vA_tmp = mydata_parm->vA + 0.5 * arma::accu(xis0 != 0.);
+      double vB_tmp = mydata_parm->vB + 0.5 * xis0.t() * xis0;
+        // std::inner_product( xis0.begin(), xis0.end(), xis0.begin(), 0. );
       vSq = 1. / R::rgamma(vA_tmp, 1. / vB_tmp);
     }
   

@@ -1,12 +1,6 @@
-// Gibbs sampling for multivariate ARMS
+// Gibbs sampling for univariate and multivariate ARMS
 
-#include <cmath>
-
-#include "arms.h"
-#include "eval_func.h"
-
-#include <RcppArmadillo.h>
-// [[Rcpp::depends(RcppArmadillo)]]
+#include "arms_gibbs.h"
 
 
 //' Multivariate ARMS via Gibbs sampler for xi
@@ -17,13 +11,12 @@
 //' @param convex Adjustment for convexity (non-negative value, default 1.0)
 //' @param npoint Maximum number of envelope points
 //'
-// [[Rcpp::export]]
 arma::mat arms_gibbs_xi(
   int n,
   int nsamp, 
   int ninit,
-  arma::vec minRange,
-  arma::vec maxRange,
+  double minRange,
+  double maxRange,
 
   int metropolis, 
   bool simple,
@@ -45,10 +38,10 @@ arma::mat arms_gibbs_xi(
 
   int dometrop = metropolis;
 
-  double minD;
-  double maxD;
-  minD = minRange[0]; // [j]
-  maxD = maxRange[0]; // [j]
+  double minD = minRange;
+  double maxD = maxRange;
+  // minD = minRange[0]; // [j]
+  // maxD = maxRange[0]; // [j]
   //double *xl; xl = &minD;
   //double *xr; xr = &maxD;
 
@@ -164,13 +157,12 @@ arma::mat arms_gibbs_xi(
 //' @param convex Adjustment for convexity (non-negative value, default 1.0)
 //' @param npoint Maximum number of envelope points
 //'
-// [[Rcpp::export]]
 arma::mat arms_gibbs_beta( 
   int n,
   int nsamp, 
   int ninit,
-  arma::vec minRange,
-  arma::vec maxRange,
+  double minRange,
+  double maxRange,
 
   int metropolis, 
   bool simple,
@@ -198,10 +190,10 @@ arma::mat arms_gibbs_beta(
   int dometrop = metropolis;
 
   // objects for arms()
-  double minD;
-  double maxD;
-  minD = minRange[0]; // [j]
-  maxD = maxRange[0]; // [j]
+  double minD = minRange;
+  double maxD = maxRange;
+  // minD = minRange[0]; // [j]
+  // maxD = maxRange[0]; // [j]
   //double *xl; xl = &minD;
   //double *xr; xr = &maxD;
 
@@ -320,13 +312,12 @@ arma::mat arms_gibbs_beta(
 //' @param npoint Maximum number of envelope points
 //' @param dirichlet Not yet implemented
 //'
-// [[Rcpp::export]]
 arma::mat arms_gibbs_zeta( 
   int n,
   int nsamp, 
   int ninit,
-  arma::vec minRange,
-  arma::vec maxRange,
+  double minRange,
+  double maxRange,
 
   int metropolis, 
   bool simple,
@@ -357,10 +348,10 @@ arma::mat arms_gibbs_zeta(
   int dometrop = metropolis;
 
   // objects for arms()
-  double minD;
-  double maxD;
-  minD = minRange[0]; // [j]
-  maxD = maxRange[0]; // [j]
+  double minD = minRange;
+  double maxD = maxRange;
+  // minD = minRange[0]; // [j]
+  // maxD = maxRange[0]; // [j]
   //double *xl; xl = &minD;
   //double *xr; xr = &maxD;
 
@@ -467,7 +458,6 @@ arma::mat arms_gibbs_zeta(
 //' @param npoint Maximum number of envelope points
 //' @param dirichlet Not yet implemented
 //'
-// [[Rcpp::export]]
 arma::vec arms_phi( 
   int n,
   int nsamp, 
@@ -563,7 +553,6 @@ arma::vec arms_phi(
 //' @param npoint Maximum number of envelope points
 //' @param dirichlet Not yet implemented
 //'
-// [[Rcpp::export]]
 arma::vec arms_kappa( 
   int n,
   int nsamp, 
